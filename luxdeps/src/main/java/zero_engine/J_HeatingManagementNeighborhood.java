@@ -1,0 +1,444 @@
+package zero_engine;
+
+import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Currency;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Random;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.Timer;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.awt.Color;
+import java.awt.Font;
+import com.anylogic.engine.connectivity.ResultSet;
+import com.anylogic.engine.connectivity.Statement;
+import com.anylogic.engine.elements.*;
+import com.anylogic.engine.markup.Network;
+import com.anylogic.engine.Position;
+import com.anylogic.engine.markup.PedFlowStatistics;
+import com.anylogic.engine.markup.DensityMap;
+
+
+import static java.lang.Math.*;
+import static com.anylogic.engine.UtilitiesArray.*;
+import static com.anylogic.engine.UtilitiesCollection.*;
+import static com.anylogic.engine.presentation.UtilitiesColor.*;
+import static com.anylogic.engine.HyperArray.*;
+
+import com.anylogic.engine.*;
+import com.anylogic.engine.analysis.*;
+import com.anylogic.engine.connectivity.*;
+import com.anylogic.engine.database.*;
+import com.anylogic.engine.gis.*;
+import com.anylogic.engine.markup.*;
+import com.anylogic.engine.routing.*;
+import com.anylogic.engine.presentation.*;
+import com.anylogic.engine.gui.*;
+import com.anylogic.engine.omniverse_connector.*;
+
+import com.anylogic.libraries.modules.markup_descriptors.*;
+
+import static zero_engine.OL_GridNodeType.*;
+import static zero_engine.OL_EnergyCarriers.*;
+import static zero_engine.OL_ElectrolyserState.*;
+import static zero_engine.OL_GISObjectType.*;
+import static zero_engine.OL_EnergyAssetType.*;
+import static zero_engine.OL_PBL_OwnershipType.*;
+import static zero_engine.OL_ContractType.*;
+import static zero_engine.OL_DeliveryContractType.*;
+import static zero_engine.OL_TransportContractType.*;
+import static zero_engine.OL_ConnectionContractType.*;
+import static zero_engine.OL_TaxContractType.*;
+import static zero_engine.OL_GridConnectionHeatingType.*;
+import static zero_engine.OL_GridConnectionInsulationLabel.*;
+import static zero_engine.OL_MobilityPatternType.*;
+import static zero_engine.OL_ChargingAttitude.*;
+import static zero_engine.OL_BatteryOperationMode.*;
+import static zero_engine.OL_ElectrolyserOperationMode.*;
+import static zero_engine.OL_ConnectionOwnerType.*;
+import static zero_engine.OL_ProfileUnits.*;
+import static zero_engine.OL_HouseholdCookingMethod.*;
+import static zero_engine.OL_FlowsMapKeys.*;
+import static zero_engine.OL_EnergyTaxesBracket.*;
+import static zero_engine.OL_ResultScope.*;
+import static zero_engine.OL_ParkingSpaceType.*;
+import static zero_engine.OL_AmbientTempType.*;
+import static zero_engine.OL_AssetFlowCategories.*;
+import static zero_engine.OL_VehicleType.*;
+import static zero_engine.OL_Days.*;
+import static zero_engine.OL_PBL_DwellingType.*;
+import static zero_engine.OL_GridConnectionEnergyLabel.*;
+import static zero_engine.OL_GridNodeProfileLoaderType.*;
+import static zero_engine.OL_GridOperator.*;
+import static zero_engine.OL_ConnectionSizeType.*;
+import static zero_engine.OL_PVOrientation.*;
+
+import static com.anylogic.engine.Utilities.*;
+
+/**
+ * J_HeatingManagementNeighborhood
+ */	
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
+@JsonAutoDetect(
+    fieldVisibility = Visibility.ANY,    // 
+    getterVisibility = Visibility.NONE,
+    isGetterVisibility = Visibility.NONE,
+    setterVisibility = Visibility.NONE,
+    creatorVisibility = Visibility.NONE
+)
+
+public class J_HeatingManagementNeighborhood implements I_HeatingManagement {
+
+    private boolean isInitialized = false;
+    private GridConnection gc;
+    private J_TimeParameters timeParameters;
+	private List<OL_GridConnectionHeatingType> validHeatingTypes = Arrays.asList(
+		OL_GridConnectionHeatingType.CUSTOM
+	);
+	private OL_GridConnectionHeatingType currentHeatingType;
+
+    private J_EAConversionGasBurner gasBurner;
+    private J_EAConversionHeatPump heatPump;
+    private J_EAConversionHeatDeliverySet heatDeliverySet;
+    private J_EAConversionHydrogenBurner hydrogenBurner;
+    private J_EAConversionHeatPump lowTempHeatGridHeatPump;
+  
+	private J_HeatingPreferences heatingPreferences = null; // Not needed for neighbourhoods
+	
+    private HashMap<String, J_EAConsumption> heatDemandProfiles = new HashMap<String, J_EAConsumption>();
+
+    private double thresholdCOP_hybridHeatpump = 3.5;
+
+    // Services
+    public double amountOfGasBurners_services_fr = 1;
+    public double amountOfHybridHeatpump_services_fr = 0;
+    public double amountOfElectricHeatpumps_services_fr = 0;
+    public double amountOfDistrictHeating_services_fr = 0;
+    public double amountOfLowTempHeatgrid_services_fr = 0;
+     
+    // Houses
+    public double amountOfGasBurners_houses_fr = 1;
+    public double amountOfHybridHeatpump_houses_fr = 0;
+    public double amountOfElectricHeatpumps_houses_fr = 0;
+    public double amountOfDistrictHeating_houses_fr = 0;
+    public double amountOfLowTempHeatgrid_houses_fr = 0;
+     
+    // Industry
+    public double amountOfGasBurners_industry_fr = 1;
+    public double amountOfHybridHeatpump_industry_fr = 0;
+    public double amountOfElectricHeatpumps_industry_fr = 0;
+    public double amountOfDistrictHeating_industry_fr = 0;
+    public double amountOfHydrogenUseForHeating_industry_fr = 0;
+     
+    // Agriculture
+    public double amountOfGasBurners_agriculture_fr = 1;
+    public double amountOfHybridHeatpump_agriculture_fr = 0;
+    public double amountOfElectricHeatpumps_agriculture_fr = 0;
+    public double amountOfDistrictHeating_agriculture_fr = 0;
+    
+    /**
+     * Default constructor
+     */
+    public J_HeatingManagementNeighborhood() {
+    	
+    }
+    
+    public J_HeatingManagementNeighborhood( GridConnection gc, J_TimeParameters timeParameters, OL_GridConnectionHeatingType heatingType ) {
+    	this.gc = gc;
+    	this.timeParameters = timeParameters;
+    	this.currentHeatingType = heatingType;
+    }
+    
+    public void manageHeating(J_TimeVariables timeVariables) {
+    	if (!isInitialized) {
+    		initializeAssets();
+    	}
+
+    	//Division of the power demand //{Gasburner power request, HP power request, DH power request, Hydrogenburner power request}
+    	double powerDemandDivision_kW[] = this.dividePowerDemandHeatingAssets(); 
+
+    	//Split the power fractions (powerDemandDivision[] = {Gasburner power request, HP power request, DH power request}
+    	if(gasBurner.getOutputCapacity_kW() != 0){
+    		double powerFraction_GASBURNER = powerDemandDivision_kW[0] / gasBurner.getOutputCapacity_kW();    		
+    		//Gas burner control (always assigned to primary heating asset)	
+        	gc.f_updateFlexAssetFlows(gasBurner, powerFraction_GASBURNER, timeVariables);
+    	}
+    	if(heatPump.getOutputCapacity_kW() != 0){
+    		double powerFraction_HEATPUMP  = powerDemandDivision_kW[1] / heatPump.getOutputCapacity_kW();    		
+    		//Heatpump control (always assigned to secondary heating asset)
+        	gc.f_updateFlexAssetFlows(heatPump, powerFraction_HEATPUMP, timeVariables);
+
+    	}
+    	if(heatDeliverySet.getOutputCapacity_kW() != 0){
+    		double powerFraction_HEATDELIVERYSET = powerDemandDivision_kW[2] / heatDeliverySet.getOutputCapacity_kW();    		
+    		//Heat delivery set control (always assigned to tertiary heating asset)
+        	gc.f_updateFlexAssetFlows(heatDeliverySet, powerFraction_HEATDELIVERYSET, timeVariables);
+    	}
+    	if(hydrogenBurner.getOutputCapacity_kW() != 0){
+    		double powerFraction_HYDROGENBURNER = powerDemandDivision_kW[3] / hydrogenBurner.getOutputCapacity_kW();
+    		//Hydrogen burner(always assigned to quaternary heating asset)
+        	gc.f_updateFlexAssetFlows(hydrogenBurner, powerFraction_HYDROGENBURNER, timeVariables);
+    	}
+    	if(lowTempHeatGridHeatPump.getOutputCapacity_kW() != 0){
+    		double powerFraction_LOWTEMPHEATGRID = powerDemandDivision_kW[4] / lowTempHeatGridHeatPump.getOutputCapacity_kW();
+    		//Hydrogen burner(always assigned to quaternary heating asset)
+        	gc.f_updateFlexAssetFlows(lowTempHeatGridHeatPump, powerFraction_LOWTEMPHEATGRID, timeVariables);
+    	}
+    }
+    
+    public double[] dividePowerDemandHeatingAssets() {
+    	//Initialize power demand division array
+    	double powerDemandDivision_kW[] = {0, 0, 0, 0, 0}; // {Gasburner power request, HP power request, DH power request, Hydrogenburner power request, lowTempHeatgridPowerDemand}
+
+    	//Calculate fraction of total heat demand delivered by the CHP
+    	/*
+    	double powerDemand_kW = fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.HEAT);
+    	double fractionOfTotalHeatDemandDeliveredyByCHP = max(0,p_chpAsset.getLastFlows().get(OL_EnergyCarriers.HEAT))/powerDemand_kW;
+    	double remainingFraction = fractionOfTotalHeatDemandDeliveredyByCHP;
+    	*/
+    	//Demanded total heating power at the current time step
+    	//double powerDemand_kW = fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.HEAT);
+
+    	//Demanded heating power for companies and household seperatly the current time step
+    	double powerDemand_households_kW = max(0,heatDemandProfiles.get("HOUSEHOLDS").getLastFlows().get(OL_EnergyCarriers.HEAT));
+    	double powerDemand_agriculture_kW = max(0,heatDemandProfiles.get("AGRICULTURE").getLastFlows().get(OL_EnergyCarriers.HEAT));
+    	double powerDemand_industry_kW = max(0,heatDemandProfiles.get("INDUSTRY").getLastFlows().get(OL_EnergyCarriers.HEAT));
+    	double powerDemand_services_kW = max(0,heatDemandProfiles.get("SERVICES").getLastFlows().get(OL_EnergyCarriers.HEAT));
+
+    	//Divide the powerdemand per heating type
+    	double gasBurnerPowerDemand_kW 		= powerDemand_households_kW*amountOfGasBurners_houses_fr + 
+    										  powerDemand_agriculture_kW*amountOfGasBurners_agriculture_fr +
+    										  powerDemand_industry_kW*amountOfGasBurners_industry_fr + 
+    										  powerDemand_services_kW*amountOfGasBurners_services_fr;
+    										  
+    	double electricHPPowerDemand_kW 		= powerDemand_households_kW*amountOfElectricHeatpumps_houses_fr + 
+    										  powerDemand_agriculture_kW*amountOfElectricHeatpumps_agriculture_fr + 
+    										  powerDemand_industry_kW*amountOfElectricHeatpumps_industry_fr + 
+    										  powerDemand_services_kW*amountOfElectricHeatpumps_services_fr;
+    										  
+    	double hybridHPPowerDemand_kW 	   		= powerDemand_households_kW*amountOfHybridHeatpump_houses_fr +
+    										  powerDemand_agriculture_kW*amountOfHybridHeatpump_agriculture_fr +
+    										  powerDemand_industry_kW*amountOfHybridHeatpump_industry_fr + 
+    										  powerDemand_services_kW*amountOfHybridHeatpump_services_fr;
+    										  
+    	double districtHeatingPowerDemand_kW   = powerDemand_households_kW*amountOfDistrictHeating_houses_fr +
+    										  powerDemand_agriculture_kW*amountOfDistrictHeating_agriculture_fr + 
+    										  powerDemand_industry_kW*amountOfDistrictHeating_industry_fr + 
+    										  powerDemand_services_kW*amountOfDistrictHeating_services_fr;
+    															  
+    	double hydrogenBurnerPowerDemand_kW	= powerDemand_industry_kW*amountOfHydrogenUseForHeating_industry_fr;
+
+    	double lowTempHeatgridPowerDemand_kW 	= powerDemand_households_kW*amountOfLowTempHeatgrid_houses_fr + 
+    										  powerDemand_services_kW*amountOfLowTempHeatgrid_services_fr;
+    	//double lowTempHeatgridPowerDemand_kW = (powerDemand_households_kW + powerDemand_agriculture_kW + powerDemand_industry_kW + powerDemand_services_kW) - hybridHPPowerDemand - electricHPPowerDemand - gasBurnerPowerDemand - districtHeatingPowerDemand - hydrogenBurnerPowerDemand; // To make sure all power demand is met
+    										  
+    	//Get the current Heatpump COP
+    	double HP_COP = ((J_EAConversionHeatPump)heatPump).getCOP();
+
+    	if ( HP_COP < thresholdCOP_hybridHeatpump ) { // switch to gasburner when HP COP is below treshold
+    		powerDemandDivision_kW[0] = max(0, gasBurnerPowerDemand_kW + hybridHPPowerDemand_kW);
+    		powerDemandDivision_kW[1] = max(0, electricHPPowerDemand_kW);
+    	}
+    	else{
+    		powerDemandDivision_kW[0] = max(0, gasBurnerPowerDemand_kW);
+    		powerDemandDivision_kW[1] = max(0, electricHPPowerDemand_kW + hybridHPPowerDemand_kW);
+    	}
+    	powerDemandDivision_kW[2] = max(0, districtHeatingPowerDemand_kW);
+    	powerDemandDivision_kW[3] = max(0, hydrogenBurnerPowerDemand_kW);
+    	powerDemandDivision_kW[4] = max(0, lowTempHeatgridPowerDemand_kW);
+
+    	return powerDemandDivision_kW; //{Gasburner power request, HP power request, DH power request, Hydrogenburner power request, lowTempHeatgridPowerDemand};
+    }
+    
+    public void initializeAssets() {
+    	if (!validHeatingTypes.contains(this.currentHeatingType)) {
+    		throw new RuntimeException(this.getClass() + " does not support heating type: " + this.currentHeatingType);
+    	}
+    	if (gc.p_heatBuffer != null) {
+    		throw new RuntimeException(this.getClass() + " does not support heat buffers.");
+    	}
+    	if (gc.p_BuildingThermalAsset != null) {
+    		throw new RuntimeException(this.getClass() + " does not support a building asset.");
+    	}
+    	if (gc.c_heatingAssets.size() != 5) {
+    		throw new RuntimeException(this.getClass() + " requires exactly 5 heating assets");
+    	}
+    	if (heatDemandProfiles.size() != 4) {
+    		throw new RuntimeException(this.getClass() + " requires exactly 4 heating profiles");
+    	}
+    	
+    	gasBurner = null;
+    	heatPump = null;
+    	lowTempHeatGridHeatPump = null;
+    	heatDeliverySet = null;
+    	hydrogenBurner = null;
+    	
+    	for (J_EA heatingAsset : gc.c_heatingAssets) {
+    		if (heatingAsset instanceof J_EAConversionGasBurner) {
+    			if (gasBurner != null) {
+    	    		throw new RuntimeException(this.getClass() + " does not support two gasburners");
+    			}
+    			gasBurner = (J_EAConversionGasBurner)heatingAsset;
+    		}
+    		else if (heatingAsset instanceof J_EAConversionHeatPump) {
+    			if (((J_EAConversionHeatPump)heatingAsset).getAmbientTempType() == OL_AmbientTempType.AMBIENT_AIR) {
+        			if (heatPump != null) {
+        	    		throw new RuntimeException(this.getClass() + " does not support two ambient air heatpumps");
+        			}
+        			heatPump = (J_EAConversionHeatPump)heatingAsset;
+    			}
+    			else if (((J_EAConversionHeatPump)heatingAsset).getAmbientTempType() == OL_AmbientTempType.HEAT_GRID) {
+        			if (lowTempHeatGridHeatPump != null) {
+        	    		throw new RuntimeException(this.getClass() + " does not support two heat grid heatpumps");
+        			}
+        			lowTempHeatGridHeatPump = (J_EAConversionHeatPump)heatingAsset;
+    			}
+    			else {
+    	    		throw new RuntimeException(this.getClass() + " does not support heatpumps with ambient type: " + ((J_EAConversionHeatPump)heatingAsset).getAmbientTempType());
+    			}
+    		}
+    		else if (heatingAsset instanceof J_EAConversionHeatDeliverySet) {
+    			if (heatDeliverySet != null) {
+    	    		throw new RuntimeException(this.getClass() + " does not support two heat delivery sets");
+    			}
+    			heatDeliverySet = (J_EAConversionHeatDeliverySet)heatingAsset;
+    		}
+    		else if (heatingAsset instanceof J_EAConversionHydrogenBurner) {
+    			if (hydrogenBurner != null) {
+    	    		throw new RuntimeException(this.getClass() + " does not support two hydrogenburners");
+    			}
+    			hydrogenBurner = (J_EAConversionHydrogenBurner)heatingAsset;
+    		}
+    		else {
+	    		throw new RuntimeException(this.getClass() + " does not support heating assets of type: " + heatingAsset.getClass());    			
+    		}
+    	}
+    	isInitialized = true;
+    }
+    
+    public void notInitialized() {
+		this.isInitialized = false;
+    }
+    
+    public List<OL_GridConnectionHeatingType> getValidHeatingTypes() {
+    	return this.validHeatingTypes;
+    }
+    
+    public OL_GridConnectionHeatingType getCurrentHeatingType() {
+    	return this.currentHeatingType;
+    }
+    
+    public void setHeatingMethodPct_services( double[] pctArray ) {
+    	amountOfGasBurners_services_fr = pctArray[0]/100;
+    	amountOfElectricHeatpumps_services_fr = pctArray[1]/100;
+    	amountOfHybridHeatpump_services_fr = pctArray[2]/100;
+    	amountOfDistrictHeating_services_fr = pctArray[3]/100;
+    	amountOfLowTempHeatgrid_services_fr = pctArray[4]/100;
+    }
+    
+    public void setHeatingMethodPct_houses( double[] pctArray ) {
+    	amountOfGasBurners_houses_fr = pctArray[0]/100;
+    	amountOfElectricHeatpumps_houses_fr = pctArray[1]/100;
+    	amountOfHybridHeatpump_houses_fr = pctArray[2]/100;
+    	amountOfDistrictHeating_houses_fr = pctArray[3]/100;
+    	amountOfLowTempHeatgrid_houses_fr = pctArray[4]/100;
+    }
+    
+    public void setHeatingMethodPct_industry( double[] pctArray ) {
+    	//Calculate actual space heating 
+    	double actualHeatingDemandSpaceHeating_fr =  (1 - amountOfHydrogenUseForHeating_industry_fr);
+    	amountOfGasBurners_industry_fr = actualHeatingDemandSpaceHeating_fr * pctArray[0]/100;
+    	amountOfElectricHeatpumps_industry_fr = actualHeatingDemandSpaceHeating_fr * pctArray[1]/100;
+    	amountOfHybridHeatpump_industry_fr = actualHeatingDemandSpaceHeating_fr * pctArray[2]/100;
+    	amountOfDistrictHeating_industry_fr = actualHeatingDemandSpaceHeating_fr * pctArray[3]/100;
+    }
+    
+    public void setH2HeatingFr_industry( double amountOfHydrogenUseForHeating_fr ) {
+    	//Get current values
+    	if(amountOfHydrogenUseForHeating_fr >= 1){
+    		//throw new RuntimeException("Can not replace all gas in industry with hydrogen! The model does not support this.");
+    		amountOfHydrogenUseForHeating_fr = 0.999;
+    	}
+    	double actualHeatingDemandSpaceHeating_fr =  (1 - amountOfHydrogenUseForHeating_industry_fr);
+    	double[] currentPctArray = {amountOfGasBurners_industry_fr*100/actualHeatingDemandSpaceHeating_fr, 
+    								amountOfHybridHeatpump_industry_fr*100/actualHeatingDemandSpaceHeating_fr, 
+    								amountOfElectricHeatpumps_industry_fr*100/actualHeatingDemandSpaceHeating_fr, 
+    								amountOfDistrictHeating_industry_fr*100/actualHeatingDemandSpaceHeating_fr};
+
+    	//Set new hydrogen use for heating fr
+    	amountOfHydrogenUseForHeating_industry_fr = min(1, amountOfHydrogenUseForHeating_fr);
+
+
+    	//Set new values
+    	this.setHeatingMethodPct_industry(currentPctArray);
+    }
+    
+    public void setHeatingMethodPct_agriculture( double[] pctArray ) {
+    	amountOfGasBurners_agriculture_fr = pctArray[0]/100;
+    	amountOfElectricHeatpumps_agriculture_fr = pctArray[1]/100;
+    	amountOfHybridHeatpump_agriculture_fr = pctArray[2]/100;
+    	amountOfDistrictHeating_agriculture_fr = pctArray[3]/100;
+    }
+    
+    public void addHeatDemandProfile(String name, J_EAConsumption profile) {
+    	heatDemandProfiles.put(name, profile);
+    }
+    
+    public void setHeatingPreferences(J_HeatingPreferences heatingPreferences) {
+    	this.heatingPreferences = heatingPreferences;
+    }
+    
+    public J_HeatingPreferences getHeatingPreferences() {
+    	return this.heatingPreferences;
+    }
+    
+    
+    
+    //Get parentagent
+    public Agent getParentAgent() {
+    	return this.gc;
+    }
+    
+    
+    //Store and reset states
+	public void storeStatesAndReset() {
+		//Nothing to store/reset
+	}
+	public void restoreStates() {
+		//Nothing to store/reset
+	}
+	
+	@Override
+	public String toString() {
+		return super.toString();
+	}
+} 

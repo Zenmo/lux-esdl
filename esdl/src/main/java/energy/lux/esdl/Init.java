@@ -1,0 +1,66 @@
+package energy.lux.esdl;
+
+import com.anylogic.engine.Engine;
+import com.anylogic.engine.ExperimentSimulation;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import zero_engine.EnergyModel;
+import zerointerfaceloader.Settings;
+import zerointerfaceloader.Zero_Loader;
+
+import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
+
+public class Init {
+    /**
+     * Create an empty energyModel.
+     * Should it return the experiment?
+     */
+    public static EnergyModel createEnergyModel() throws IOException, InvalidFormatException {
+        var experiment = new ExperimentSimulation<EnergyModel>() {
+            @Override
+            public EnergyModel createRoot(Engine engine) {
+                var energyModel = new EnergyModel();
+                // We can't call this here because this is the root agent.
+                // It will try to make itself its own owner and fail.
+                // Maybe the root agent should be a simpler agent?
+//                energyModel.setEngine(engine);
+//                energyModel.instantiateBaseStructure_xjal();
+                return energyModel;
+            }
+
+            @Override
+            public void setupRootParameters(EnergyModel e, boolean b) {
+                // AnyLogic usually generates this method body
+            }
+        };
+
+        // needs to start at midnight
+        var start = ZonedDateTime.of(2025, 1, 1, 0, 0, 0, 0, ZoneId.of("Europe/Amsterdam"));
+        var engine = experiment.getEngine();
+        engine.setStartDate(Date.from(start.toInstant()));
+
+        var energyModel = experiment.createRoot(experiment.getEngine());
+
+        var loader = new Zero_Loader();
+        loader.setEngine(experiment.getEngine());
+        loader.instantiateBaseStructure_xjal();
+        // intializes child agents
+        // calls setupPlainVariables_xjal
+        loader.doCreate();
+        energyModel.createAndStart(loader);
+
+        loader.energyModel = energyModel;
+        loader.settings = Settings.builder().build();
+        loader.f_setSimulationTimeParameters();
+
+        loader.defaultProfiles_data = ExcelProfileReader.loadDefaultProfiles2025();
+        loader.f_setEngineProfiles();
+
+        energyModel.f_initializeEngine();
+
+        return energyModel;
+    }
+}
