@@ -16,16 +16,20 @@ import java.util.Date;
 public class Init {
     /**
      * Create an empty energyModel.
-     * Should it return the experiment?
+     *
+     * Return the loader because it might be useful for the caller,
+     * and it contains the energyModel.
+     *
+     * Caller must take care to call {@link EnergyModel#f_initializeEngine} before running the simulation.
      */
-    public static EnergyModel createEnergyModel() throws IOException, InvalidFormatException {
+    public static Zero_Loader createEnergyModel() throws IOException, InvalidFormatException {
         var experiment = new ExperimentSimulation<EnergyModel>() {
             @Override
             public EnergyModel createRoot(Engine engine) {
                 var energyModel = new EnergyModel();
                 // We can't call this here because this is the root agent.
                 // It will try to make itself its own owner and fail.
-                // Maybe the root agent should be a simpler agent?
+                // Maybe the root agent should be a simpler agent.
 //                energyModel.setEngine(engine);
 //                energyModel.instantiateBaseStructure_xjal();
                 return energyModel;
@@ -42,10 +46,10 @@ public class Init {
         var engine = experiment.getEngine();
         engine.setStartDate(Date.from(start.toInstant()));
 
-        var energyModel = experiment.createRoot(experiment.getEngine());
+        var energyModel = experiment.createRoot(engine);
 
         var loader = new Zero_Loader();
-        loader.setEngine(experiment.getEngine());
+        loader.setEngine(engine);
         loader.instantiateBaseStructure_xjal();
         // intializes child agents
         // calls setupPlainVariables_xjal
@@ -59,8 +63,6 @@ public class Init {
         loader.defaultProfiles_data = ExcelProfileReader.loadDefaultProfiles2025();
         loader.f_setEngineProfiles();
 
-        energyModel.f_initializeEngine();
-
-        return energyModel;
+        return loader;
     }
 }
