@@ -2,6 +2,8 @@ package energy.lux.esdl.loader;
 
 import energy.lux.esdl.NotImplemented;
 import esdl.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import zero_engine.EnergyModel;
 import zero_engine.OL_ProfileUnits;
 import zerointerfaceloader.Zero_Loader;
@@ -10,6 +12,8 @@ import zerointerfaceloader.Zero_Loader;
  * Transform ESDL EnergySystem to a LUX EnergyModel.
  */
 public class RootLoader {
+    private static final Logger logger = LoggerFactory.getLogger(RootLoader.class);
+
     /**
      * LUX {@link EnergyModel} is a property of the loader {@link Zero_Loader}.
      * The loader is passed because it might have some useful methods.
@@ -36,21 +40,14 @@ public class RootLoader {
             Zero_Loader luxLoader
     ) {
         if (info == null) return;
-        EnvironmentalProfiles envProfiles = info.getEnvironmentalProfiles();
-        if (envProfiles == null) return;
+        EnvironmentalProfiles environmentalProfiles = info.getEnvironmentalProfiles();
+        if (environmentalProfiles == null) return;
 
-        DateTimeProfileLoader.loadOutsideTemperature(envProfiles, luxLoader);
+        DateTimeProfileLoader.loadOutsideTemperature(environmentalProfiles, luxLoader);
+        DateTimeProfileLoader.loadSolarIrradiance(environmentalProfiles, luxLoader);
 
-        if (envProfiles.getSolarIrradianceProfile() instanceof DateTimeProfile solarIrradiance) {
-            for (ProfileElement element : solarIrradiance.getElement()) {
-                // TODO: use solar irradiance data
-            }
-        }
-
-        if (envProfiles.getSoilTemperatureProfile() instanceof DateTimeProfile soilTemp) {
-            for (ProfileElement element : soilTemp.getElement()) {
-                // TODO: use soil temperature data
-            }
+        if (environmentalProfiles.getSoilTemperatureProfile() != null) {
+            logger.info("Skipping soil temperature profile, not implemented in LUX");
         }
     }
 

@@ -5,6 +5,8 @@ import esdl.DateTimeProfile;
 import esdl.EnvironmentalProfiles;
 import esdl.ProfileElement;
 import org.eclipse.emf.common.util.EList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import zero_engine.J_ProfilePointer;
 import zero_engine.OL_ProfileUnits;
 import zerointerfaceloader.Zero_Loader;
@@ -18,6 +20,8 @@ import java.util.Date;
 import java.util.List;
 
 public class DateTimeProfileLoader {
+    private static final Logger logger = LoggerFactory.getLogger(RootLoader.class);
+
     static void loadOutsideTemperature(
             EnvironmentalProfiles environmentalProfiles,
             Zero_Loader luxLoader
@@ -34,6 +38,13 @@ public class DateTimeProfileLoader {
         } else {
             throw new NotImplemented("Outside temperature profile is only implemented for DateTimeProfile");
         }
+    }
+
+    static void loadSolarIrradiance(
+            EnvironmentalProfiles environmentalProfiles,
+            Zero_Loader luxLoader
+    ) {
+        logger.warn("Solar irradiance not loaded, don't know how to convert it to the LUX format");
     }
 
     static J_ProfilePointer createProfilePointer(
