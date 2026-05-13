@@ -8,19 +8,19 @@ import zerointerfaceloader.Settings;
 import zerointerfaceloader.Zero_Loader;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-public class Init {
+public class GenericInit {
     /**
      * Create an empty energyModel.
-     *
+     * <p>
      * Return the loader because it might be useful for the caller,
      * and it contains the energyModel.
-     *
-     * Caller must take care to call {@link EnergyModel#f_initializeEngine} before running the simulation.
+     * <p>
+     * Caller must take care to call {@link EnergyModel#f_initializeEngine}
+     * before running the simulation.
      */
     public static Zero_Loader createEnergyModel() throws IOException, InvalidFormatException {
         var experiment = new ExperimentSimulation<EnergyModel>() {
