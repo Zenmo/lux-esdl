@@ -43,5 +43,8 @@ public class TueEsdlTest {
         var degC = luxEngine.pp_ambientTemperature_degC.getValue(hourOffset);
         // The ESDL file seems to have kelvin but the ESDL spec says it should be Celsius
         assertEquals(295.85, degC, 0.01);
+
+        var eurpMWh = luxEngine.pp_dayAheadElectricityPricing_eurpMWh.getValue(hourOffset);
+        assertEquals(98.2, eurpMWh, 0.01);
     }
 }

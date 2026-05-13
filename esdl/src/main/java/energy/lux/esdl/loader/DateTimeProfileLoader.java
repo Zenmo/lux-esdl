@@ -2,6 +2,7 @@ package energy.lux.esdl.loader;
 
 import energy.lux.esdl.NotImplemented;
 import esdl.DateTimeProfile;
+import esdl.EnergyMarket;
 import esdl.EnvironmentalProfiles;
 import esdl.ProfileElement;
 import org.eclipse.emf.common.util.EList;
@@ -40,6 +41,35 @@ public class DateTimeProfileLoader {
         }
     }
 
+    /**
+     * This assumes that only electricity prices are given.
+     */
+    static void loadDayAheadElectricityPricing(
+            EnergyMarket energyMarket,
+            Zero_Loader luxLoader
+    ) {
+        if (energyMarket.getMarketPrice() instanceof DateTimeProfile marketPriceProfile) {
+            var elements = sorted(marketPriceProfile.getElement());
+
+            for (var element : elements) {
+                double value = element.getValue();
+                if (value < -1.0 || value > 10.0) {
+                    throw new IllegalArgumentException(
+                            "Day-ahead electricity price " + value + " €/kWh is outside the expected range [-1.0, 10.0] €/kWh"
+                    );
+                }
+            }
+
+            luxLoader.energyModel.pp_dayAheadElectricityPricing_eurpMWh = createProfilePointer(
+                    luxLoader,
+                    marketPriceProfile,
+                    "esdl_day_ahead_electricity_pricing_eur_per_mwh",
+                    OL_ProfileUnits.PRICE_EURPMWH,
+                    1000.0
+            );
+        }
+    }
+
     static void loadSolarIrradiance(
             EnvironmentalProfiles environmentalProfiles,
             Zero_Loader luxLoader
@@ -53,10 +83,20 @@ public class DateTimeProfileLoader {
             String profileId,
             OL_ProfileUnits unit
     ) {
+        return createProfilePointer(luxLoader, esdlProfile, profileId, unit, 1.0);
+    }
+
+    static J_ProfilePointer createProfilePointer(
+            Zero_Loader luxLoader,
+            DateTimeProfile esdlProfile,
+            String profileId,
+            OL_ProfileUnits unit,
+            double valueMultiplier
+    ) {
         var elements = sorted(esdlProfile.getElement());
         // TODO: give a warning if the time series is outside of the simulation year
 
-        var hoursValues = toHoursValues(elements, luxLoader.getYear());
+        var hoursValues = toHoursValues(elements, luxLoader.getYear(), valueMultiplier);
 
         return luxLoader.f_createEngineProfile(
             profileId,
@@ -68,7 +108,8 @@ public class DateTimeProfileLoader {
 
     static private HoursValues toHoursValues(
             List<ProfileElement> profileElements,
-            int startYear
+            int startYear,
+            double valueMultiplier
     ) {
         var luxStart = luxJan1stInstant(startYear);
 
@@ -78,7 +119,7 @@ public class DateTimeProfileLoader {
         var i = 0;
         for (var element : profileElements) {
             hours[i] = hoursBetween(luxStart, element.getFrom());
-            values[i] = element.getValue();
+            values[i] = element.getValue() * valueMultiplier;
             i++;
         }
 

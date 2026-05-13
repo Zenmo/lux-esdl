@@ -1,11 +1,9 @@
 package energy.lux.esdl.loader;
 
-import energy.lux.esdl.NotImplemented;
 import esdl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zero_engine.EnergyModel;
-import zero_engine.OL_ProfileUnits;
 import zerointerfaceloader.Zero_Loader;
 
 /**
@@ -72,11 +70,7 @@ public class RootLoader {
         if (services == null) return;
         for (Service service : services.getService()) {
             if (service instanceof EnergyMarket energyMarket) {
-                if (energyMarket.getMarketPrice() instanceof DateTimeProfile marketPrice) {
-                    for (ProfileElement element : marketPrice.getElement()) {
-                        // TODO: use market price data
-                    }
-                }
+                DateTimeProfileLoader.loadDayAheadElectricityPricing(energyMarket, luxLoader);
             }
         }
     }
