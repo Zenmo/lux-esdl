@@ -1,13 +1,15 @@
-package energy.lux.esdl;
+package energy.lux.esdl.loader;
 
+import energy.lux.esdl.NotImplemented;
 import esdl.*;
 import zero_engine.EnergyModel;
+import zero_engine.OL_ProfileUnits;
 import zerointerfaceloader.Zero_Loader;
 
 /**
  * Transform ESDL EnergySystem to a LUX EnergyModel.
  */
-public class ESDLLoader {
+public class RootLoader {
     /**
      * LUX {@link EnergyModel} is a property of the loader {@link Zero_Loader}.
      * The loader is passed because it might have some useful methods.
@@ -37,16 +39,14 @@ public class ESDLLoader {
         EnvironmentalProfiles envProfiles = info.getEnvironmentalProfiles();
         if (envProfiles == null) return;
 
-        if (envProfiles.getOutsideTemperatureProfile() instanceof DateTimeProfile outsideTemp) {
-            for (ProfileElement element : outsideTemp.getElement()) {
-                // TODO: use element.getValue(), element.getFrom(), element.getTo()
-            }
-        }
+        DateTimeProfileLoader.loadOutsideTemperature(envProfiles, luxLoader);
+
         if (envProfiles.getSolarIrradianceProfile() instanceof DateTimeProfile solarIrradiance) {
             for (ProfileElement element : solarIrradiance.getElement()) {
                 // TODO: use solar irradiance data
             }
         }
+
         if (envProfiles.getSoilTemperatureProfile() instanceof DateTimeProfile soilTemp) {
             for (ProfileElement element : soilTemp.getElement()) {
                 // TODO: use soil temperature data

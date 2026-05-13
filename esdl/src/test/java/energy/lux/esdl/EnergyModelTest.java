@@ -1,20 +1,19 @@
 package energy.lux.esdl;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.jupiter.api.Test;
 import zero_engine.OL_EnergyCarriers;
 import zero_engine.OL_PVOrientation;
 
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
+/**
+ * Test our LUX model initialization code without any ESDL input.
+ */
 public class EnergyModelTest {
     @Test
-    public void testEmptyEnergyModel() throws IOException, InvalidFormatException {
-        var loader = GenericInit.createEnergyModel();
+    public void testEmptyEnergyModel() {
+        var loader = LuxFactory.createEnergyModel();
         var energyModel = loader.energyModel;
         energyModel.f_initializeEngine();
 
@@ -26,8 +25,8 @@ public class EnergyModelTest {
     }
 
     @Test
-    public void testEnergyModelWithResidentialPv() throws IOException, InvalidFormatException {
-        var loader = GenericInit.createEnergyModel();
+    public void testEnergyModelWithResidentialPv() {
+        var loader = LuxFactory.createEnergyModel();
         var energyModel = loader.energyModel;
 
         var gridNode = energyModel.add_pop_gridNodes();

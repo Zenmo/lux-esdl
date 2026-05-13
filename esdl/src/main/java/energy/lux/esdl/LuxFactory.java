@@ -12,9 +12,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-public class GenericInit {
+public class LuxFactory {
     /**
-     * Create an empty energyModel.
+     * Create a LUX energy model with no assets or grid connections.
      * <p>
      * Return the loader because it might be useful for the caller,
      * and it contains the energyModel.
@@ -22,7 +22,17 @@ public class GenericInit {
      * Caller must take care to call {@link EnergyModel#f_initializeEngine}
      * before running the simulation.
      */
-    public static Zero_Loader createEnergyModel() throws IOException, InvalidFormatException {
+    public static Zero_Loader createEnergyModel() {
+        try {
+            return createEnergyModelImpl();
+        } catch (IOException | InvalidFormatException e) {
+            throw new RuntimeException("Failed to create initial energy model: " + e.getMessage(), e);
+        }
+    }
+
+    public static Zero_Loader createEnergyModelImpl() throws IOException, InvalidFormatException {
+        // I suspect it's possible to create an EnergyModel without an experiment
+        // if we do some small changes to the EnergyModel and Loader.
         var experiment = new ExperimentSimulation<EnergyModel>() {
             @Override
             public EnergyModel createRoot(Engine engine) {
