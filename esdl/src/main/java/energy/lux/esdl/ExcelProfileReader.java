@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * Read columns of numbers from an Excel sheet to a list.
- * Replace the AnyLogic logic which first loads an Excel file to a Database.
+ * Replaces the AnyLogic logic which first loads an Excel file to a Database.
  * Uses the Apache POI library which is included with AnyLogic.
  */
 public class ExcelProfileReader {

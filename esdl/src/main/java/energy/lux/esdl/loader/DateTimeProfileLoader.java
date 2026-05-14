@@ -42,7 +42,7 @@ public class DateTimeProfileLoader {
     }
 
     /**
-     * This assumes that only electricity prices are given.
+     * TODO: This assumes that only electricity prices are given.
      */
     static void loadDayAheadElectricityPricing(
             EnergyMarket energyMarket,

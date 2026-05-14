@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class EnergyModelTest {
     @Test
     public void testEmptyEnergyModel() {
-        var loader = LuxFactory.createEnergyModel();
+        var loader = LuxModelFactory.createEnergyModel();
         var energyModel = loader.energyModel;
         energyModel.f_initializeEngine();
 
@@ -26,7 +26,7 @@ public class EnergyModelTest {
 
     @Test
     public void testEnergyModelWithResidentialPv() {
-        var loader = LuxFactory.createEnergyModel();
+        var loader = LuxModelFactory.createEnergyModel();
         var energyModel = loader.energyModel;
 
         var gridNode = energyModel.add_pop_gridNodes();

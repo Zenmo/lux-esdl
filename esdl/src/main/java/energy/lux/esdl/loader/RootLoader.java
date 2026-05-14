@@ -28,7 +28,7 @@ public class RootLoader {
         for (Instance instance : esdlEnergySystem.getInstance()) {
             Area area = instance.getArea();
             if (area != null) {
-                loadArea(area, luxLoader);
+                AreaLoader.loadArea(area, luxLoader);
             }
         }
     }
@@ -71,61 +71,8 @@ public class RootLoader {
         for (Service service : services.getService()) {
             if (service instanceof EnergyMarket energyMarket) {
                 DateTimeProfileLoader.loadDayAheadElectricityPricing(energyMarket, luxLoader);
-            }
-        }
-    }
-
-    private static void loadArea(Area area, Zero_Loader luxLoader) {
-        for (Asset asset : area.getAsset()) {
-            if (asset instanceof Joint joint) {
-                // TODO: map to LUX grid node
-            } else if (asset instanceof ElectricityCable cable) {
-                // TODO: map to LUX grid connection (grid cables use 4x150Al/4x95Al, home cables use 4x6Cu)
-            } else if (asset instanceof Transformer transformer) {
-                // TODO: map transformer
-            } else if (asset instanceof Import source) {
-                // TODO: map import/source
-            } else if (asset instanceof Building building) {
-                loadBuilding(building, luxLoader);
-            }
-        }
-
-        for (Area subArea : area.getArea()) {
-            loadArea(subArea, luxLoader);
-        }
-    }
-
-    private static void loadBuilding(Building building, Zero_Loader luxLoader) {
-        EnergyModel energyModel = luxLoader.energyModel;
-
-        var house = energyModel.add_Houses();
-        house.p_gridConnectionID = building.getId();
-
-        var owner = energyModel.add_pop_connectionOwners();
-        owner.p_actorID = building.getId() + "_owner";
-        house.p_ownerID = owner.p_actorID;
-
-        for (Asset asset : building.getAsset()) {
-            if (asset instanceof EConnection eConnection) {
-                // TODO: use electricity connection properties (capacity, owner, energy contract)
-            } else if (asset instanceof ElectricityNetwork electricityNetwork) {
-                // TODO: handle phase grid (3 phases per building)
-            } else if (asset instanceof ElectricityDemand demand) {
-                for (Port port : demand.getPort()) {
-                    for (GenericProfile profile : port.getProfile()) {
-                        if (profile instanceof DateTimeProfile demandProfile) {
-                            for (ProfileElement element : demandProfile.getElement()) {
-                                // TODO: load demand time series into LUX
-                            }
-                        }
-                    }
-                }
-            } else if (asset instanceof PVInstallation pv) {
-                // TODO: call luxLoader.f_addPVProductionAsset(house, pv.getName(), installedPower_kW, orientation)
-            } else if (asset instanceof EVChargingStation evStation) {
-                // TODO: add EV charging via luxLoader
-            } else if (asset instanceof HybridHeatPump heatPump) {
-                // TODO: add heat pump via luxLoader
+            } else {
+                logger.warn("Loading ESDL service type {} not implemented", service.getClass());
             }
         }
     }

@@ -12,7 +12,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-public class LuxFactory {
+public class LuxModelFactory {
     /**
      * Create a LUX energy model with no assets or grid connections.
      * <p>
