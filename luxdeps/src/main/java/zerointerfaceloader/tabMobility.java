@@ -93,6 +93,14 @@ int
   public 
 int 
  v_totalNumberOfGhostVehicle_Cars;
+  public 
+int 
+ v_currentPageIndex;
+
+  // Collection Variables
+  public 
+ArrayList <
+ShapeGroup > c_loadedPageGroups = new ArrayList<ShapeGroup>();
 
   @AnyLogicInternalCodegenAPI
   private static Map<String, IElementDescriptor> elementDesciptors_xjal = createElementDescriptors( tabMobility.class );
@@ -1362,26 +1370,28 @@ v_totalNumberOfGhostVehicle_Cars = triple.getLeft();
 v_totalNumberOfGhostVehicle_Vans = triple.getMiddle();
 v_totalNumberOfGhostVehicle_Trucks = triple.getRight();
 
-
-if(gr_mobilitySliders_default.isVisible()){
-	f_updateMobilitySliders_default();
-}
-else if(gr_mobilitySliders_residential.isVisible()){
-	f_updateMobilitySliders_residential();
-}
-else{
-	f_updateMobilitySliders_custom();
+// Update all loaded pages
+for (ShapeGroup page : c_loadedPageGroups) {
+	if(page == gr_mobilitySliders_households){
+		f_updateMobilitySliders_households();
+	}
+	else if(page == gr_mobilitySliders_companies){
+		f_updateMobilitySliders_companies();
+	}
+	else{
+		f_updateMobilitySliders_custom(); 
+	}
 } 
   }
 
-  void f_updateMobilitySliders_default(  ) { 
+  protected void f_updateMobilitySliders_companies(  ) { 
 
-List<GridConnection> allConsumerGridConnections = uI_Tabs.f_getActiveSliderGridConnections_consumption();
+List<GCUtility> allUtilityGridConnections = uI_Tabs.f_getActiveSliderGridConnections_utilities();
 
 ////Savings
 double totalBaseTravelDistance_km = 0;
 double totalSavedTravelDistance_km = 0;
-for(GridConnection GC : allConsumerGridConnections){
+for(GridConnection GC : allUtilityGridConnections){
 	if(GC.v_isActive){
 		for(J_ActivityTrackerTrips tripTracker : GC.c_tripTrackers){
 			totalBaseTravelDistance_km += tripTracker.getAnnualDistance_km();
@@ -1391,18 +1401,18 @@ for(GridConnection GC : allConsumerGridConnections){
 }
 
 double mobilitySavings_pct = totalBaseTravelDistance_km > 0 ? (totalSavedTravelDistance_km/totalBaseTravelDistance_km * 100) : 0;
-sl_mobilityDemandReduction_pct.setValue(roundToInt(mobilitySavings_pct), false);
+sl_companiesMobilityDemandReduction_pct.setValue(roundToInt(mobilitySavings_pct), false);
 
 
 //Smart charging
 boolean smartCharging = false;
-for(GridConnection GC : allConsumerGridConnections){
+for(GridConnection GC : allUtilityGridConnections){
 	if(GC.c_electricVehicles.size() > 0 && GC.f_getCurrentChargingType() != OL_ChargingAttitude.SIMPLE){
 		smartCharging = true;
 		break;
 	}
 }
-cb_spreadChargingEVs.setSelected(smartCharging, false);
+cb_companiesSpreadChargingEVs.setSelected(smartCharging, false);
 
 
 ////Vehicles
@@ -1420,7 +1430,7 @@ int ElectricTrucks = v_totalNumberOfGhostVehicle_Trucks;
 int HydrogenTrucks = 0;
 
 //Count the amount of vehicles for each type
-for (GridConnection gc : allConsumerGridConnections) {
+for (GridConnection gc : allUtilityGridConnections) {
 	if(gc.v_isActive){
 		for (J_EAFuelVehicle vehicle : gc.c_petroleumFuelVehicles) {
 			switch(vehicle.getEAType()){
@@ -1476,11 +1486,11 @@ if (totalCars != 0) {
 	HydrogenCars_pct = roundToInt((100.0 * HydrogenCars) / totalCars);
 }
 else{
-	sl_fossilFuelCars_pct.setEnabled(false);
-	sl_electricCars_pct.setEnabled(false);
+	sl_companiesFossilFuelCars_pct.setEnabled(false);
+	sl_companiesElectricCars_pct.setEnabled(false);
 }
-sl_fossilFuelCars_pct.setValue(PetroleumFuelCars_pct, false);
-sl_electricCars_pct.setValue(ElectricCars_pct, false);
+sl_companiesFossilFuelCars_pct.setValue(PetroleumFuelCars_pct, false);
+sl_companiesElectricCars_pct.setValue(ElectricCars_pct, false);
 
 
 //Set VAN sliders
@@ -1494,11 +1504,11 @@ if (totalVans != 0) {
 	HydrogenVans_pct = roundToInt(100.0 * HydrogenVans / totalVans);
 }
 else{
-	sl_fossilFuelVans_pct.setEnabled(false);
-	sl_electricVans_pct.setEnabled(false);
+	sl_companiesFossilFuelVans_pct.setEnabled(false);
+	sl_companiesElectricVans_pct.setEnabled(false);
 }
-sl_fossilFuelVans_pct.setValue(PetroleumFuelVans_pct, false);
-sl_electricVans_pct.setValue(ElectricVans_pct, false);
+sl_companiesFossilFuelVans_pct.setValue(PetroleumFuelVans_pct, false);
+sl_companiesElectricVans_pct.setValue(ElectricVans_pct, false);
 
 
 //Set TRUCK sliders
@@ -1512,20 +1522,19 @@ if (totalTrucks != 0) {
 	HydrogenTrucks_pct = roundToInt(100.0 * HydrogenTrucks / totalTrucks);
 }
 else{
-	sl_fossilFuelTrucks_pct.setEnabled(false);
-	sl_electricTrucks_pct.setEnabled(false);
-	sl_hydrogenTrucks_pct.setEnabled(false);
+	sl_companiesFossilFuelTrucks_pct.setEnabled(false);
+	sl_companiesElectricTrucks_pct.setEnabled(false);
+	sl_companiesHydrogenTrucks_pct.setEnabled(false);
 }
-sl_fossilFuelTrucks_pct.setValue(PetroleumFuelTrucks_pct, false);
-sl_electricTrucks_pct.setValue(ElectricTrucks_pct, false);
-sl_hydrogenTrucks_pct.setValue(HydrogenTrucks_pct, false); 
+sl_companiesFossilFuelTrucks_pct.setValue(PetroleumFuelTrucks_pct, false);
+sl_companiesElectricTrucks_pct.setValue(ElectricTrucks_pct, false);
+sl_companiesHydrogenTrucks_pct.setValue(HydrogenTrucks_pct, false); 
   }
 
   protected void f_updateMobilitySliders_custom(  ) { 
 
-//If you have a custom tab, 
-//override this function to make it update automatically
-traceln("Forgot to override the update custom electricity sliders functionality"); 
+//If you have a custom tab, override this function to make it update automatically
+throw new RuntimeException("Forgot to override the update custom mobility sliders functionality"); 
   }
 
   protected void f_setChargingAttitude( OL_ChargingAttitude selectedChargingAttitude, List<GridConnection> gcList ) { 
@@ -1541,12 +1550,12 @@ if(!zero_Interface.b_runningMainInterfaceScenarios){
 zero_Interface.f_resetSettings(); 
   }
 
-  void f_updateMobilitySliders_residential(  ) { 
+  protected void f_updateMobilitySliders_households(  ) { 
 
 ////Private EV
-gr_activateV2GPrivateParkedCars.setVisible(false);
-cb_activateV2GPrivateParkedCars.setSelected(false, false);
-gr_settingsV2G_privateParkedCars.setVisible(false);
+gr_householdActivateV2GPrivateParkedCars.setVisible(false);
+cb_householdActivateV2GPrivateParkedCars.setSelected(false, false);
+gr_householdSettingsV2G_privateParkedCars.setVisible(false);
 
 List<GCHouse> houseGridConnectionsWithPrivateParking = findAll(uI_Tabs.f_getActiveSliderGridConnections_houses(), house -> house.p_eigenOprit);
 List<I_Vehicle> privateParkedCars = new ArrayList<>();
@@ -1557,8 +1566,8 @@ if (privateParkedCars.size() > 0) {
 	int nbPrivateEVsThatSupportV2G = count(privateParkedCars, x -> x instanceof J_EAEV && ((J_EAEV)x).getV2GCapable());
 	double privateEVs_pct = 100.0 * nbPrivateEVs / privateParkedCars.size();
 	double privateEVsThatSupportV2G_pct = 100.0 * nbPrivateEVsThatSupportV2G / nbPrivateEVs;
-	sl_privateEVsResidentialArea_pct.setValue(roundToInt(privateEVs_pct), false);
-	sl_EVsThatSupportV2G_pct.setValue(roundToInt(privateEVsThatSupportV2G_pct), false);
+	sl_householdPrivateEVs_pct.setValue(roundToInt(privateEVs_pct), false);
+	sl_householdEVsThatSupportV2G_pct.setValue(roundToInt(privateEVsThatSupportV2G_pct), false);
 	
 	//Selected charging mode
 	GCHouse GCWithPrivateParkedEV = findFirst(houseGridConnectionsWithPrivateParking, gc -> gc.c_electricVehicles.size() > 0);
@@ -1587,36 +1596,36 @@ if (privateParkedCars.size() > 0) {
 			break;
 		case PRICE:
 			selectedChargingAttitudeString = "Slim laden: Prijs gestuurd";
-			gr_activateV2GPrivateParkedCars.setVisible(true);
+			gr_householdActivateV2GPrivateParkedCars.setVisible(true);
 			break;
 		case BALANCE_LOCAL:
 			selectedChargingAttitudeString = "Slim laden: Netbewust";
-			gr_activateV2GPrivateParkedCars.setVisible(true);
+			gr_householdActivateV2GPrivateParkedCars.setVisible(true);
 			break;
 		case CUSTOM:
 			selectedChargingAttitudeString = "Gevarieerd";
 			break;
 	}
 	
-	cb_chargingAttitudePrivateParkedCars.setValue(selectedChargingAttitudeString, false);
-	cb_activateV2GPrivateParkedCars.setSelected(V2GActive, false);
+	cb_householdChargingStrategyPrivateParkedCars.setValue(selectedChargingAttitudeString, false);
+	cb_householdActivateV2GPrivateParkedCars.setSelected(V2GActive, false);
 	
-	if(gr_activateV2GPrivateParkedCars.isVisible() && V2GActive){
-		gr_settingsV2G_privateParkedCars.setVisible(true);
+	if(gr_householdActivateV2GPrivateParkedCars.isVisible() && V2GActive){
+		gr_householdSettingsV2G_privateParkedCars.setVisible(true);
 	}
 }
 else{
-	sl_privateEVsResidentialArea_pct.setEnabled(false);
+	sl_householdPrivateEVs_pct.setEnabled(false);
 }
 
 ////Chargers
 OL_ChargingAttitude selectedChargingAttitude = null;
-gr_activateV2GPublicChargers.setVisible(false);
-cb_activateV2GPublicChargers.setSelected(false, false);
-gr_settingsV1G_publicChargers.setVisible(false);
-gr_settingsV2G_publicChargers.setVisible(false);
+gr_householdActivateV2GPublicChargers.setVisible(false);
+cb_householdActivateV2GPublicChargers.setSelected(false, false);
+gr_householdSettingsV1G_publicChargers.setVisible(false);
+gr_householdSettingsV2G_publicChargers.setVisible(false);
 
-List<GCPublicCharger> activeChargerGridConnections = uI_Tabs.f_getSliderGridConnections_chargers();
+List<GCPublicCharger> activeChargerGridConnections = uI_Tabs.f_getActiveSliderGridConnections_chargers();
 List<GCPublicCharger> pausedChargerGridConnections = uI_Tabs.f_getPausedSliderGridConnections_chargers();
 
 
@@ -1625,7 +1634,7 @@ int nbPublicChargerGC = activeChargerGridConnections.size() + pausedChargerGridC
 if(nbPublicChargerGC > 0 ){
 	int nbActivePublicChargersGC = activeChargerGridConnections.size();
 	double activePublicChargers_pct = 100.0 * nbActivePublicChargersGC / nbPublicChargerGC;
-	sl_publicChargersResidentialArea_pct.setValue(roundToInt(activePublicChargers_pct), false);
+	sl_householdPublicChargers_pct.setValue(roundToInt(activePublicChargers_pct), false);
 	
 	int nbV1GChargers = count(activeChargerGridConnections, x -> x.f_getChargePoint().getV1GCapable());
 	int nbV2GChargers =count(activeChargerGridConnections, x -> x.f_getChargePoint().getV2GCapable());
@@ -1633,8 +1642,8 @@ if(nbPublicChargerGC > 0 ){
 		
 	double V1G_pct = 100.0 * nbV1GChargers / nbPublicChargers;
 	double V2G_pct = 100.0 * nbV2GChargers / nbPublicChargers;
-	sl_chargersThatSupportV1G_pct.setValue(roundToInt(V1G_pct), false);
-	sl_chargersThatSupportV2G_pct.setValue(roundToInt(V2G_pct), false);
+	sl_householdChargersThatSupportV1G_pct.setValue(roundToInt(V1G_pct), false);
+	sl_householdChargersThatSupportV2G_pct.setValue(roundToInt(V2G_pct), false);
 	
 	//Selected charging mode
 	OL_ChargingAttitude currentChargingAttitude = activeChargerGridConnections.size() > 0 ? activeChargerGridConnections.get(0).f_getCurrentChargingType(): OL_ChargingAttitude.SIMPLE;
@@ -1659,28 +1668,28 @@ if(nbPublicChargerGC > 0 ){
 			break;
 		case PRICE:
 			selectedChargingAttitudeString = "Slim laden: Prijs gestuurd";
-			gr_settingsV1G_publicChargers.setVisible(true);
-			gr_activateV2GPublicChargers.setVisible(true);
+			gr_householdSettingsV1G_publicChargers.setVisible(true);
+			gr_householdActivateV2GPublicChargers.setVisible(true);
 			break;
 		case BALANCE_GRID:
 			selectedChargingAttitudeString = "Slim laden: Netbewust";
-			gr_settingsV1G_publicChargers.setVisible(true);
-			gr_activateV2GPublicChargers.setVisible(true);
+			gr_householdSettingsV1G_publicChargers.setVisible(true);
+			gr_householdActivateV2GPublicChargers.setVisible(true);
 			break;
 		case CUSTOM:
 			selectedChargingAttitudeString = "Gevarieerd";
 			break;
 	}
 	
-	cb_chargingAttitudePrivatePublicChargers.setValue(selectedChargingAttitudeString, false);
-	cb_activateV2GPublicChargers.setSelected(V2GActive, false);
+	cb_householdChargingStrategyPrivatePublicChargers.setValue(selectedChargingAttitudeString, false);
+	cb_householdActivateV2GPublicChargers.setSelected(V2GActive, false);
 	
-	if(gr_activateV2GPublicChargers.isVisible() && V2GActive){
-		gr_settingsV2G_publicChargers.setVisible(true);
+	if(gr_householdActivateV2GPublicChargers.isVisible() && V2GActive){
+		gr_householdSettingsV2G_publicChargers.setVisible(true);
 	}
 }
 else{
-	sl_publicChargersResidentialArea_pct.setEnabled(false);
+	sl_householdPublicChargers_pct.setEnabled(false);
 } 
   }
 
@@ -1933,66 +1942,139 @@ zero_Interface.f_resetSettings();
 
   protected void f_initializeTab_Mobility(  ) { 
 
-//Use this function to initialize mobility tab settings at start of simulation 
+//Use this function to initialize mobility tab settings at start of simulation
+f_initializeMobilityPages(); 
+  }
+
+  protected void f_initializeMobilityPages(  ) { 
+
+// CHOOSE WHICH PAGES IN YOUR TAB YOU WANT TO BE ABLE TO SHOW FOR YOUR PROJECT 
+boolean hasHouses = uI_Tabs.f_getActiveSliderGridConnections_houses().size() > 0;
+boolean hasCompanies = uI_Tabs.f_getActiveSliderGridConnections_utilities().size() > 0;
+
+c_loadedPageGroups = new ArrayList<>();
+// Load in the existing pages you want to include in the tab
+if (hasHouses) {
+	c_loadedPageGroups.add(gr_mobilitySliders_households);
+} 
+if (hasCompanies) {
+	c_loadedPageGroups.add(gr_mobilitySliders_companies);
+}
+
+// If you have a custom page, add it by using f_addCustomPage:
+f_addCustomPage();
+
+// Show/hide page indicator based on number of pages
+if (c_loadedPageGroups.size() <= 1) {
+    gr_pageIndicator.setVisible(false);
+} else {
+    gr_pageIndicator.setVisible(true);
+}
+// Navigate to the first page
+if (!c_loadedPageGroups.isEmpty()) {
+    f_goToPage(0);
+} 
+  }
+
+  protected void f_goToPage( int pageIndex ) { 
+
+for (ShapeGroup group : c_loadedPageGroups) {
+    group.setVisible(false);
+}
+
+if (c_loadedPageGroups.isEmpty()) return;
+
+v_currentPageIndex = pageIndex;
+c_loadedPageGroups.get(v_currentPageIndex).setVisible(true); // Show the selected page group
+f_updatePageIndicator(); // Update the page indicator text 
+  }
+
+  protected void f_nextPage(  ) { 
+
+if (c_loadedPageGroups.isEmpty()) return;
+int nextIndex = (v_currentPageIndex + 1) % c_loadedPageGroups.size();
+f_goToPage(nextIndex); 
+  }
+
+  protected void f_previousPage(  ) { 
+
+if (c_loadedPageGroups.isEmpty()) return;
+int prevIndex = (v_currentPageIndex - 1 + c_loadedPageGroups.size()) % c_loadedPageGroups.size();
+f_goToPage(prevIndex); 
+  }
+
+  protected void f_updatePageIndicator(  ) { 
+
+t_pageIndicator.setText("Pagina " + (v_currentPageIndex + 1) + "/" + c_loadedPageGroups.size());
+presentation.remove(gr_pageIndicator);
+presentation.add(gr_pageIndicator); 
+  }
+
+  protected void f_addCustomPage(  ) { 
+
+// Override this function to add your custom page to c_loadedPageGroups, for instance, like this:
+//c_loadedPageGroups.add(gr_mobilitySliders_custom); 
   }
 private double _datasetUpdateTime_xjal() {
 	return time();
 }
   // View areas
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_spreadChargingEVs_Font = new Font("Dialog", 0, 11 );
+  protected static final Font _cb_companiesSpreadChargingEVs_Font = new Font("Dialog", 0, 11 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_setChargingAttitude_Font = _cb_spreadChargingEVs_Font;
+  protected static final Font _cb_setChargingAttitude_Font = _cb_companiesSpreadChargingEVs_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_activateV2GPrivateParkedCars_Font = _cb_spreadChargingEVs_Font;
+  protected static final Font _cb_householdActivateV2GPrivateParkedCars_Font = _cb_companiesSpreadChargingEVs_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_chargingAttitudePrivateParkedCars_Font = _cb_spreadChargingEVs_Font;
+  protected static final Font _cb_householdChargingStrategyPrivateParkedCars_Font = _cb_companiesSpreadChargingEVs_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_chargingAttitudePrivatePublicChargers_Font = _cb_spreadChargingEVs_Font;
+  protected static final Font _cb_householdChargingStrategyPrivatePublicChargers_Font = _cb_companiesSpreadChargingEVs_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_activateV2GPublicChargers_Font = _cb_spreadChargingEVs_Font;
+  protected static final Font _cb_householdActivateV2GPublicChargers_Font = _cb_companiesSpreadChargingEVs_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_genericFunctions_Font = new Font("SansSerif", 0, 22 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_fossilFuelCars_pct_Font = new Font("Dialog", 0, 14 );
+  protected static final Font _txt_companiesFossilFuelCars_pct_Font = new Font("Dialog", 0, 12 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_fossilFuelCarsDescription_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesFossilFuelCarsDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricTrucksDescription_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesElectricTrucksDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricTrucks_pct_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesElectricTrucks_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_mobilityDemandReductionDescription_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesMobilityDemandReductionDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_mobilityDemandReduction_pct_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesMobilityDemandReduction_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_hydrogenTrucksDescription_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesHydrogenTrucksDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_hydrogenTrucks_pct_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesHydrogenTrucks_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_fossilFuelTrucksDescription_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesFossilFuelTrucksDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_fossilFuelTrucks_pct_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _t_fossilFuelTrucks_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_trucksDescription_Font = new Font("Dialog", 1, 14 );
+  protected static final Font _t_trucksDescription_Font = new Font("Dialog", 1, 12 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricCarsDescription_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesElectricCarsDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricCars_pct_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesElectricCars_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_carsDescription_Font = _t_trucksDescription_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_fossilFuelVans_pct_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesFossilFuelVans_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_fossilFuelVansDescription_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesFossilFuelVansDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricVansDescription_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesElectricVansDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricVans_pct_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesElectricVans_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_vansDescription_Font = _t_trucksDescription_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_spreadChargingEVsDescription1_Font = _t_fossilFuelCars_pct_Font;
+  protected static final Font _txt_companiesSpreadChargingEVsDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_mobilitySlidersCompaniesDescription_Font = new Font("Dialog", 1, 22 );
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_demandFunctionsDescription_Font = new Font("SansSerif", 0, 18 );
   @AnyLogicInternalCodegenAPI
@@ -2002,37 +2084,41 @@ private double _datasetUpdateTime_xjal() {
   @AnyLogicInternalCodegenAPI
   protected static final Font _txt_publicChargePoints_Font = _t_trucksDescription_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_publicEVsResidentialAreaDescription_Font = new Font("Dialog", 0, 12 );
+  protected static final Font _txt_householdPublicEVsResidentialAreaDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_publicEVsResidentialArea_pct_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdPublicEVs_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_privateEVsResidentialAreaDescription_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdPrivateEVsDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_privateEVsResidentialArea_pct_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdPrivateEVs_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_chargersThatSupportV2GDescription_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_chargersThatSupportV2GDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_chargersThatSupportV2G_pct_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdChargersThatSupportV2G_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_chargersThatSupportV1GDescription_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdChargersThatSupportV1GDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_chargersThatSupportV1G_pct_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdChargersThatSupportV1G_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_activateV2GPrivateParkedCars_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdActivateV2GPrivateParkedCars_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_chargingStrategyPrivateParkedCars_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdChargingStrategyPrivateParkedCars_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_chargingStrategyPublicChargers_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_chargingStrategyPublicChargers_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_activateV2GPrivatePublicChargers_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_activateV2GPrivatePublicChargers_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_EVsThatSupportV2GDescription_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdEVsThatSupportV2GDescription_Font = _txt_companiesFossilFuelCars_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_EVsThatSupportV2G_pct_Font = _t_publicEVsResidentialAreaDescription_Font;
+  protected static final Font _txt_householdEVsThatSupportV2G_pct_Font = _txt_companiesFossilFuelCars_pct_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_mobilitySlidersHousesholdsDescription_Font = _txt_mobilitySlidersCompaniesDescription_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _txt_mobilityFunctionsDescription_Font = new Font("Dialog", 0, 18 );
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_mobilityFunctionsDescription1_Font = new Font("SansSerif", 1, 14 );
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _t_pageIndicator_Font = new Font("Dialog", 0, 10 );
   protected static final Color _rect_mobilityDemandSliders_default_Fill_Color = new Color( 0xFFD7EFF2, true );
   protected static final Color _rect_mobilityDemandSliders_residential_Fill_Color = new Color( 0xFFD7EFF2, true );
   @AnyLogicInternalCodegenAPI
@@ -2042,185 +2128,197 @@ private double _datasetUpdateTime_xjal() {
   @AnyLogicInternalCodegenAPI
   protected static final int _rect_mobilityDemandSliders_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 3;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_fossilFuelCars_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 4;
+  protected static final int _txt_companiesFossilFuelCars_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 4;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_fossilFuelCarsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 5;
+  protected static final int _txt_companiesFossilFuelCarsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 5;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricTrucksDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 6;
+  protected static final int _txt_companiesElectricTrucksDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 6;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 7;
+  protected static final int _txt_companiesElectricTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 7;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_mobilityDemandReductionDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 8;
+  protected static final int _txt_companiesMobilityDemandReductionDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 8;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_mobilityDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 9;
+  protected static final int _txt_companiesMobilityDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 9;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_hydrogenTrucksDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 10;
+  protected static final int _txt_companiesHydrogenTrucksDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 10;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_hydrogenTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 11;
+  protected static final int _txt_companiesHydrogenTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 11;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_fossilFuelTrucksDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 12;
+  protected static final int _txt_companiesFossilFuelTrucksDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 12;
   @AnyLogicInternalCodegenAPI
   protected static final int _t_fossilFuelTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 13;
   @AnyLogicInternalCodegenAPI
   protected static final int _t_trucksDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 14;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricCarsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 15;
+  protected static final int _txt_companiesElectricCarsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 15;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricCars_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 16;
+  protected static final int _txt_companiesElectricCars_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 16;
   @AnyLogicInternalCodegenAPI
   protected static final int _t_carsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 17;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_fossilFuelVans_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 18;
+  protected static final int _txt_companiesFossilFuelVans_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 18;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_fossilFuelVansDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 19;
+  protected static final int _txt_companiesFossilFuelVansDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 19;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricVansDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 20;
+  protected static final int _txt_companiesElectricVansDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 20;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricVans_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 21;
+  protected static final int _txt_companiesElectricVans_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 21;
   @AnyLogicInternalCodegenAPI
   protected static final int _t_vansDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 22;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_mobilityReduction = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 23;
+  protected static final int _i_companiesMobilityReduction = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 23;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_electricTruck = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 24;
+  protected static final int _i_companiesElectricTruck = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 24;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_hydrogenTruck = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 25;
+  protected static final int _i_companiesHydrogenTruck = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 25;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_fossilFuelTruck = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 26;
+  protected static final int _i_companiesFossilFuelTruck = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 26;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_electricVans = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 27;
+  protected static final int _i_companiesElectricVans = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 27;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_fossilFuelVans = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 28;
+  protected static final int _i_companiesFossilFuelVans = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 28;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_electricCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 29;
+  protected static final int _i_companiesElectricCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 29;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_fossilFuelCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 30;
+  protected static final int _i_companiesFossilFuelCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 30;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_spreadChargingEVsDescription1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 31;
+  protected static final int _txt_companiesSpreadChargingEVsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 31;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_mobilitySliders_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 32;
+  protected static final int _i_companiesMobilityChargingAttitude = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 32;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_demandFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 33;
+  protected static final int _txt_mobilitySlidersCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 33;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_demandFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 34;
+  protected static final int _gr_mobilitySliders_companies = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 34;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mobilityFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 35;
+  protected static final int _rect_demandFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 35;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_mobilityFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 36;
+  protected static final int _t_demandFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 36;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_mobilityChargingAttitude = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 37;
+  protected static final int _rect_mobilityFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 37;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mobilityDemandSliders_residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 38;
+  protected static final int _t_mobilityFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 38;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_privateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 39;
+  protected static final int _rect_mobilityDemandSliders_residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 39;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_publicChargePoints = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 40;
+  protected static final int _txt_privateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 40;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_publicEVsResidentialAreaDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 41;
+  protected static final int _txt_publicChargePoints = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 41;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_publicEVsResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 42;
+  protected static final int _txt_householdPublicEVsResidentialAreaDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 42;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_privateEVsResidentialAreaDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 43;
+  protected static final int _txt_householdPublicEVs_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 43;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_privateEVsResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 44;
+  protected static final int _txt_householdPrivateEVsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 44;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_chargersThatSupportV2GDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 45;
+  protected static final int _txt_householdPrivateEVs_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 45;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_chargersThatSupportV2G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 46;
+  protected static final int _txt_chargersThatSupportV2GDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 46;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdPublicChargersV2G = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 47;
+  protected static final int _txt_householdChargersThatSupportV2G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 47;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_settingsV2G_publicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 48;
+  protected static final int _i_householdPublicChargersV2G = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 48;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdPrivateEV = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 49;
+  protected static final int _gr_householdSettingsV2G_publicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 49;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 50;
+  protected static final int _i_householdPrivateEV = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 50;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_chargersThatSupportV1GDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 51;
+  protected static final int _i_householdPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 51;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_chargersThatSupportV1G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 52;
+  protected static final int _txt_householdChargersThatSupportV1GDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 52;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdPublicChargersV1G = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 53;
+  protected static final int _txt_householdChargersThatSupportV1G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 53;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_settingsV1G_publicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 54;
+  protected static final int _i_householdPublicChargersV1G = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 54;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_activateV2GPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 55;
+  protected static final int _gr_householdSettingsV1G_publicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 55;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_activateV2GPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 56;
+  protected static final int _i_householdActivateV2GPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 56;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_activateV2GPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 57;
+  protected static final int _txt_householdActivateV2GPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 57;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_chargingStrategyPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 58;
+  protected static final int _gr_householdActivateV2GPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 58;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_chargingAttitudePrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 59;
+  protected static final int _txt_householdChargingStrategyPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 59;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_chargingStrategyPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 60;
+  protected static final int _i_householdChargingStrategyPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 60;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_chargingStrategyPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 61;
+  protected static final int _txt_chargingStrategyPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 61;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_activateV2GPrivatePublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 62;
+  protected static final int _i_householdChargingStrategyPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 62;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_activateV2GPrivatePublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 63;
+  protected static final int _i_householdActivateV2GPrivatePublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 63;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_activateV2GPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 64;
+  protected static final int _txt_activateV2GPrivatePublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 64;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_EVsThatSupportV2GDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 65;
+  protected static final int _gr_householdActivateV2GPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 65;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_EVsThatSupportV2G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 66;
+  protected static final int _txt_householdEVsThatSupportV2GDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 66;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_EVsThatSupportV2G = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 67;
+  protected static final int _txt_householdEVsThatSupportV2G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 67;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_settingsV2G_privateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 68;
+  protected static final int _i_householdEVsThatSupportV2G = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 68;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_mobilitySliders_residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 69;
+  protected static final int _gr_householdSettingsV2G_privateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 69;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mobilityFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 70;
+  protected static final int _txt_mobilitySlidersHousesholdsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 70;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mobilityFunctions1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 71;
+  protected static final int _gr_mobilitySliders_households = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 71;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_mobilityFunctionsDescription1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 72;
+  protected static final int _txt_mobilityFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 72;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_fossilFuelCars_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 73;
+  protected static final int _rect_mobilityFunctions1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 73;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 74;
+  protected static final int _t_mobilityFunctionsDescription1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 74;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_mobilityDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 75;
+  protected static final int _arrowLeftResidential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 75;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_hydrogenTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 76;
+  protected static final int _arrowRightResidential1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 76;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_fossilFuelTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 77;
+  protected static final int _t_pageIndicator = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 77;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricCars_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 78;
+  protected static final int _gr_pageIndicator = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 78;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_fossilFuelVans_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 79;
+  protected static final int _sl_companiesFossilFuelCars_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 79;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricVans_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 80;
+  protected static final int _sl_companiesElectricTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 80;
   @AnyLogicInternalCodegenAPI
-  protected static final int _cb_spreadChargingEVs = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 81;
+  protected static final int _sl_companiesMobilityDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 81;
   @AnyLogicInternalCodegenAPI
-  protected static final int _cb_setChargingAttitude = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 82;
+  protected static final int _sl_companiesHydrogenTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 82;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_publicChargersResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 83;
+  protected static final int _sl_companiesFossilFuelTrucks_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 83;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_privateEVsResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 84;
+  protected static final int _sl_companiesElectricCars_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 84;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_chargersThatSupportV2G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 85;
+  protected static final int _sl_companiesFossilFuelVans_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 85;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_chargersThatSupportV1G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 86;
+  protected static final int _sl_companiesElectricVans_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 86;
   @AnyLogicInternalCodegenAPI
-  protected static final int _cb_activateV2GPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 87;
+  protected static final int _cb_companiesSpreadChargingEVs = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 87;
   @AnyLogicInternalCodegenAPI
-  protected static final int _cb_chargingAttitudePrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 88;
+  protected static final int _cb_setChargingAttitude = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 88;
   @AnyLogicInternalCodegenAPI
-  protected static final int _cb_chargingAttitudePrivatePublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 89;
+  protected static final int _sl_householdPublicChargers_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 89;
   @AnyLogicInternalCodegenAPI
-  protected static final int _cb_activateV2GPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 90;
+  protected static final int _sl_householdPrivateEVs_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 90;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_EVsThatSupportV2G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 91;
+  protected static final int _sl_householdChargersThatSupportV2G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 91;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_householdChargersThatSupportV1G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 92;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_householdActivateV2GPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 93;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_householdChargingStrategyPrivateParkedCars = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 94;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_householdChargingStrategyPrivatePublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 95;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_householdActivateV2GPublicChargers = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 96;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_householdEVsThatSupportV2G_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 97;
 
   /** Internal constant, shouldn't be accessed by user */
   @AnyLogicInternalCodegenAPI
-  protected static final int _SHAPE_NEXT_ID_xjal = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 92;
+  protected static final int _SHAPE_NEXT_ID_xjal = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 98;
 
   @AnyLogicInternalCodegenAPI
   public boolean isPublicPresentationDefined() {
@@ -2233,81 +2331,81 @@ private double _datasetUpdateTime_xjal() {
   }
   @AnyLogicInternalCodegenAPI
   private void _initialize_level_xjal() {
-	  level.addAll(rect_genericFunctions, t_genericFunctions, gr_mobilitySliders_default, rect_demandFunctions, t_demandFunctionsDescription, rect_mobilityFunctions, t_mobilityFunctionsDescription, cb_setChargingAttitude, i_mobilityChargingAttitude, gr_mobilitySliders_residential, txt_mobilityFunctionsDescription, rect_mobilityFunctions1, t_mobilityFunctionsDescription1);
+	  level.addAll(rect_genericFunctions, t_genericFunctions, gr_mobilitySliders_companies, rect_demandFunctions, t_demandFunctionsDescription, rect_mobilityFunctions, t_mobilityFunctionsDescription, cb_setChargingAttitude, gr_mobilitySliders_households, txt_mobilityFunctionsDescription, rect_mobilityFunctions1, t_mobilityFunctionsDescription1, gr_pageIndicator);
   }
 
   @Override
   @AnyLogicInternalCodegenAPI
   public boolean onShapeClick( int _shape, int index, double clickx, double clicky ){
     switch( _shape ){
-      case _i_mobilityReduction:
+      case _i_companiesMobilityReduction:
         if (true) {
-          ShapeImage self = this.i_mobilityReduction;
+          ShapeImage self = this.i_companiesMobilityReduction;
           
-zero_Interface.f_setInfoText(i_mobilityReduction, zero_Interface.v_infoText.mobilityDemandReduction, i_mobilityReduction.getX() + uI_Tabs.v_presentationXOffset, i_mobilityReduction.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companiesMobilityReduction, zero_Interface.v_infoText.mobilityDemandReduction, i_companiesMobilityReduction.getX() + uI_Tabs.v_presentationXOffset, i_companiesMobilityReduction.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_electricTruck:
+      case _i_companiesElectricTruck:
         if (true) {
-          ShapeImage self = this.i_electricTruck;
+          ShapeImage self = this.i_companiesElectricTruck;
           
-zero_Interface.f_setInfoText(i_electricTruck, zero_Interface.v_infoText.electricTrucks, i_electricTruck.getX() + uI_Tabs.v_presentationXOffset, i_electricTruck.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companiesElectricTruck, zero_Interface.v_infoText.electricTrucks, i_companiesElectricTruck.getX() + uI_Tabs.v_presentationXOffset, i_companiesElectricTruck.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_hydrogenTruck:
+      case _i_companiesHydrogenTruck:
         if (true) {
-          ShapeImage self = this.i_hydrogenTruck;
+          ShapeImage self = this.i_companiesHydrogenTruck;
           
-zero_Interface.f_setInfoText(i_hydrogenTruck, zero_Interface.v_infoText.hydrogenTrucks, i_hydrogenTruck.getX() + uI_Tabs.v_presentationXOffset, i_hydrogenTruck.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companiesHydrogenTruck, zero_Interface.v_infoText.hydrogenTrucks, i_companiesHydrogenTruck.getX() + uI_Tabs.v_presentationXOffset, i_companiesHydrogenTruck.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_fossilFuelTruck:
+      case _i_companiesFossilFuelTruck:
         if (true) {
-          ShapeImage self = this.i_fossilFuelTruck;
+          ShapeImage self = this.i_companiesFossilFuelTruck;
           
-zero_Interface.f_setInfoText(i_fossilFuelTruck, zero_Interface.v_infoText.fossilTrucks, i_fossilFuelTruck.getX() + uI_Tabs.v_presentationXOffset, i_fossilFuelTruck.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companiesFossilFuelTruck, zero_Interface.v_infoText.fossilTrucks, i_companiesFossilFuelTruck.getX() + uI_Tabs.v_presentationXOffset, i_companiesFossilFuelTruck.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_electricVans:
+      case _i_companiesElectricVans:
         if (true) {
-          ShapeImage self = this.i_electricVans;
+          ShapeImage self = this.i_companiesElectricVans;
           
-zero_Interface.f_setInfoText(i_electricVans, zero_Interface.v_infoText.electricVans, i_electricVans.getX() + uI_Tabs.v_presentationXOffset, i_electricVans.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companiesElectricVans, zero_Interface.v_infoText.electricVans, i_companiesElectricVans.getX() + uI_Tabs.v_presentationXOffset, i_companiesElectricVans.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_fossilFuelVans:
+      case _i_companiesFossilFuelVans:
         if (true) {
-          ShapeImage self = this.i_fossilFuelVans;
+          ShapeImage self = this.i_companiesFossilFuelVans;
           
-zero_Interface.f_setInfoText(i_fossilFuelVans, zero_Interface.v_infoText.fossilVans, i_fossilFuelVans.getX() + uI_Tabs.v_presentationXOffset, i_fossilFuelVans.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companiesFossilFuelVans, zero_Interface.v_infoText.fossilVans, i_companiesFossilFuelVans.getX() + uI_Tabs.v_presentationXOffset, i_companiesFossilFuelVans.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_electricCars:
+      case _i_companiesElectricCars:
         if (true) {
-          ShapeImage self = this.i_electricCars;
+          ShapeImage self = this.i_companiesElectricCars;
           
-zero_Interface.f_setInfoText(i_electricCars, zero_Interface.v_infoText.electricCars, i_electricCars.getX() + uI_Tabs.v_presentationXOffset, i_electricCars.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companiesElectricCars, zero_Interface.v_infoText.electricCars, i_companiesElectricCars.getX() + uI_Tabs.v_presentationXOffset, i_companiesElectricCars.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_fossilFuelCars:
+      case _i_companiesFossilFuelCars:
         if (true) {
-          ShapeImage self = this.i_fossilFuelCars;
+          ShapeImage self = this.i_companiesFossilFuelCars;
           
-zero_Interface.f_setInfoText(i_fossilFuelCars, zero_Interface.v_infoText.fossilCars, i_fossilFuelCars.getX() + uI_Tabs.v_presentationXOffset, i_fossilFuelCars.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companiesFossilFuelCars, zero_Interface.v_infoText.fossilCars, i_companiesFossilFuelCars.getX() + uI_Tabs.v_presentationXOffset, i_companiesFossilFuelCars.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_mobilityChargingAttitude:
+      case _i_companiesMobilityChargingAttitude:
         if (true) {
-          ShapeImage self = this.i_mobilityChargingAttitude;
+          ShapeImage self = this.i_companiesMobilityChargingAttitude;
           
-zero_Interface.f_setInfoText(i_mobilityChargingAttitude, zero_Interface.v_infoText.mobilitySmartCharging, i_mobilityChargingAttitude.getX() + uI_Tabs.v_presentationXOffset, i_mobilityChargingAttitude.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companiesMobilityChargingAttitude, zero_Interface.v_infoText.mobilitySmartCharging, i_companiesMobilityChargingAttitude.getX() + uI_Tabs.v_presentationXOffset, i_companiesMobilityChargingAttitude.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
       case _i_householdPublicChargersV2G:
         if (true) {
           ShapeImage self = this.i_householdPublicChargersV2G;
           
-zero_Interface.f_setInfoText(i_householdPublicChargersV2G, zero_Interface.v_infoText.householdPublicParkingV2G, i_householdPublicChargersV2G.getX() + gr_settingsV2G_publicChargers.getX() + uI_Tabs.v_presentationXOffset, i_householdPublicChargersV2G.getY() + gr_settingsV2G_publicChargers.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_householdPublicChargersV2G, zero_Interface.v_infoText.householdPublicParkingV2G, i_householdPublicChargersV2G.getX() + gr_householdSettingsV2G_publicChargers.getX() + uI_Tabs.v_presentationXOffset, i_householdPublicChargersV2G.getY() + gr_householdSettingsV2G_publicChargers.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
       case _i_householdPrivateEV:
@@ -2328,42 +2426,56 @@ zero_Interface.f_setInfoText(i_householdPublicChargers, zero_Interface.v_infoTex
         if (true) {
           ShapeImage self = this.i_householdPublicChargersV1G;
           
-zero_Interface.f_setInfoText(i_householdPublicChargersV1G, zero_Interface.v_infoText.householdPublicParkingV1G, i_householdPublicChargersV1G.getX() + gr_settingsV1G_publicChargers.getX() + uI_Tabs.v_presentationXOffset, i_householdPublicChargersV1G.getY() + gr_settingsV1G_publicChargers.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_householdPublicChargersV1G, zero_Interface.v_infoText.householdPublicParkingV1G, i_householdPublicChargersV1G.getX() + gr_householdSettingsV1G_publicChargers.getX() + uI_Tabs.v_presentationXOffset, i_householdPublicChargersV1G.getY() + gr_householdSettingsV1G_publicChargers.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_activateV2GPrivateParkedCars:
+      case _i_householdActivateV2GPrivateParkedCars:
         if (true) {
-          ShapeImage self = this.i_activateV2GPrivateParkedCars;
+          ShapeImage self = this.i_householdActivateV2GPrivateParkedCars;
           
-zero_Interface.f_setInfoText(i_activateV2GPrivateParkedCars, zero_Interface.v_infoText.activateV2GPrivateParkedCars, i_activateV2GPrivateParkedCars.getX() + gr_activateV2GPrivateParkedCars.getX() + uI_Tabs.v_presentationXOffset, i_activateV2GPrivateParkedCars.getY() + gr_activateV2GPrivateParkedCars.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_householdActivateV2GPrivateParkedCars, zero_Interface.v_infoText.activateV2GPrivateParkedCars, i_householdActivateV2GPrivateParkedCars.getX() + gr_householdActivateV2GPrivateParkedCars.getX() + uI_Tabs.v_presentationXOffset, i_householdActivateV2GPrivateParkedCars.getY() + gr_householdActivateV2GPrivateParkedCars.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_chargingAttitudePrivateParkedCars:
+      case _i_householdChargingStrategyPrivateParkedCars:
         if (true) {
-          ShapeImage self = this.i_chargingAttitudePrivateParkedCars;
+          ShapeImage self = this.i_householdChargingStrategyPrivateParkedCars;
           
-zero_Interface.f_setInfoText(i_chargingAttitudePrivateParkedCars, zero_Interface.v_infoText.chargingAttitudePrivateParkedCars, i_chargingAttitudePrivateParkedCars.getX() + uI_Tabs.v_presentationXOffset, i_chargingAttitudePrivateParkedCars.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_householdChargingStrategyPrivateParkedCars, zero_Interface.v_infoText.chargingAttitudePrivateParkedCars, i_householdChargingStrategyPrivateParkedCars.getX() + uI_Tabs.v_presentationXOffset, i_householdChargingStrategyPrivateParkedCars.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_chargingStrategyPublicChargers:
+      case _i_householdChargingStrategyPublicChargers:
         if (true) {
-          ShapeImage self = this.i_chargingStrategyPublicChargers;
+          ShapeImage self = this.i_householdChargingStrategyPublicChargers;
           
-zero_Interface.f_setInfoText(i_chargingStrategyPublicChargers, zero_Interface.v_infoText.chargingStrategyPublicChargers, i_chargingStrategyPublicChargers.getX() + uI_Tabs.v_presentationXOffset, i_chargingStrategyPublicChargers.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_householdChargingStrategyPublicChargers, zero_Interface.v_infoText.chargingStrategyPublicChargers, i_householdChargingStrategyPublicChargers.getX() + uI_Tabs.v_presentationXOffset, i_householdChargingStrategyPublicChargers.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_activateV2GPrivatePublicChargers:
+      case _i_householdActivateV2GPrivatePublicChargers:
         if (true) {
-          ShapeImage self = this.i_activateV2GPrivatePublicChargers;
+          ShapeImage self = this.i_householdActivateV2GPrivatePublicChargers;
           
-zero_Interface.f_setInfoText(i_activateV2GPrivatePublicChargers, zero_Interface.v_infoText.activateV2GPrivatePublicChargers, i_activateV2GPrivatePublicChargers.getX() + gr_activateV2GPublicChargers.getX() + uI_Tabs.v_presentationXOffset, i_activateV2GPrivatePublicChargers.getY() + gr_activateV2GPublicChargers.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_householdActivateV2GPrivatePublicChargers, zero_Interface.v_infoText.activateV2GPrivatePublicChargers, i_householdActivateV2GPrivatePublicChargers.getX() + gr_householdActivateV2GPublicChargers.getX() + uI_Tabs.v_presentationXOffset, i_householdActivateV2GPrivatePublicChargers.getY() + gr_householdActivateV2GPublicChargers.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_EVsThatSupportV2G:
+      case _i_householdEVsThatSupportV2G:
         if (true) {
-          ShapeImage self = this.i_EVsThatSupportV2G;
+          ShapeImage self = this.i_householdEVsThatSupportV2G;
           
-zero_Interface.f_setInfoText(i_EVsThatSupportV2G, zero_Interface.v_infoText.EVsThatSupportV2G, i_EVsThatSupportV2G.getX() + gr_settingsV2G_privateParkedCars.getX() + uI_Tabs.v_presentationXOffset, i_EVsThatSupportV2G.getY() + gr_settingsV2G_privateParkedCars.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_householdEVsThatSupportV2G, zero_Interface.v_infoText.EVsThatSupportV2G, i_householdEVsThatSupportV2G.getX() + gr_householdSettingsV2G_privateParkedCars.getX() + uI_Tabs.v_presentationXOffset, i_householdEVsThatSupportV2G.getY() + gr_householdSettingsV2G_privateParkedCars.getY() + uI_Tabs.v_presentationYOffset); 
+        }
+        break;
+      case _arrowLeftResidential:
+        if (true) {
+          ShapeImage self = this.arrowLeftResidential;
+          
+f_previousPage(); 
+        }
+        break;
+      case _arrowRightResidential1:
+        if (true) {
+          ShapeImage self = this.arrowRightResidential1;
+          
+f_nextPage(); 
         }
         break;
       default: return super.onShapeClick( _shape, index, clickx, clicky );
@@ -2375,26 +2487,26 @@ zero_Interface.f_setInfoText(i_EVsThatSupportV2G, zero_Interface.v_infoText.EVsT
   @AnyLogicInternalCodegenAPI
   public void executeShapeControlAction( int _shape, int index, boolean value ) {
     switch( _shape ) {
-      case _cb_spreadChargingEVs: {
-          ShapeCheckBox self = this.cb_spreadChargingEVs;
+      case _cb_companiesSpreadChargingEVs: {
+          ShapeCheckBox self = this.cb_companiesSpreadChargingEVs;
 OL_ChargingAttitude selectedChargingAttitude = OL_ChargingAttitude.SIMPLE; 
-if(cb_spreadChargingEVs.isSelected()){
+if(cb_companiesSpreadChargingEVs.isSelected()){
 	selectedChargingAttitude = OL_ChargingAttitude.MAX_POWER; 
 }
 
-f_setChargingAttitude(selectedChargingAttitude, uI_Tabs.f_getAllSliderGridConnections_all()); 
+f_setChargingAttitude(selectedChargingAttitude, new ArrayList<GridConnection>(uI_Tabs.f_getAllSliderGridConnections_utilities())); 
 ;}
         break;
-      case _cb_activateV2GPrivateParkedCars: {
-          ShapeCheckBox self = this.cb_activateV2GPrivateParkedCars;
-f_activateV2G(new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), cb_activateV2GPrivateParkedCars.isSelected());
-gr_settingsV2G_privateParkedCars.setVisible(cb_activateV2GPrivateParkedCars.isSelected()); 
+      case _cb_householdActivateV2GPrivateParkedCars: {
+          ShapeCheckBox self = this.cb_householdActivateV2GPrivateParkedCars;
+f_activateV2G(new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), cb_householdActivateV2GPrivateParkedCars.isSelected());
+gr_householdSettingsV2G_privateParkedCars.setVisible(cb_householdActivateV2GPrivateParkedCars.isSelected()); 
 ;}
         break;
-      case _cb_activateV2GPublicChargers: {
-          ShapeCheckBox self = this.cb_activateV2GPublicChargers;
-f_activateV2G(new ArrayList<GridConnection>(uI_Tabs.f_getAllSliderGridConnections_chargers()), cb_activateV2GPublicChargers.isSelected());
-gr_settingsV2G_publicChargers.setVisible(cb_activateV2GPublicChargers.isSelected()); 
+      case _cb_householdActivateV2GPublicChargers: {
+          ShapeCheckBox self = this.cb_householdActivateV2GPublicChargers;
+f_activateV2G(new ArrayList<GridConnection>(uI_Tabs.f_getAllSliderGridConnections_chargers()), cb_householdActivateV2GPublicChargers.isSelected());
+gr_householdSettingsV2G_publicChargers.setVisible(cb_householdActivateV2GPublicChargers.isSelected()); 
 ;}
         break;
       default:
@@ -2407,77 +2519,76 @@ gr_settingsV2G_publicChargers.setVisible(cb_activateV2GPublicChargers.isSelected
   @AnyLogicInternalCodegenAPI
   public void executeShapeControlAction( int _shape, int index, double value ) {
     switch( _shape ) {
-      case _sl_fossilFuelCars_pct: {
-          ShapeSlider self = this.sl_fossilFuelCars_pct;
-sl_electricCars_pct.setValue(100 - sl_fossilFuelCars_pct.getIntValue(), false);
-f_setPetroleumFuelCars( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_electricCars_pct, sl_fossilFuelCars_pct ); 
+      case _sl_companiesFossilFuelCars_pct: {
+          ShapeSlider self = this.sl_companiesFossilFuelCars_pct;
+sl_companiesElectricCars_pct.setValue(100 - sl_companiesFossilFuelCars_pct.getIntValue(), false);
+f_setPetroleumFuelCars( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_companiesElectricCars_pct, sl_companiesFossilFuelCars_pct ); 
 ;}
         break;
-      case _sl_electricTrucks_pct: {
-          ShapeSlider self = this.sl_electricTrucks_pct;
-f_setVehicleSliders( 0, sl_electricTrucks_pct, sl_hydrogenTrucks_pct, sl_fossilFuelTrucks_pct );
-f_setElectricTrucks( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_electricTrucks_pct, sl_hydrogenTrucks_pct, sl_fossilFuelTrucks_pct ); 
+      case _sl_companiesElectricTrucks_pct: {
+          ShapeSlider self = this.sl_companiesElectricTrucks_pct;
+f_setVehicleSliders( 0, sl_companiesElectricTrucks_pct, sl_companiesHydrogenTrucks_pct, sl_companiesFossilFuelTrucks_pct );
+f_setElectricTrucks( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_companiesElectricTrucks_pct, sl_companiesHydrogenTrucks_pct, sl_companiesFossilFuelTrucks_pct ); 
 ;}
         break;
-      case _sl_mobilityDemandReduction_pct: {
-          ShapeSlider self = this.sl_mobilityDemandReduction_pct;
-f_setDemandReduction( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_mobilityDemandReduction_pct.getValue() );
- 
+      case _sl_companiesMobilityDemandReduction_pct: {
+          ShapeSlider self = this.sl_companiesMobilityDemandReduction_pct;
+f_setDemandReduction( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_companiesMobilityDemandReduction_pct.getValue() ); 
 ;}
         break;
-      case _sl_hydrogenTrucks_pct: {
-          ShapeSlider self = this.sl_hydrogenTrucks_pct;
-f_setVehicleSliders( 1, sl_electricTrucks_pct, sl_hydrogenTrucks_pct, sl_fossilFuelTrucks_pct );
-f_setHydrogenTrucks( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_electricTrucks_pct, sl_hydrogenTrucks_pct, sl_fossilFuelTrucks_pct ); 
+      case _sl_companiesHydrogenTrucks_pct: {
+          ShapeSlider self = this.sl_companiesHydrogenTrucks_pct;
+f_setVehicleSliders( 1, sl_companiesElectricTrucks_pct, sl_companiesHydrogenTrucks_pct, sl_companiesFossilFuelTrucks_pct );
+f_setHydrogenTrucks( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_companiesElectricTrucks_pct, sl_companiesHydrogenTrucks_pct, sl_companiesFossilFuelTrucks_pct ); 
 ;}
         break;
-      case _sl_fossilFuelTrucks_pct: {
-          ShapeSlider self = this.sl_fossilFuelTrucks_pct;
-f_setVehicleSliders( 2, sl_electricTrucks_pct, sl_hydrogenTrucks_pct, sl_fossilFuelTrucks_pct );
-f_setPetroleumFuelTrucks( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_electricTrucks_pct, sl_hydrogenTrucks_pct, sl_fossilFuelTrucks_pct ); 
+      case _sl_companiesFossilFuelTrucks_pct: {
+          ShapeSlider self = this.sl_companiesFossilFuelTrucks_pct;
+f_setVehicleSliders( 2, sl_companiesElectricTrucks_pct, sl_companiesHydrogenTrucks_pct, sl_companiesFossilFuelTrucks_pct );
+f_setPetroleumFuelTrucks( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_companiesElectricTrucks_pct, sl_companiesHydrogenTrucks_pct, sl_companiesFossilFuelTrucks_pct ); 
 ;}
         break;
-      case _sl_electricCars_pct: {
-          ShapeSlider self = this.sl_electricCars_pct;
-sl_fossilFuelCars_pct.setValue(100 - sl_electricCars_pct.getIntValue(), false);
-f_setElectricCars( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_electricCars_pct, sl_fossilFuelCars_pct ); 
+      case _sl_companiesElectricCars_pct: {
+          ShapeSlider self = this.sl_companiesElectricCars_pct;
+sl_companiesFossilFuelCars_pct.setValue(100 - sl_companiesElectricCars_pct.getIntValue(), false);
+f_setElectricCars( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_companiesElectricCars_pct, sl_companiesFossilFuelCars_pct ); 
 ;}
         break;
-      case _sl_fossilFuelVans_pct: {
-          ShapeSlider self = this.sl_fossilFuelVans_pct;
-sl_electricVans_pct.setValue(100 - sl_fossilFuelVans_pct.getIntValue(), false);
-f_setPetroleumFuelVans( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_electricVans_pct, sl_fossilFuelVans_pct ); 
+      case _sl_companiesFossilFuelVans_pct: {
+          ShapeSlider self = this.sl_companiesFossilFuelVans_pct;
+sl_companiesElectricVans_pct.setValue(100 - sl_companiesFossilFuelVans_pct.getIntValue(), false);
+f_setPetroleumFuelVans( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_companiesElectricVans_pct, sl_companiesFossilFuelVans_pct ); 
 ;}
         break;
-      case _sl_electricVans_pct: {
-          ShapeSlider self = this.sl_electricVans_pct;
-sl_fossilFuelVans_pct.setValue(100 - sl_electricVans_pct.getIntValue(), false);
-f_setElectricVans( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_electricVans_pct, sl_fossilFuelVans_pct ); 
+      case _sl_companiesElectricVans_pct: {
+          ShapeSlider self = this.sl_companiesElectricVans_pct;
+sl_companiesFossilFuelVans_pct.setValue(100 - sl_companiesElectricVans_pct.getIntValue(), false);
+f_setElectricVans( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_companiesElectricVans_pct, sl_companiesFossilFuelVans_pct ); 
 ;}
         break;
-      case _sl_publicChargersResidentialArea_pct: {
-          ShapeSlider self = this.sl_publicChargersResidentialArea_pct;
-f_setPublicChargingStations(uI_Tabs.f_getAllSliderGridConnections_chargers(), sl_publicChargersResidentialArea_pct.getIntValue(), sl_chargersThatSupportV1G_pct, sl_chargersThatSupportV2G_pct); 
+      case _sl_householdPublicChargers_pct: {
+          ShapeSlider self = this.sl_householdPublicChargers_pct;
+f_setPublicChargingStations(uI_Tabs.f_getAllSliderGridConnections_chargers(), sl_householdPublicChargers_pct.getIntValue(), sl_householdChargersThatSupportV1G_pct, sl_householdChargersThatSupportV2G_pct); 
 ;}
         break;
-      case _sl_privateEVsResidentialArea_pct: {
-          ShapeSlider self = this.sl_privateEVsResidentialArea_pct;
-f_setVehiclesPrivateParking(uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_privateEVsResidentialArea_pct.getValue(), sl_EVsThatSupportV2G_pct); 
+      case _sl_householdPrivateEVs_pct: {
+          ShapeSlider self = this.sl_householdPrivateEVs_pct;
+f_setVehiclesPrivateParking(uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdPrivateEVs_pct.getValue(), sl_householdEVsThatSupportV2G_pct); 
 ;}
         break;
-      case _sl_chargersThatSupportV2G_pct: {
-          ShapeSlider self = this.sl_chargersThatSupportV2G_pct;
-f_setV2GChargerCapabilities( uI_Tabs.f_getSliderGridConnections_chargers(), sl_chargersThatSupportV2G_pct.getValue() ); 
+      case _sl_householdChargersThatSupportV2G_pct: {
+          ShapeSlider self = this.sl_householdChargersThatSupportV2G_pct;
+f_setV2GChargerCapabilities( uI_Tabs.f_getActiveSliderGridConnections_chargers(), sl_householdChargersThatSupportV2G_pct.getValue() ); 
 ;}
         break;
-      case _sl_chargersThatSupportV1G_pct: {
-          ShapeSlider self = this.sl_chargersThatSupportV1G_pct;
-f_setV1GChargerCapabilities( uI_Tabs.f_getSliderGridConnections_chargers(), sl_chargersThatSupportV1G_pct.getValue() ); 
+      case _sl_householdChargersThatSupportV1G_pct: {
+          ShapeSlider self = this.sl_householdChargersThatSupportV1G_pct;
+f_setV1GChargerCapabilities( uI_Tabs.f_getActiveSliderGridConnections_chargers(), sl_householdChargersThatSupportV1G_pct.getValue() ); 
 ;}
         break;
-      case _sl_EVsThatSupportV2G_pct: {
-          ShapeSlider self = this.sl_EVsThatSupportV2G_pct;
-f_setV2GEVCapabilities( uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_EVsThatSupportV2G_pct.getValue() ); 
+      case _sl_householdEVsThatSupportV2G_pct: {
+          ShapeSlider self = this.sl_householdEVsThatSupportV2G_pct;
+f_setV2GEVCapabilities( uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdEVsThatSupportV2G_pct.getValue() ); 
 ;}
         break;
       default:
@@ -2518,28 +2629,28 @@ if(selectedChargingAttitude != null){
 } 
 ;}
         break;
-      case _cb_chargingAttitudePrivateParkedCars: {
-          ShapeComboBox self = this.cb_chargingAttitudePrivateParkedCars;
+      case _cb_householdChargingStrategyPrivateParkedCars: {
+          ShapeComboBox self = this.cb_householdChargingStrategyPrivateParkedCars;
 OL_ChargingAttitude selectedChargingAttitude = null;
-gr_activateV2GPrivateParkedCars.setVisible(false);
-cb_activateV2GPrivateParkedCars.setSelected(false, false);
-gr_settingsV2G_privateParkedCars.setVisible(false);
+gr_householdActivateV2GPrivateParkedCars.setVisible(false);
+cb_householdActivateV2GPrivateParkedCars.setSelected(false, false);
+gr_householdSettingsV2G_privateParkedCars.setVisible(false);
 
-switch(cb_chargingAttitudePrivateParkedCars.getValue()){
+switch(cb_householdChargingStrategyPrivateParkedCars.getValue()){
 	case "Niet slim laden":
 		selectedChargingAttitude = OL_ChargingAttitude.SIMPLE;
 		break;
 	case "Slim laden: Prijs gestuurd":
 		selectedChargingAttitude = OL_ChargingAttitude.PRICE;
-		gr_activateV2GPrivateParkedCars.setVisible(true);
+		gr_householdActivateV2GPrivateParkedCars.setVisible(true);
 		break;
 	case "Slim laden: Prijs marktfeedback":
 		selectedChargingAttitude = OL_ChargingAttitude.PRICE_MARKET_FEEDBACK;
-		gr_activateV2GPrivateParkedCars.setVisible(false);
+		gr_householdActivateV2GPrivateParkedCars.setVisible(false);
 		break;
 	case "Slim laden: Netbewust":
 		selectedChargingAttitude = OL_ChargingAttitude.BALANCE_LOCAL; // For now Balance_Local
-		gr_activateV2GPrivateParkedCars.setVisible(true);
+		gr_householdActivateV2GPrivateParkedCars.setVisible(true);
 		break;
 	/*
 	case "Slim laden: Locale balans":
@@ -2557,36 +2668,36 @@ if(selectedChargingAttitude != null){
 	f_setChargingAttitude(selectedChargingAttitude, new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()));
 }
 else{
-	cb_chargingAttitudePrivateParkedCars.setValue("Niet slim laden", true);
+	cb_householdChargingStrategyPrivateParkedCars.setValue("Niet slim laden", true);
 } 
 ;}
         break;
-      case _cb_chargingAttitudePrivatePublicChargers: {
-          ShapeComboBox self = this.cb_chargingAttitudePrivatePublicChargers;
+      case _cb_householdChargingStrategyPrivatePublicChargers: {
+          ShapeComboBox self = this.cb_householdChargingStrategyPrivatePublicChargers;
 OL_ChargingAttitude selectedChargingAttitude = null;
-gr_activateV2GPublicChargers.setVisible(false);
-cb_activateV2GPublicChargers.setSelected(false, true); // True call for now needed for chargepoints only
-gr_settingsV1G_publicChargers.setVisible(false);
-gr_settingsV2G_publicChargers.setVisible(false);
+gr_householdActivateV2GPublicChargers.setVisible(false);
+cb_householdActivateV2GPublicChargers.setSelected(false, true); // True call for now needed for chargepoints only
+gr_householdSettingsV1G_publicChargers.setVisible(false);
+gr_householdSettingsV2G_publicChargers.setVisible(false);
 
-switch(cb_chargingAttitudePrivatePublicChargers.getValue()){
+switch(cb_householdChargingStrategyPrivatePublicChargers.getValue()){
 	case "Niet slim laden":
 		selectedChargingAttitude = OL_ChargingAttitude.SIMPLE;
 		break;
 	case "Slim laden: Prijs gestuurd":
 		selectedChargingAttitude = OL_ChargingAttitude.PRICE;
-		gr_activateV2GPublicChargers.setVisible(true);
-		gr_settingsV1G_publicChargers.setVisible(true);
+		gr_householdActivateV2GPublicChargers.setVisible(true);
+		gr_householdSettingsV1G_publicChargers.setVisible(true);
 		break;
 	case "Slim laden: Prijs marktfeedback":
 		selectedChargingAttitude = OL_ChargingAttitude.PRICE_MARKET_FEEDBACK;
-		gr_activateV2GPublicChargers.setVisible(false);
-		gr_settingsV1G_publicChargers.setVisible(true);
+		gr_householdActivateV2GPublicChargers.setVisible(false);
+		gr_householdSettingsV1G_publicChargers.setVisible(true);
 		break;
 	case "Slim laden: Netbewust":
 		selectedChargingAttitude = OL_ChargingAttitude.BALANCE_GRID;
-		gr_activateV2GPublicChargers.setVisible(true);
-		gr_settingsV1G_publicChargers.setVisible(true);
+		gr_householdActivateV2GPublicChargers.setVisible(true);
+		gr_householdSettingsV1G_publicChargers.setVisible(true);
 		break;
 	case "Gevarieerd":
 		zero_Interface.f_setErrorScreen("De geselecteerde laad strategie is er alleen ter visualisatie in het geval niet elk huis dezelfde laad strategie heeft. Dit is dus niet een strategie die je handmatig aan kunt zetten. Voor nu is 'Niet slim laden' weer geselecteerd.", 0, 0);
@@ -2595,12 +2706,11 @@ switch(cb_chargingAttitudePrivatePublicChargers.getValue()){
 }
 
 if(selectedChargingAttitude != null){
-	List<GridConnection> allChargersInModel = new ArrayList<GridConnection>(uI_Tabs.f_getSliderGridConnections_chargers());
-	allChargersInModel.addAll(uI_Tabs.f_getPausedSliderGridConnections_chargers());
+	List<GridConnection> allChargersInModel = new ArrayList<GridConnection>(uI_Tabs.f_getAllSliderGridConnections_chargers());
 	f_setChargingAttitude(selectedChargingAttitude, allChargersInModel);
 }
 else{
-	cb_chargingAttitudePrivatePublicChargers.setValue("Niet slim laden", true);
+	cb_householdChargingStrategyPrivatePublicChargers.setValue("Niet slim laden", true);
 } 
 ;}
         break;
@@ -2614,43 +2724,43 @@ else{
   @AnyLogicInternalCodegenAPI
   public double getShapeControlDefaultValueDouble( int _shape, int index ) {
     switch(_shape) {
-      case _sl_fossilFuelCars_pct: return 
+      case _sl_companiesFossilFuelCars_pct: return 
 0 
 ;
-      case _sl_electricTrucks_pct: return 
+      case _sl_companiesElectricTrucks_pct: return 
 0 
 ;
-      case _sl_mobilityDemandReduction_pct: return 
+      case _sl_companiesMobilityDemandReduction_pct: return 
 0 
 ;
-      case _sl_hydrogenTrucks_pct: return 
+      case _sl_companiesHydrogenTrucks_pct: return 
 0 
 ;
-      case _sl_fossilFuelTrucks_pct: return 
+      case _sl_companiesFossilFuelTrucks_pct: return 
 0 
 ;
-      case _sl_electricCars_pct: return 
+      case _sl_companiesElectricCars_pct: return 
 0 
 ;
-      case _sl_fossilFuelVans_pct: return 
+      case _sl_companiesFossilFuelVans_pct: return 
 0 
 ;
-      case _sl_electricVans_pct: return 
+      case _sl_companiesElectricVans_pct: return 
 0 
 ;
-      case _sl_publicChargersResidentialArea_pct: return 
+      case _sl_householdPublicChargers_pct: return 
 0 
 ;
-      case _sl_privateEVsResidentialArea_pct: return 
+      case _sl_householdPrivateEVs_pct: return 
 0 
 ;
-      case _sl_chargersThatSupportV2G_pct: return 
+      case _sl_householdChargersThatSupportV2G_pct: return 
 0 
 ;
-      case _sl_chargersThatSupportV1G_pct: return 
+      case _sl_householdChargersThatSupportV1G_pct: return 
 0 
 ;
-      case _sl_EVsThatSupportV2G_pct: return 
+      case _sl_householdEVsThatSupportV2G_pct: return 
 0 
 ;
       default: return super.getShapeControlDefaultValueDouble( _shape, index );
@@ -2662,7 +2772,7 @@ else{
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_fossilFuelCars_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesFossilFuelCars_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2674,13 +2784,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_fossilFuelCars_pct;
+  protected ShapeSlider sl_companiesFossilFuelCars_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_electricTrucks_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesElectricTrucks_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2692,13 +2802,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_electricTrucks_pct;
+  protected ShapeSlider sl_companiesElectricTrucks_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_mobilityDemandReduction_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesMobilityDemandReduction_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2710,13 +2820,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_mobilityDemandReduction_pct;
+  protected ShapeSlider sl_companiesMobilityDemandReduction_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_hydrogenTrucks_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesHydrogenTrucks_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2728,13 +2838,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_hydrogenTrucks_pct;
+  protected ShapeSlider sl_companiesHydrogenTrucks_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_fossilFuelTrucks_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesFossilFuelTrucks_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2746,13 +2856,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_fossilFuelTrucks_pct;
+  protected ShapeSlider sl_companiesFossilFuelTrucks_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_electricCars_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesElectricCars_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2764,13 +2874,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_electricCars_pct;
+  protected ShapeSlider sl_companiesElectricCars_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_fossilFuelVans_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesFossilFuelVans_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2782,13 +2892,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_fossilFuelVans_pct;
+  protected ShapeSlider sl_companiesFossilFuelVans_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_electricVans_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesElectricVans_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2800,15 +2910,15 @@ else{
     }
   }
   
-  protected ShapeSlider sl_electricVans_pct;
-  protected ShapeCheckBox cb_spreadChargingEVs;
+  protected ShapeSlider sl_companiesElectricVans_pct;
+  protected ShapeCheckBox cb_companiesSpreadChargingEVs;
   protected ShapeComboBox cb_setChargingAttitude;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_publicChargersResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdPublicChargers_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2820,13 +2930,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_publicChargersResidentialArea_pct;
+  protected ShapeSlider sl_householdPublicChargers_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_privateEVsResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdPrivateEVs_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2838,13 +2948,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_privateEVsResidentialArea_pct;
+  protected ShapeSlider sl_householdPrivateEVs_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_chargersThatSupportV2G_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdChargersThatSupportV2G_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2856,13 +2966,13 @@ else{
     }
   }
   
-  protected ShapeSlider sl_chargersThatSupportV2G_pct;
+  protected ShapeSlider sl_householdChargersThatSupportV2G_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_chargersThatSupportV1G_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdChargersThatSupportV1G_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2874,39 +2984,39 @@ else{
     }
   }
   
-  protected ShapeSlider sl_chargersThatSupportV1G_pct;
-  protected ShapeCheckBox cb_activateV2GPrivateParkedCars;
+  protected ShapeSlider sl_householdChargersThatSupportV1G_pct;
+  protected ShapeCheckBox cb_householdActivateV2GPrivateParkedCars;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _cb_chargingAttitudePrivateParkedCars_SetDynamicParams_xjal( ShapeComboBox shape ) {
+  private void _cb_householdChargingStrategyPrivateParkedCars_SetDynamicParams_xjal( ShapeComboBox shape ) {
     shape.setEnabled(
-sl_privateEVsResidentialArea_pct.isEnabled() 
+sl_householdPrivateEVs_pct.isEnabled() 
 );
   }
   
-  protected ShapeComboBox cb_chargingAttitudePrivateParkedCars;
+  protected ShapeComboBox cb_householdChargingStrategyPrivateParkedCars;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _cb_chargingAttitudePrivatePublicChargers_SetDynamicParams_xjal( ShapeComboBox shape ) {
+  private void _cb_householdChargingStrategyPrivatePublicChargers_SetDynamicParams_xjal( ShapeComboBox shape ) {
     shape.setEnabled(
-sl_publicChargersResidentialArea_pct.isEnabled() 
+sl_householdPublicChargers_pct.isEnabled() 
 );
   }
   
-  protected ShapeComboBox cb_chargingAttitudePrivatePublicChargers;
-  protected ShapeCheckBox cb_activateV2GPublicChargers;
+  protected ShapeComboBox cb_householdChargingStrategyPrivatePublicChargers;
+  protected ShapeCheckBox cb_householdActivateV2GPublicChargers;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_EVsThatSupportV2G_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdEVsThatSupportV2G_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2918,7 +3028,7 @@ sl_publicChargersResidentialArea_pct.isEnabled()
     }
   }
   
-  protected ShapeSlider sl_EVsThatSupportV2G_pct;
+  protected ShapeSlider sl_householdEVsThatSupportV2G_pct;
   protected ShapeRectangle rect_genericFunctions;
   protected ShapeText t_genericFunctions;
   protected ShapeRectangle rect_mobilityDemandSliders_default;
@@ -2927,123 +3037,432 @@ sl_publicChargersResidentialArea_pct.isEnabled()
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_fossilFuelCars_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesFossilFuelCars_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesFossilFuelCars_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
     shape.setText(
-sl_fossilFuelCars_pct.getIntValue() + "%" 
+sl_companiesFossilFuelCars_pct.getIntValue() + "%" 
 );
+ 	}
   }
   
-  protected ShapeText t_fossilFuelCars_pct;
-  protected ShapeText t_fossilFuelCarsDescription;
-  protected ShapeText t_electricTrucksDescription;
+  protected ShapeText txt_companiesFossilFuelCars_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_electricTrucks_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_electricTrucks_pct.getIntValue() + "%" 
-);
+  private void _txt_companiesFossilFuelCarsDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesFossilFuelCars_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
   }
   
-  protected ShapeText t_electricTrucks_pct;
-  protected ShapeText t_mobilityDemandReductionDescription;
+  protected ShapeText txt_companiesFossilFuelCarsDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_mobilityDemandReduction_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_mobilityDemandReduction_pct.getIntValue() + "%" 
-);
+  private void _txt_companiesElectricTrucksDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesElectricTrucks_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
   }
   
-  protected ShapeText t_mobilityDemandReduction_pct;
-  protected ShapeText t_hydrogenTrucksDescription;
+  protected ShapeText txt_companiesElectricTrucksDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_hydrogenTrucks_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesElectricTrucks_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesElectricTrucks_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
     shape.setText(
-sl_hydrogenTrucks_pct.getIntValue() + "%" 
+sl_companiesElectricTrucks_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_companiesElectricTrucks_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesMobilityDemandReductionDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesMobilityDemandReduction_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesMobilityDemandReductionDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesMobilityDemandReduction_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesMobilityDemandReduction_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_companiesMobilityDemandReduction_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_companiesMobilityDemandReduction_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesHydrogenTrucksDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesHydrogenTrucks_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesHydrogenTrucksDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesHydrogenTrucks_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    shape.setText(
+sl_companiesHydrogenTrucks_pct.getIntValue() + "%" 
 );
   }
   
-  protected ShapeText t_hydrogenTrucks_pct;
-  protected ShapeText t_fossilFuelTrucksDescription;
+  protected ShapeText txt_companiesHydrogenTrucks_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesFossilFuelTrucksDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesFossilFuelTrucks_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesFossilFuelTrucksDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
   private void _t_fossilFuelTrucks_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesFossilFuelTrucks_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
     shape.setText(
-sl_fossilFuelTrucks_pct.getIntValue() + "%" 
+sl_companiesFossilFuelTrucks_pct.getIntValue() + "%" 
 );
+ 	}
   }
   
   protected ShapeText t_fossilFuelTrucks_pct;
   protected ShapeText t_trucksDescription;
-  protected ShapeText t_electricCarsDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_electricCars_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_electricCars_pct.getIntValue() + "%" 
-);
+  private void _txt_companiesElectricCarsDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesElectricCars_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
   }
   
-  protected ShapeText t_electricCars_pct;
+  protected ShapeText txt_companiesElectricCarsDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesElectricCars_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesElectricCars_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_companiesElectricCars_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_companiesElectricCars_pct;
   protected ShapeText t_carsDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_fossilFuelVans_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesFossilFuelVans_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesFossilFuelVans_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
     shape.setText(
-sl_fossilFuelVans_pct.getIntValue() + "%" 
+sl_companiesFossilFuelVans_pct.getIntValue() + "%" 
 );
+ 	}
   }
   
-  protected ShapeText t_fossilFuelVans_pct;
-  protected ShapeText t_fossilFuelVansDescription;
-  protected ShapeText t_electricVansDescription;
+  protected ShapeText txt_companiesFossilFuelVans_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_electricVans_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesFossilFuelVansDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesFossilFuelVans_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesFossilFuelVansDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesElectricVansDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesElectricVans_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesElectricVansDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesElectricVans_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesElectricVans_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
     shape.setText(
-sl_electricVans_pct.getIntValue() + "%" 
+sl_companiesElectricVans_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_companiesElectricVans_pct;
+  protected ShapeText t_vansDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companiesMobilityReduction_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesMobilityDemandReduction_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companiesMobilityReduction;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companiesElectricTruck_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesElectricTrucks_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companiesElectricTruck;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companiesHydrogenTruck_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesHydrogenTrucks_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companiesHydrogenTruck;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companiesFossilFuelTruck_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesFossilFuelTrucks_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companiesFossilFuelTruck;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companiesElectricVans_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesElectricVans_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companiesElectricVans;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companiesFossilFuelVans_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesFossilFuelVans_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companiesFossilFuelVans;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companiesElectricCars_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesElectricCars_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companiesElectricCars;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companiesFossilFuelCars_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesFossilFuelCars_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companiesFossilFuelCars;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesSpreadChargingEVsDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+cb_companiesSpreadChargingEVs.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesSpreadChargingEVsDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companiesMobilityChargingAttitude_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+cb_companiesSpreadChargingEVs.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companiesMobilityChargingAttitude;
+  protected ShapeText txt_mobilitySlidersCompaniesDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _gr_mobilitySliders_companies_SetDynamicParams_xjal( ShapeGroup shape ) {
+    shape.setX(
+0 
+);
+    shape.setY(
+0 
 );
   }
   
-  protected ShapeText t_electricVans_pct;
-  protected ShapeText t_vansDescription;
-  protected ShapeImage i_mobilityReduction;
-  protected ShapeImage i_electricTruck;
-  protected ShapeImage i_hydrogenTruck;
-  protected ShapeImage i_fossilFuelTruck;
-  protected ShapeImage i_electricVans;
-  protected ShapeImage i_fossilFuelVans;
-  protected ShapeImage i_electricCars;
-  protected ShapeImage i_fossilFuelCars;
-  protected ShapeText t_spreadChargingEVsDescription1;
-  protected ShapeGroup gr_mobilitySliders_default;
+  protected ShapeGroup gr_mobilitySliders_companies;
   protected ShapeRectangle rect_demandFunctions;
   protected ShapeText t_demandFunctionsDescription;
   protected ShapeRectangle rect_mobilityFunctions;
   protected ShapeText t_mobilityFunctionsDescription;
-  protected ShapeImage i_mobilityChargingAttitude;
   protected ShapeRectangle rect_mobilityDemandSliders_residential;
   protected ShapeText txt_privateParkedCars;
   protected ShapeText txt_publicChargePoints;
@@ -3052,100 +3471,100 @@ sl_electricVans_pct.getIntValue() + "%"
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_publicEVsResidentialAreaDescription_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdPublicEVsResidentialAreaDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_publicChargersResidentialArea_pct.isVisible() 
+sl_householdPublicChargers_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText t_publicEVsResidentialAreaDescription;
+  protected ShapeText txt_householdPublicEVsResidentialAreaDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_publicEVsResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdPublicEVs_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_publicChargersResidentialArea_pct.isVisible() 
+sl_householdPublicChargers_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_publicChargersResidentialArea_pct.getIntValue() + " %" 
+sl_householdPublicChargers_pct.getIntValue() + " %" 
 );
  	}
   }
   
-  protected ShapeText t_publicEVsResidentialArea_pct;
+  protected ShapeText txt_householdPublicEVs_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_privateEVsResidentialAreaDescription_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdPrivateEVsDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_privateEVsResidentialArea_pct.isVisible() 
+sl_householdPrivateEVs_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText t_privateEVsResidentialAreaDescription;
+  protected ShapeText txt_householdPrivateEVsDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_privateEVsResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdPrivateEVs_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_privateEVsResidentialArea_pct.isVisible() 
+sl_householdPrivateEVs_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_privateEVsResidentialArea_pct.getIntValue() + " %" 
+sl_householdPrivateEVs_pct.getIntValue() + " %" 
 );
  	}
   }
   
-  protected ShapeText t_privateEVsResidentialArea_pct;
+  protected ShapeText txt_householdPrivateEVs_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_chargersThatSupportV2GDescription_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_chargersThatSupportV2GDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_chargersThatSupportV2G_pct.isVisible() 
+sl_householdChargersThatSupportV2G_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText t_chargersThatSupportV2GDescription;
+  protected ShapeText txt_chargersThatSupportV2GDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_chargersThatSupportV2G_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdChargersThatSupportV2G_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_chargersThatSupportV2G_pct.isVisible() 
+sl_householdChargersThatSupportV2G_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_chargersThatSupportV2G_pct.getIntValue() + " %" 
+sl_householdChargersThatSupportV2G_pct.getIntValue() + " %" 
 );
  	}
   }
   
-  protected ShapeText t_chargersThatSupportV2G_pct;
+  protected ShapeText txt_householdChargersThatSupportV2G_pct;
   
   /**
    * <i>This method should not be called by user</i>
@@ -3153,7 +3572,7 @@ sl_chargersThatSupportV2G_pct.getIntValue() + " %"
   @AnyLogicInternalCodegenAPI
   private void _i_householdPublicChargersV2G_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_chargersThatSupportV2G_pct.isVisible() 
+sl_householdChargersThatSupportV2G_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3161,7 +3580,7 @@ sl_chargersThatSupportV2G_pct.isVisible()
   }
   
   protected ShapeImage i_householdPublicChargersV2G;
-  protected ShapeGroup gr_settingsV2G_publicChargers;
+  protected ShapeGroup gr_householdSettingsV2G_publicChargers;
   
   /**
    * <i>This method should not be called by user</i>
@@ -3169,7 +3588,7 @@ sl_chargersThatSupportV2G_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdPrivateEV_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_privateEVsResidentialArea_pct.isVisible() 
+sl_householdPrivateEVs_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3184,7 +3603,7 @@ sl_privateEVsResidentialArea_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdPublicChargers_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_publicChargersResidentialArea_pct.isVisible() 
+sl_householdPublicChargers_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3197,34 +3616,34 @@ sl_publicChargersResidentialArea_pct.isVisible()
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _txt_chargersThatSupportV1GDescription_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdChargersThatSupportV1GDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_chargersThatSupportV1G_pct.isVisible() 
+sl_householdChargersThatSupportV1G_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText txt_chargersThatSupportV1GDescription;
+  protected ShapeText txt_householdChargersThatSupportV1GDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_chargersThatSupportV1G_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdChargersThatSupportV1G_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_chargersThatSupportV1G_pct.isVisible() 
+sl_householdChargersThatSupportV1G_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_chargersThatSupportV1G_pct.getIntValue() + " %" 
+sl_householdChargersThatSupportV1G_pct.getIntValue() + " %" 
 );
  	}
   }
   
-  protected ShapeText t_chargersThatSupportV1G_pct;
+  protected ShapeText txt_householdChargersThatSupportV1G_pct;
   
   /**
    * <i>This method should not be called by user</i>
@@ -3232,7 +3651,7 @@ sl_chargersThatSupportV1G_pct.getIntValue() + " %"
   @AnyLogicInternalCodegenAPI
   private void _i_householdPublicChargersV1G_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_chargersThatSupportV1G_pct.isVisible() 
+sl_householdChargersThatSupportV1G_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3240,68 +3659,68 @@ sl_chargersThatSupportV1G_pct.isVisible()
   }
   
   protected ShapeImage i_householdPublicChargersV1G;
-  protected ShapeGroup gr_settingsV1G_publicChargers;
+  protected ShapeGroup gr_householdSettingsV1G_publicChargers;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _i_activateV2GPrivateParkedCars_SetDynamicParams_xjal( ShapeImage shape ) {
+  private void _i_householdActivateV2GPrivateParkedCars_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-cb_activateV2GPrivateParkedCars.isVisible() 
+cb_householdActivateV2GPrivateParkedCars.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeImage i_activateV2GPrivateParkedCars;
+  protected ShapeImage i_householdActivateV2GPrivateParkedCars;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _txt_activateV2GPrivateParkedCars_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdActivateV2GPrivateParkedCars_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-cb_activateV2GPrivateParkedCars.isVisible() 
+cb_householdActivateV2GPrivateParkedCars.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText txt_activateV2GPrivateParkedCars;
-  protected ShapeGroup gr_activateV2GPrivateParkedCars;
+  protected ShapeText txt_householdActivateV2GPrivateParkedCars;
+  protected ShapeGroup gr_householdActivateV2GPrivateParkedCars;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _txt_chargingStrategyPrivateParkedCars_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdChargingStrategyPrivateParkedCars_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-cb_chargingAttitudePrivateParkedCars.isVisible() 
+cb_householdChargingStrategyPrivateParkedCars.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText txt_chargingStrategyPrivateParkedCars;
+  protected ShapeText txt_householdChargingStrategyPrivateParkedCars;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _i_chargingAttitudePrivateParkedCars_SetDynamicParams_xjal( ShapeImage shape ) {
+  private void _i_householdChargingStrategyPrivateParkedCars_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-cb_chargingAttitudePrivateParkedCars.isVisible() 
+cb_householdChargingStrategyPrivateParkedCars.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeImage i_chargingAttitudePrivateParkedCars;
+  protected ShapeImage i_householdChargingStrategyPrivateParkedCars;
   
   /**
    * <i>This method should not be called by user</i>
@@ -3309,7 +3728,7 @@ cb_chargingAttitudePrivateParkedCars.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _txt_chargingStrategyPublicChargers_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-cb_chargingAttitudePrivatePublicChargers.isVisible() 
+cb_householdChargingStrategyPrivatePublicChargers.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3322,31 +3741,31 @@ cb_chargingAttitudePrivatePublicChargers.isVisible()
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _i_chargingStrategyPublicChargers_SetDynamicParams_xjal( ShapeImage shape ) {
+  private void _i_householdChargingStrategyPublicChargers_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-cb_chargingAttitudePrivatePublicChargers.isVisible() 
+cb_householdChargingStrategyPrivatePublicChargers.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeImage i_chargingStrategyPublicChargers;
+  protected ShapeImage i_householdChargingStrategyPublicChargers;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _i_activateV2GPrivatePublicChargers_SetDynamicParams_xjal( ShapeImage shape ) {
+  private void _i_householdActivateV2GPrivatePublicChargers_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-cb_activateV2GPublicChargers.isVisible() 
+cb_householdActivateV2GPublicChargers.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeImage i_activateV2GPrivatePublicChargers;
+  protected ShapeImage i_householdActivateV2GPrivatePublicChargers;
   
   /**
    * <i>This method should not be called by user</i>
@@ -3354,7 +3773,7 @@ cb_activateV2GPublicChargers.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _txt_activateV2GPrivatePublicChargers_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-cb_activateV2GPublicChargers.isVisible() 
+cb_householdActivateV2GPublicChargers.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3362,62 +3781,63 @@ cb_activateV2GPublicChargers.isVisible()
   }
   
   protected ShapeText txt_activateV2GPrivatePublicChargers;
-  protected ShapeGroup gr_activateV2GPublicChargers;
+  protected ShapeGroup gr_householdActivateV2GPublicChargers;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _txt_EVsThatSupportV2GDescription_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdEVsThatSupportV2GDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_EVsThatSupportV2G_pct.isVisible() 
+sl_householdEVsThatSupportV2G_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText txt_EVsThatSupportV2GDescription;
+  protected ShapeText txt_householdEVsThatSupportV2GDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _txt_EVsThatSupportV2G_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdEVsThatSupportV2G_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_EVsThatSupportV2G_pct.isVisible() 
+sl_householdEVsThatSupportV2G_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_EVsThatSupportV2G_pct.getIntValue() + " %" 
+sl_householdEVsThatSupportV2G_pct.getIntValue() + " %" 
 );
  	}
   }
   
-  protected ShapeText txt_EVsThatSupportV2G_pct;
+  protected ShapeText txt_householdEVsThatSupportV2G_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _i_EVsThatSupportV2G_SetDynamicParams_xjal( ShapeImage shape ) {
+  private void _i_householdEVsThatSupportV2G_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_EVsThatSupportV2G_pct.isVisible() 
+sl_householdEVsThatSupportV2G_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeImage i_EVsThatSupportV2G;
-  protected ShapeGroup gr_settingsV2G_privateParkedCars;
+  protected ShapeImage i_householdEVsThatSupportV2G;
+  protected ShapeGroup gr_householdSettingsV2G_privateParkedCars;
+  protected ShapeText txt_mobilitySlidersHousesholdsDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _gr_mobilitySliders_residential_SetDynamicParams_xjal( ShapeGroup shape ) {
+  private void _gr_mobilitySliders_households_SetDynamicParams_xjal( ShapeGroup shape ) {
     shape.setX(
 0 
 );
@@ -3426,10 +3846,25 @@ sl_EVsThatSupportV2G_pct.isVisible()
 );
   }
   
-  protected ShapeGroup gr_mobilitySliders_residential;
+  protected ShapeGroup gr_mobilitySliders_households;
   protected ShapeText txt_mobilityFunctionsDescription;
   protected ShapeRectangle rect_mobilityFunctions1;
   protected ShapeText t_mobilityFunctionsDescription1;
+  protected ShapeImage arrowLeftResidential;
+  protected ShapeImage arrowRightResidential1;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _t_pageIndicator_SetDynamicParams_xjal( ShapeText shape ) {
+    shape.setText(
+"Pagina " + (v_currentPageIndex + 1) + "/" + c_loadedPageGroups.size() 
+);
+  }
+  
+  protected ShapeText t_pageIndicator;
+  protected ShapeGroup gr_pageIndicator;
   protected com.anylogic.engine.markup.Level level;
 
   private com.anylogic.engine.markup.Level[] _getLevels_xjal;
@@ -3441,8 +3876,8 @@ sl_EVsThatSupportV2G_pct.isVisible()
 
   @AnyLogicInternalCodegenAPI
   private void _createPersistentElementsBP0_xjal() {
-    sl_fossilFuelCars_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 315.0,
+    sl_companiesFossilFuelCars_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 309.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3454,7 +3889,7 @@ tabMobility.this, true, 260.0, 315.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_fossilFuelCars_pct_SetDynamicParams_xjal( this );
+      _sl_companiesFossilFuelCars_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3463,16 +3898,16 @@ tabMobility.this, true, 260.0, 315.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_fossilFuelCars_pct, 0, value );
+        executeShapeControlAction( _sl_companiesFossilFuelCars_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_fossilFuelCars_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesFossilFuelCars_pct, 0 ), getMax() ) );
       }
     };
-    sl_electricTrucks_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 105.0,
+    sl_companiesElectricTrucks_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 125.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3484,7 +3919,7 @@ tabMobility.this, true, 260.0, 105.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_electricTrucks_pct_SetDynamicParams_xjal( this );
+      _sl_companiesElectricTrucks_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3493,16 +3928,16 @@ tabMobility.this, true, 260.0, 105.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_electricTrucks_pct, 0, value );
+        executeShapeControlAction( _sl_companiesElectricTrucks_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_electricTrucks_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesElectricTrucks_pct, 0 ), getMax() ) );
       }
     };
-    sl_mobilityDemandReduction_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 15.0,
+    sl_companiesMobilityDemandReduction_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 55.0,
 			100.0, 30.0,
             true, false,
             -50
@@ -3514,7 +3949,7 @@ tabMobility.this, true, 260.0, 15.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_mobilityDemandReduction_pct_SetDynamicParams_xjal( this );
+      _sl_companiesMobilityDemandReduction_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3523,16 +3958,16 @@ tabMobility.this, true, 260.0, 15.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_mobilityDemandReduction_pct, 0, value );
+        executeShapeControlAction( _sl_companiesMobilityDemandReduction_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_mobilityDemandReduction_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesMobilityDemandReduction_pct, 0 ), getMax() ) );
       }
     };
-    sl_hydrogenTrucks_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 130.0,
+    sl_companiesHydrogenTrucks_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 147.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3544,7 +3979,7 @@ tabMobility.this, true, 260.0, 130.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_hydrogenTrucks_pct_SetDynamicParams_xjal( this );
+      _sl_companiesHydrogenTrucks_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3553,16 +3988,16 @@ tabMobility.this, true, 260.0, 130.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_hydrogenTrucks_pct, 0, value );
+        executeShapeControlAction( _sl_companiesHydrogenTrucks_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_hydrogenTrucks_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesHydrogenTrucks_pct, 0 ), getMax() ) );
       }
     };
-    sl_fossilFuelTrucks_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 155.0,
+    sl_companiesFossilFuelTrucks_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 169.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3574,7 +4009,7 @@ tabMobility.this, true, 260.0, 155.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_fossilFuelTrucks_pct_SetDynamicParams_xjal( this );
+      _sl_companiesFossilFuelTrucks_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3583,16 +4018,16 @@ tabMobility.this, true, 260.0, 155.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_fossilFuelTrucks_pct, 0, value );
+        executeShapeControlAction( _sl_companiesFossilFuelTrucks_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_fossilFuelTrucks_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesFossilFuelTrucks_pct, 0 ), getMax() ) );
       }
     };
-    sl_electricCars_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 290.0,
+    sl_companiesElectricCars_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 287.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3604,7 +4039,7 @@ tabMobility.this, true, 260.0, 290.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_electricCars_pct_SetDynamicParams_xjal( this );
+      _sl_companiesElectricCars_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3613,16 +4048,16 @@ tabMobility.this, true, 260.0, 290.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_electricCars_pct, 0, value );
+        executeShapeControlAction( _sl_companiesElectricCars_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_electricCars_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesElectricCars_pct, 0 ), getMax() ) );
       }
     };
-    sl_fossilFuelVans_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 235.0,
+    sl_companiesFossilFuelVans_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 239.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3634,7 +4069,7 @@ tabMobility.this, true, 260.0, 235.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_fossilFuelVans_pct_SetDynamicParams_xjal( this );
+      _sl_companiesFossilFuelVans_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3643,16 +4078,16 @@ tabMobility.this, true, 260.0, 235.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_fossilFuelVans_pct, 0, value );
+        executeShapeControlAction( _sl_companiesFossilFuelVans_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_fossilFuelVans_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesFossilFuelVans_pct, 0 ), getMax() ) );
       }
     };
-    sl_electricVans_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 210.0,
+    sl_companiesElectricVans_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 217.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3664,7 +4099,7 @@ tabMobility.this, true, 260.0, 210.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_electricVans_pct_SetDynamicParams_xjal( this );
+      _sl_companiesElectricVans_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3673,25 +4108,25 @@ tabMobility.this, true, 260.0, 210.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_electricVans_pct, 0, value );
+        executeShapeControlAction( _sl_companiesElectricVans_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_electricVans_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesElectricVans_pct, 0 ), getMax() ) );
       }
     };
-    cb_spreadChargingEVs = new ShapeCheckBox(
-tabMobility.this,true,260.0, 50.0,
+    cb_companiesSpreadChargingEVs = new ShapeCheckBox(
+tabMobility.this,true,302.0, 74.0,
 		40.0, 30.0,
             black, true,
-            _cb_spreadChargingEVs_Font,
+            _cb_companiesSpreadChargingEVs_Font,
 			"" ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _cb_spreadChargingEVs, 0, value );
+        executeShapeControlAction( _cb_companiesSpreadChargingEVs, 0, value );
       }
     };
     cb_setChargingAttitude = new ShapeComboBox(
@@ -3707,8 +4142,8 @@ _cb_setChargingAttitude_Font,
         executeShapeControlAction( _cb_setChargingAttitude, 0, value );
       }
     };
-    sl_publicChargersResidentialArea_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 190.0,
+    sl_householdPublicChargers_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 205.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3720,7 +4155,7 @@ tabMobility.this, true, 260.0, 190.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_publicChargersResidentialArea_pct_SetDynamicParams_xjal( this );
+      _sl_householdPublicChargers_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3729,16 +4164,16 @@ tabMobility.this, true, 260.0, 190.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_publicChargersResidentialArea_pct, 0, value );
+        executeShapeControlAction( _sl_householdPublicChargers_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_publicChargersResidentialArea_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdPublicChargers_pct, 0 ), getMax() ) );
       }
     };
-    sl_privateEVsResidentialArea_pct = new ShapeSlider(
-tabMobility.this, true, 260.0, 34.0,
+    sl_householdPrivateEVs_pct = new ShapeSlider(
+tabMobility.this, true, 260.0, 75.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3750,7 +4185,7 @@ tabMobility.this, true, 260.0, 34.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_privateEVsResidentialArea_pct_SetDynamicParams_xjal( this );
+      _sl_householdPrivateEVs_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3759,16 +4194,16 @@ tabMobility.this, true, 260.0, 34.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_privateEVsResidentialArea_pct, 0, value );
+        executeShapeControlAction( _sl_householdPrivateEVs_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_privateEVsResidentialArea_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdPrivateEVs_pct, 0 ), getMax() ) );
       }
     };
-    sl_chargersThatSupportV2G_pct = new ShapeSlider(
-tabMobility.this, true, 251.0, 4.0,
+    sl_householdChargersThatSupportV2G_pct = new ShapeSlider(
+tabMobility.this, true, 251.0, 5.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3780,7 +4215,7 @@ tabMobility.this, true, 251.0, 4.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_chargersThatSupportV2G_pct_SetDynamicParams_xjal( this );
+      _sl_householdChargersThatSupportV2G_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3789,15 +4224,15 @@ tabMobility.this, true, 251.0, 4.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_chargersThatSupportV2G_pct, 0, value );
+        executeShapeControlAction( _sl_householdChargersThatSupportV2G_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_chargersThatSupportV2G_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdChargersThatSupportV2G_pct, 0 ), getMax() ) );
       }
     };
-    sl_chargersThatSupportV1G_pct = new ShapeSlider(
+    sl_householdChargersThatSupportV1G_pct = new ShapeSlider(
 tabMobility.this, true, 255.0, 0.0,
 			100.0, 30.0,
             true, false,
@@ -3810,7 +4245,7 @@ tabMobility.this, true, 255.0, 0.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_chargersThatSupportV1G_pct_SetDynamicParams_xjal( this );
+      _sl_householdChargersThatSupportV1G_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3819,39 +4254,39 @@ tabMobility.this, true, 255.0, 0.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_chargersThatSupportV1G_pct, 0, value );
+        executeShapeControlAction( _sl_householdChargersThatSupportV1G_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_chargersThatSupportV1G_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdChargersThatSupportV1G_pct, 0 ), getMax() ) );
       }
     };
-    cb_activateV2GPrivateParkedCars = new ShapeCheckBox(
-tabMobility.this,true,135.0, -16.0,
+    cb_householdActivateV2GPrivateParkedCars = new ShapeCheckBox(
+tabMobility.this,true,132.0, -18.0,
 		20.0, 30.0,
             black, true,
-            _cb_activateV2GPrivateParkedCars_Font,
+            _cb_householdActivateV2GPrivateParkedCars_Font,
 			"" ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _cb_activateV2GPrivateParkedCars, 0, value );
+        executeShapeControlAction( _cb_householdActivateV2GPrivateParkedCars, 0, value );
       }
     };
-    cb_chargingAttitudePrivateParkedCars = new ShapeComboBox(
-tabMobility.this, true, 221.0, 70.0,
+    cb_householdChargingStrategyPrivateParkedCars = new ShapeComboBox(
+tabMobility.this, true, 221.0, 103.0,
 			140.0, 20.0,
             white, black, true,
-_cb_chargingAttitudePrivateParkedCars_Font,
+_cb_householdChargingStrategyPrivateParkedCars_Font,
             new String[]{"Niet slim laden", "Slim laden: Prijs gestuurd", "Slim laden: Prijs marktfeedback", "Slim laden: Netbewust", "Gevarieerd", }, false, ShapeControl.TYPE_STRING ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _cb_chargingAttitudePrivateParkedCars_SetDynamicParams_xjal( this );
+      _cb_householdChargingStrategyPrivateParkedCars_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3860,21 +4295,21 @@ _cb_chargingAttitudePrivateParkedCars_Font,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _cb_chargingAttitudePrivateParkedCars, 0, value );
+        executeShapeControlAction( _cb_householdChargingStrategyPrivateParkedCars, 0, value );
       }
     };
-    cb_chargingAttitudePrivatePublicChargers = new ShapeComboBox(
-tabMobility.this, true, 221.0, 225.0,
+    cb_householdChargingStrategyPrivatePublicChargers = new ShapeComboBox(
+tabMobility.this, true, 221.0, 233.0,
 			140.0, 20.0,
             white, black, true,
-_cb_chargingAttitudePrivatePublicChargers_Font,
+_cb_householdChargingStrategyPrivatePublicChargers_Font,
             new String[]{"Niet slim laden", "Slim laden: Prijs gestuurd", "Slim laden: Prijs marktfeedback", "Slim laden: Netbewust", "Gevarieerd", }, false, ShapeControl.TYPE_STRING ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _cb_chargingAttitudePrivatePublicChargers_SetDynamicParams_xjal( this );
+      _cb_householdChargingStrategyPrivatePublicChargers_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3883,24 +4318,24 @@ _cb_chargingAttitudePrivatePublicChargers_Font,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _cb_chargingAttitudePrivatePublicChargers, 0, value );
+        executeShapeControlAction( _cb_householdChargingStrategyPrivatePublicChargers, 0, value );
       }
     };
-    cb_activateV2GPublicChargers = new ShapeCheckBox(
-tabMobility.this,true,135.0, -16.0,
+    cb_householdActivateV2GPublicChargers = new ShapeCheckBox(
+tabMobility.this,true,132.0, -18.0,
 		20.0, 30.0,
             black, true,
-            _cb_activateV2GPublicChargers_Font,
+            _cb_householdActivateV2GPublicChargers_Font,
 			"" ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _cb_activateV2GPublicChargers, 0, value );
+        executeShapeControlAction( _cb_householdActivateV2GPublicChargers, 0, value );
       }
     };
-    sl_EVsThatSupportV2G_pct = new ShapeSlider(
-tabMobility.this, true, 251.0, 4.0,
+    sl_householdEVsThatSupportV2G_pct = new ShapeSlider(
+tabMobility.this, true, 251.0, 5.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3912,7 +4347,7 @@ tabMobility.this, true, 251.0, 4.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_EVsThatSupportV2G_pct_SetDynamicParams_xjal( this );
+      _sl_householdEVsThatSupportV2G_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3921,12 +4356,12 @@ tabMobility.this, true, 251.0, 4.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_EVsThatSupportV2G_pct, 0, value );
+        executeShapeControlAction( _sl_householdEVsThatSupportV2G_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_EVsThatSupportV2G_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdEVsThatSupportV2G_pct, 0 ), getMax() ) );
       }
     };
     rect_genericFunctions = new ShapeRectangle(
@@ -3941,90 +4376,145 @@ tabMobility.this, true, 251.0, 4.0,
        SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
             null, _rect_mobilityDemandSliders_default_Fill_Color,
 			370.0, 350.0, 10.0, 1.0, LINE_STYLE_DOTTED );
-    t_fossilFuelCars_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 320.0, 0.0, 0.0,
+    txt_companiesFossilFuelCars_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 314.0, 0.0, 0.0,
         black,"#",
-        _t_fossilFuelCars_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesFossilFuelCars_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_fossilFuelCars_pct_SetDynamicParams_xjal( this );
+      _txt_companiesFossilFuelCars_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_fossilFuelCarsDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 320.0, 0.0, 0.0,
+    txt_companiesFossilFuelCarsDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 314.0, 0.0, 0.0,
         black,"Fossiele brandstof",
-        _t_fossilFuelCarsDescription_Font, ALIGNMENT_LEFT );
-    t_electricTrucksDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 110.0, 0.0, 0.0,
+        _txt_companiesFossilFuelCarsDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesFossilFuelCarsDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesElectricTrucksDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 130.0, 0.0, 0.0,
         black,"Elektrisch",
-        _t_electricTrucksDescription_Font, ALIGNMENT_LEFT );
-    t_electricTrucks_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 110.0, 0.0, 0.0,
-        black,"#",
-        _t_electricTrucks_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesElectricTrucksDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_electricTrucks_pct_SetDynamicParams_xjal( this );
+      _txt_companiesElectricTrucksDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_mobilityDemandReductionDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 20.0, 0.0, 0.0,
+    txt_companiesElectricTrucks_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 130.0, 0.0, 0.0,
+        black,"#",
+        _txt_companiesElectricTrucks_pct_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesElectricTrucks_pct_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesMobilityDemandReductionDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 60.0, 0.0, 0.0,
         black,"Besparing transport",
-        _t_mobilityDemandReductionDescription_Font, ALIGNMENT_LEFT );
-    t_mobilityDemandReduction_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 20.0, 0.0, 0.0,
-        black,"#",
-        _t_mobilityDemandReduction_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesMobilityDemandReductionDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_mobilityDemandReduction_pct_SetDynamicParams_xjal( this );
+      _txt_companiesMobilityDemandReductionDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_hydrogenTrucksDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 135.0, 0.0, 0.0,
+    txt_companiesMobilityDemandReduction_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 60.0, 0.0, 0.0,
+        black,"#",
+        _txt_companiesMobilityDemandReduction_pct_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesMobilityDemandReduction_pct_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesHydrogenTrucksDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 152.0, 0.0, 0.0,
         black,"Waterstof",
-        _t_hydrogenTrucksDescription_Font, ALIGNMENT_LEFT );
-    t_hydrogenTrucks_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 135.0, 0.0, 0.0,
-        black,"#",
-        _t_hydrogenTrucks_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesHydrogenTrucksDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_hydrogenTrucks_pct_SetDynamicParams_xjal( this );
+      _txt_companiesHydrogenTrucksDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_fossilFuelTrucksDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 160.0, 0.0, 0.0,
-        black,"Fossiele brandstof",
-        _t_fossilFuelTrucksDescription_Font, ALIGNMENT_LEFT );
-    t_fossilFuelTrucks_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 160.0, 0.0, 0.0,
+    txt_companiesHydrogenTrucks_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 152.0, 0.0, 0.0,
         black,"#",
-        _t_fossilFuelTrucks_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesHydrogenTrucks_pct_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesHydrogenTrucks_pct_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesFossilFuelTrucksDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 174.0, 0.0, 0.0,
+        black,"Fossiele brandstof",
+        _txt_companiesFossilFuelTrucksDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesFossilFuelTrucksDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    t_fossilFuelTrucks_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 174.0, 0.0, 0.0,
+        black,"#",
+        _t_fossilFuelTrucks_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
@@ -4037,166 +4527,315 @@ tabMobility.this, true, 251.0, 4.0,
       }
     };
     t_trucksDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 85.0, 0.0, 0.0,
+        SHAPE_DRAW_2D, true,20.0, 110.0, 0.0, 0.0,
         black,"Vrachtwagens",
         _t_trucksDescription_Font, ALIGNMENT_LEFT );
-    t_electricCarsDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 295.0, 0.0, 0.0,
+    txt_companiesElectricCarsDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 292.0, 0.0, 0.0,
         black,"Elektrisch",
-        _t_electricCarsDescription_Font, ALIGNMENT_LEFT );
-    t_electricCars_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 295.0, 0.0, 0.0,
-        black,"#",
-        _t_electricCars_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesElectricCarsDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_electricCars_pct_SetDynamicParams_xjal( this );
+      _txt_companiesElectricCarsDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesElectricCars_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 292.0, 0.0, 0.0,
+        black,"#",
+        _txt_companiesElectricCars_pct_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesElectricCars_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     t_carsDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 270.0, 0.0, 0.0,
+        SHAPE_DRAW_2D, true,20.0, 272.0, 0.0, 0.0,
         black,"Auto's",
         _t_carsDescription_Font, ALIGNMENT_LEFT );
-    t_fossilFuelVans_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 240.0, 0.0, 0.0,
+    txt_companiesFossilFuelVans_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 244.0, 0.0, 0.0,
         black,"#",
-        _t_fossilFuelVans_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesFossilFuelVans_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_fossilFuelVans_pct_SetDynamicParams_xjal( this );
+      _txt_companiesFossilFuelVans_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_fossilFuelVansDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 240.0, 0.0, 0.0,
+    txt_companiesFossilFuelVansDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 244.0, 0.0, 0.0,
         black,"Fossiele brandstof",
-        _t_fossilFuelVansDescription_Font, ALIGNMENT_LEFT );
-    t_electricVansDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 215.0, 0.0, 0.0,
-        black,"Elektrisch",
-        _t_electricVansDescription_Font, ALIGNMENT_LEFT );
-    t_electricVans_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 215.0, 0.0, 0.0,
-        black,"#",
-        _t_electricVans_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesFossilFuelVansDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_electricVans_pct_SetDynamicParams_xjal( this );
+      _txt_companiesFossilFuelVansDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesElectricVansDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 222.0, 0.0, 0.0,
+        black,"Elektrisch",
+        _txt_companiesElectricVansDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesElectricVansDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesElectricVans_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 222.0, 0.0, 0.0,
+        black,"#",
+        _txt_companiesElectricVans_pct_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesElectricVans_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     t_vansDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 190.0, 0.0, 0.0,
+        SHAPE_DRAW_2D, true,20.0, 202.0, 0.0, 0.0,
         black,"Busjes",
         _t_vansDescription_Font, ALIGNMENT_LEFT );
-    i_mobilityReduction = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 160.0, 20.0, 0.0, 0.0,
+    i_companiesMobilityReduction = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 58.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companiesMobilityReduction_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_mobilityReduction, 0, clickx, clicky );
+        return onShapeClick( _i_companiesMobilityReduction, 0, clickx, clicky );
       }
     };
-    i_electricTruck = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 160.0, 110.0, 0.0, 0.0,
+    i_companiesElectricTruck = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 128.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companiesElectricTruck_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_electricTruck, 0, clickx, clicky );
+        return onShapeClick( _i_companiesElectricTruck, 0, clickx, clicky );
       }
     };
-    i_hydrogenTruck = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 160.0, 135.0, 0.0, 0.0,
+    i_companiesHydrogenTruck = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 150.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companiesHydrogenTruck_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_hydrogenTruck, 0, clickx, clicky );
+        return onShapeClick( _i_companiesHydrogenTruck, 0, clickx, clicky );
       }
     };
-    i_fossilFuelTruck = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 160.0, 160.0, 0.0, 0.0,
+    i_companiesFossilFuelTruck = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 172.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companiesFossilFuelTruck_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_fossilFuelTruck, 0, clickx, clicky );
+        return onShapeClick( _i_companiesFossilFuelTruck, 0, clickx, clicky );
       }
     };
-    i_electricVans = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 160.0, 215.0, 0.0, 0.0,
+    i_companiesElectricVans = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 220.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companiesElectricVans_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_electricVans, 0, clickx, clicky );
+        return onShapeClick( _i_companiesElectricVans, 0, clickx, clicky );
       }
     };
-    i_fossilFuelVans = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 160.0, 240.0, 0.0, 0.0,
+    i_companiesFossilFuelVans = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 242.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companiesFossilFuelVans_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_fossilFuelVans, 0, clickx, clicky );
+        return onShapeClick( _i_companiesFossilFuelVans, 0, clickx, clicky );
       }
     };
-    i_electricCars = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 160.0, 295.0, 0.0, 0.0,
+    i_companiesElectricCars = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 290.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companiesElectricCars_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_electricCars, 0, clickx, clicky );
+        return onShapeClick( _i_companiesElectricCars, 0, clickx, clicky );
       }
     };
-    i_fossilFuelCars = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 160.0, 320.0, 0.0, 0.0,
+    i_companiesFossilFuelCars = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 312.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companiesFossilFuelCars_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_fossilFuelCars, 0, clickx, clicky );
+        return onShapeClick( _i_companiesFossilFuelCars, 0, clickx, clicky );
       }
     };
-    t_spreadChargingEVsDescription1 = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 55.0, 0.0, 0.0,
+    txt_companiesSpreadChargingEVsDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 82.0, 0.0, 0.0,
         black,"Slim laden",
-        _t_spreadChargingEVsDescription1_Font, ALIGNMENT_LEFT );
+        _txt_companiesSpreadChargingEVsDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesSpreadChargingEVsDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    i_companiesMobilityChargingAttitude = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 80.0, 0.0, 0.0,
+20.0, 20.0, "/zerointerfaceloader/",
+			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companiesMobilityChargingAttitude_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _i_companiesMobilityChargingAttitude, 0, clickx, clicky );
+      }
+    };
+    txt_mobilitySlidersCompaniesDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 20.0, 0.0, 0.0,
+        black,"Bedrijven",
+        _txt_mobilitySlidersCompaniesDescription_Font, ALIGNMENT_LEFT );
     rect_demandFunctions = new ShapeRectangle(
        SHAPE_DRAW_2D3D, false,50.0, 550.0, 0.0, 0.0,
             olive, white,
@@ -4213,121 +4852,110 @@ tabMobility.this, true, 251.0, 4.0,
         SHAPE_DRAW_2D, false,170.0, 700.0, 0.0, 0.0,
         black,"Mobility Functions (default)",
         _t_mobilityFunctionsDescription_Font, ALIGNMENT_CENTER );
-    i_mobilityChargingAttitude = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 160.0, 55.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_mobilityChargingAttitude, 0, clickx, clicky );
-      }
-    };
     rect_mobilityDemandSliders_residential = new ShapeRectangle(
        SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
             null, _rect_mobilityDemandSliders_residential_Fill_Color,
 			370.0, 350.0, 10.0, 1.0, LINE_STYLE_DOTTED );
     txt_privateParkedCars = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 10.0, 0.0, 0.0,
+        SHAPE_DRAW_2D, true,20.0, 60.0, 0.0, 0.0,
         black,"Privé geparkeerde autos",
         _txt_privateParkedCars_Font, ALIGNMENT_LEFT );
     txt_publicChargePoints = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 165.0, 0.0, 0.0,
+        SHAPE_DRAW_2D, true,20.0, 190.0, 0.0, 0.0,
         black,"Publieke laadpalen",
         _txt_publicChargePoints_Font, ALIGNMENT_LEFT );
-    t_publicEVsResidentialAreaDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 195.0, 0.0, 0.0,
+    txt_householdPublicEVsResidentialAreaDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 210.0, 0.0, 0.0,
         black,"Actieve laadpalen in gebied",
-        _t_publicEVsResidentialAreaDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_householdPublicEVsResidentialAreaDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_publicEVsResidentialAreaDescription_SetDynamicParams_xjal( this );
+      _txt_householdPublicEVsResidentialAreaDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_publicEVsResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,245.0, 195.0, 0.0, 0.0,
+    txt_householdPublicEVs_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 210.0, 0.0, 0.0,
         black,"0%",
-        _t_publicEVsResidentialArea_pct_Font, ALIGNMENT_RIGHT ) {
+        _txt_householdPublicEVs_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_publicEVsResidentialArea_pct_SetDynamicParams_xjal( this );
+      _txt_householdPublicEVs_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_privateEVsResidentialAreaDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 40.0, 0.0, 0.0,
+    txt_householdPrivateEVsDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 80.0, 0.0, 0.0,
         black,"Aandeel Elektrisch",
-        _t_privateEVsResidentialAreaDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_householdPrivateEVsDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_privateEVsResidentialAreaDescription_SetDynamicParams_xjal( this );
+      _txt_householdPrivateEVsDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_privateEVsResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,244.0, 40.0, 0.0, 0.0,
+    txt_householdPrivateEVs_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 80.0, 0.0, 0.0,
         black,"0%",
-        _t_privateEVsResidentialArea_pct_Font, ALIGNMENT_RIGHT ) {
+        _txt_householdPrivateEVs_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_privateEVsResidentialArea_pct_SetDynamicParams_xjal( this );
+      _txt_householdPrivateEVs_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_chargersThatSupportV2GDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,5.0, 10.0, 0.0, 0.0,
+    txt_chargersThatSupportV2GDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,10.0, 10.0, 0.0, 0.0,
         black,"Laadpalen met V2G",
-        _t_chargersThatSupportV2GDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_chargersThatSupportV2GDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_chargersThatSupportV2GDescription_SetDynamicParams_xjal( this );
+      _txt_chargersThatSupportV2GDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_chargersThatSupportV2G_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,226.0, 11.0, 0.0, 0.0,
+    txt_householdChargersThatSupportV2G_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,235.0, 10.0, 0.0, 0.0,
         black,"0%",
-        _t_chargersThatSupportV2G_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_householdChargersThatSupportV2G_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_chargersThatSupportV2G_pct_SetDynamicParams_xjal( this );
+      _txt_householdChargersThatSupportV2G_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     i_householdPublicChargersV2G = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 181.0, 10.0, 0.0, 0.0,
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 170.0, 8.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4348,7 +4976,7 @@ tabMobility.this, true, 251.0, 4.0,
       }
     };
     i_householdPrivateEV = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 190.0, 39.0, 0.0, 0.0,
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 78.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4369,7 +4997,7 @@ tabMobility.this, true, 251.0, 4.0,
       }
     };
     i_householdPublicChargers = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 190.0, 193.0, 0.0, 0.0,
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 208.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4389,38 +5017,38 @@ tabMobility.this, true, 251.0, 4.0,
         return onShapeClick( _i_householdPublicChargers, 0, clickx, clicky );
       }
     };
-    txt_chargersThatSupportV1GDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,10.0, 5.0, 0.0, 0.0,
+    txt_householdChargersThatSupportV1GDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,15.0, 5.0, 0.0, 0.0,
         black,"Laadpalen met V1G",
-        _txt_chargersThatSupportV1GDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_householdChargersThatSupportV1GDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _txt_chargersThatSupportV1GDescription_SetDynamicParams_xjal( this );
+      _txt_householdChargersThatSupportV1GDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_chargersThatSupportV1G_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 7.0, 0.0, 0.0,
+    txt_householdChargersThatSupportV1G_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,240.0, 5.0, 0.0, 0.0,
         black,"0%",
-        _t_chargersThatSupportV1G_pct_Font, ALIGNMENT_RIGHT ) {
+        _txt_householdChargersThatSupportV1G_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_chargersThatSupportV1G_pct_SetDynamicParams_xjal( this );
+      _txt_householdChargersThatSupportV1G_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     i_householdPublicChargersV1G = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 185.0, 5.0, 0.0, 0.0,
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 175.0, 3.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4440,8 +5068,8 @@ tabMobility.this, true, 251.0, 4.0,
         return onShapeClick( _i_householdPublicChargersV1G, 0, clickx, clicky );
       }
     };
-    i_activateV2GPrivateParkedCars = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 20.0, -10.0, 0.0, 0.0,
+    i_householdActivateV2GPrivateParkedCars = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 10.0, -12.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4449,7 +5077,7 @@ tabMobility.this, true, 251.0, 4.0,
 	
       public void updateDynamicProperties() {
 	
-      _i_activateV2GPrivateParkedCars_SetDynamicParams_xjal( this );
+      _i_householdActivateV2GPrivateParkedCars_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -4458,41 +5086,41 @@ tabMobility.this, true, 251.0, 4.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_activateV2GPrivateParkedCars, 0, clickx, clicky );
+        return onShapeClick( _i_householdActivateV2GPrivateParkedCars, 0, clickx, clicky );
       }
     };
-    txt_activateV2GPrivateParkedCars = new ShapeText(
-        SHAPE_DRAW_2D, true,-155.0, -10.0, 0.0, 0.0,
+    txt_householdActivateV2GPrivateParkedCars = new ShapeText(
+        SHAPE_DRAW_2D, true,-150.0, -10.0, 0.0, 0.0,
         black,"Activeer V2G",
-        _txt_activateV2GPrivateParkedCars_Font, ALIGNMENT_LEFT ) {
+        _txt_householdActivateV2GPrivateParkedCars_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _txt_activateV2GPrivateParkedCars_SetDynamicParams_xjal( this );
+      _txt_householdActivateV2GPrivateParkedCars_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    txt_chargingStrategyPrivateParkedCars = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 70.0, 0.0, 0.0,
+    txt_householdChargingStrategyPrivateParkedCars = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 105.0, 0.0, 0.0,
         black,"Laad strategie",
-        _txt_chargingStrategyPrivateParkedCars_Font, ALIGNMENT_LEFT ) {
+        _txt_householdChargingStrategyPrivateParkedCars_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _txt_chargingStrategyPrivateParkedCars_SetDynamicParams_xjal( this );
+      _txt_householdChargingStrategyPrivateParkedCars_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    i_chargingAttitudePrivateParkedCars = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 190.0, 70.0, 0.0, 0.0,
+    i_householdChargingStrategyPrivateParkedCars = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 103.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4500,7 +5128,7 @@ tabMobility.this, true, 251.0, 4.0,
 	
       public void updateDynamicProperties() {
 	
-      _i_chargingAttitudePrivateParkedCars_SetDynamicParams_xjal( this );
+      _i_householdChargingStrategyPrivateParkedCars_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -4509,11 +5137,11 @@ tabMobility.this, true, 251.0, 4.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_chargingAttitudePrivateParkedCars, 0, clickx, clicky );
+        return onShapeClick( _i_householdChargingStrategyPrivateParkedCars, 0, clickx, clicky );
       }
     };
     txt_chargingStrategyPublicChargers = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 225.0, 0.0, 0.0,
+        SHAPE_DRAW_2D, true,20.0, 235.0, 0.0, 0.0,
         black,"Laad strategie",
         _txt_chargingStrategyPublicChargers_Font, ALIGNMENT_LEFT ) {
 	
@@ -4527,8 +5155,8 @@ tabMobility.this, true, 251.0, 4.0,
 	
       }
     };
-    i_chargingStrategyPublicChargers = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 190.0, 225.0, 0.0, 0.0,
+    i_householdChargingStrategyPublicChargers = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 180.0, 233.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4536,7 +5164,7 @@ tabMobility.this, true, 251.0, 4.0,
 	
       public void updateDynamicProperties() {
 	
-      _i_chargingStrategyPublicChargers_SetDynamicParams_xjal( this );
+      _i_householdChargingStrategyPublicChargers_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -4545,11 +5173,11 @@ tabMobility.this, true, 251.0, 4.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_chargingStrategyPublicChargers, 0, clickx, clicky );
+        return onShapeClick( _i_householdChargingStrategyPublicChargers, 0, clickx, clicky );
       }
     };
-    i_activateV2GPrivatePublicChargers = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 20.0, -10.0, 0.0, 0.0,
+    i_householdActivateV2GPrivatePublicChargers = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 10.0, -12.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4557,7 +5185,7 @@ tabMobility.this, true, 251.0, 4.0,
 	
       public void updateDynamicProperties() {
 	
-      _i_activateV2GPrivatePublicChargers_SetDynamicParams_xjal( this );
+      _i_householdActivateV2GPrivatePublicChargers_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -4566,11 +5194,11 @@ tabMobility.this, true, 251.0, 4.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_activateV2GPrivatePublicChargers, 0, clickx, clicky );
+        return onShapeClick( _i_householdActivateV2GPrivatePublicChargers, 0, clickx, clicky );
       }
     };
     txt_activateV2GPrivatePublicChargers = new ShapeText(
-        SHAPE_DRAW_2D, true,-155.0, -10.0, 0.0, 0.0,
+        SHAPE_DRAW_2D, true,-150.0, -10.0, 0.0, 0.0,
         black,"Activeer V2G",
         _txt_activateV2GPrivatePublicChargers_Font, ALIGNMENT_LEFT ) {
 	
@@ -4584,38 +5212,38 @@ tabMobility.this, true, 251.0, 4.0,
 	
       }
     };
-    txt_EVsThatSupportV2GDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,5.0, 10.0, 0.0, 0.0,
+    txt_householdEVsThatSupportV2GDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,10.0, 10.0, 0.0, 0.0,
         black,"EVs die V2G ondersteunen",
-        _txt_EVsThatSupportV2GDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_householdEVsThatSupportV2GDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _txt_EVsThatSupportV2GDescription_SetDynamicParams_xjal( this );
+      _txt_householdEVsThatSupportV2GDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    txt_EVsThatSupportV2G_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,226.0, 10.0, 0.0, 0.0,
+    txt_householdEVsThatSupportV2G_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,235.0, 10.0, 0.0, 0.0,
         black,"0%",
-        _txt_EVsThatSupportV2G_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_householdEVsThatSupportV2G_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _txt_EVsThatSupportV2G_pct_SetDynamicParams_xjal( this );
+      _txt_householdEVsThatSupportV2G_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    i_EVsThatSupportV2G = new ShapeImage(
-		tabMobility.this, SHAPE_DRAW_2D3D, true, 181.0, 8.0, 0.0, 0.0,
+    i_householdEVsThatSupportV2G = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 170.0, 8.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4623,7 +5251,7 @@ tabMobility.this, true, 251.0, 4.0,
 	
       public void updateDynamicProperties() {
 	
-      _i_EVsThatSupportV2G_SetDynamicParams_xjal( this );
+      _i_householdEVsThatSupportV2G_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -4632,9 +5260,13 @@ tabMobility.this, true, 251.0, 4.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_EVsThatSupportV2G, 0, clickx, clicky );
+        return onShapeClick( _i_householdEVsThatSupportV2G, 0, clickx, clicky );
       }
     };
+    txt_mobilitySlidersHousesholdsDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 20.0, 0.0, 0.0,
+        black,"Huizen",
+        _txt_mobilitySlidersHousesholdsDescription_Font, ALIGNMENT_LEFT );
     txt_mobilityFunctionsDescription = new ShapeText(
         SHAPE_DRAW_2D, false,590.0, 510.0, 0.0, 0.0,
         black,"Mobility Functions",
@@ -4647,134 +5279,193 @@ tabMobility.this, true, 251.0, 4.0,
         SHAPE_DRAW_2D, false,590.0, 510.0, 0.0, 0.0,
         black,"Mobility Functions (residential)",
         _t_mobilityFunctionsDescription1_Font, ALIGNMENT_CENTER );
-  }
+    arrowLeftResidential = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, -35.0, -12.0, 0.0, 1.5707963267948966,
+12.0, 12.0, "/zerointerfaceloader/",
+			new String[]{"icon_arrow.png",} ) {
 
-  @AnyLogicInternalCodegenAPI
-  private void _createPersistentElementsAP0_xjal() {
-    {
-    gr_mobilitySliders_default = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 0.0, 0.0, 0.0, 0.0
-	
-	     , rect_mobilityDemandSliders_default
-	     , sl_fossilFuelCars_pct
-	     , sl_electricTrucks_pct
-	     , t_fossilFuelCars_pct
-	     , t_fossilFuelCarsDescription
-	     , t_electricTrucksDescription
-	     , t_electricTrucks_pct
-	     , t_mobilityDemandReductionDescription
-	     , sl_mobilityDemandReduction_pct
-	     , t_mobilityDemandReduction_pct
-	     , sl_hydrogenTrucks_pct
-	     , t_hydrogenTrucksDescription
-	     , t_hydrogenTrucks_pct
-	     , sl_fossilFuelTrucks_pct
-	     , t_fossilFuelTrucksDescription
-	     , t_fossilFuelTrucks_pct
-	     , t_trucksDescription
-	     , sl_electricCars_pct
-	     , t_electricCarsDescription
-	     , t_electricCars_pct
-	     , t_carsDescription
-	     , sl_fossilFuelVans_pct
-	     , t_fossilFuelVans_pct
-	     , t_fossilFuelVansDescription
-	     , sl_electricVans_pct
-	     , t_electricVansDescription
-	     , t_electricVans_pct
-	     , t_vansDescription
-	     , i_mobilityReduction
-	     , i_electricTruck
-	     , i_hydrogenTruck
-	     , i_fossilFuelTruck
-	     , i_electricVans
-	     , i_fossilFuelVans
-	     , i_electricCars
-	     , i_fossilFuelCars
-	     , cb_spreadChargingEVs
-	     , t_spreadChargingEVsDescription1 );
-    }
-    gr_mobilitySliders_default.setVisible( false );
-    {
-    gr_settingsV2G_publicChargers = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 9.0, 311.0, 0.0, 0.0
-	
-	     , sl_chargersThatSupportV2G_pct
-	     , t_chargersThatSupportV2GDescription
-	     , t_chargersThatSupportV2G_pct
-	     , i_householdPublicChargersV2G );
-    }
-    gr_settingsV2G_publicChargers.setVisible( false );
-    {
-    gr_settingsV1G_publicChargers = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 5.0, 250.0, 0.0, 0.0
-	
-	     , sl_chargersThatSupportV1G_pct
-	     , txt_chargersThatSupportV1GDescription
-	     , t_chargersThatSupportV1G_pct
-	     , i_householdPublicChargersV1G );
-    }
-    gr_settingsV1G_publicChargers.setVisible( false );
-    {
-    gr_activateV2GPrivateParkedCars = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 170.0, 110.0, 0.0, 0.0
-	
-	     , cb_activateV2GPrivateParkedCars
-	     , i_activateV2GPrivateParkedCars
-	     , txt_activateV2GPrivateParkedCars );
-    }
-    gr_activateV2GPrivateParkedCars.setVisible( false );
-    {
-    gr_activateV2GPublicChargers = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 170.0, 300.0, 0.0, 0.0
-	
-	     , cb_activateV2GPublicChargers
-	     , i_activateV2GPrivatePublicChargers
-	     , txt_activateV2GPrivatePublicChargers );
-    }
-    gr_activateV2GPublicChargers.setVisible( false );
-    {
-    gr_settingsV2G_privateParkedCars = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 9.0, 121.0, 0.0, 0.0
-	
-	     , sl_EVsThatSupportV2G_pct
-	     , txt_EVsThatSupportV2GDescription
-	     , txt_EVsThatSupportV2G_pct
-	     , i_EVsThatSupportV2G );
-    }
-    gr_settingsV2G_privateParkedCars.setVisible( false );
-    {
-    gr_mobilitySliders_residential = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 400.0, 0.0, 0.0, 0.0
-	
-	     , rect_mobilityDemandSliders_residential
-	     , txt_privateParkedCars
-	     , txt_publicChargePoints
-	     , sl_publicChargersResidentialArea_pct
-	     , t_publicEVsResidentialAreaDescription
-	     , t_publicEVsResidentialArea_pct
-	     , t_privateEVsResidentialAreaDescription
-	     , sl_privateEVsResidentialArea_pct
-	     , t_privateEVsResidentialArea_pct
-	     , gr_settingsV2G_publicChargers
-	     , i_householdPrivateEV
-	     , i_householdPublicChargers
-	     , gr_settingsV1G_publicChargers
-	     , gr_activateV2GPrivateParkedCars
-	     , txt_chargingStrategyPrivateParkedCars
-	     , cb_chargingAttitudePrivateParkedCars
-	     , i_chargingAttitudePrivateParkedCars
-	     , txt_chargingStrategyPublicChargers
-	     , cb_chargingAttitudePrivatePublicChargers
-	     , i_chargingStrategyPublicChargers
-	     , gr_activateV2GPublicChargers
-	     , gr_settingsV2G_privateParkedCars ) {
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _arrowLeftResidential, 0, clickx, clicky );
+      }
+    };
+    arrowRightResidential1 = new ShapeImage(
+		tabMobility.this, SHAPE_DRAW_2D3D, true, 35.0, 0.0, 0.0, 4.71238898038469,
+12.0, 12.0, "/zerointerfaceloader/",
+			new String[]{"icon_arrow.png",} ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _arrowRightResidential1, 0, clickx, clicky );
+      }
+    };
+    t_pageIndicator = new ShapeText(
+        SHAPE_DRAW_2D, true,0.0, -12.0, 0.0, 0.0,
+        black,"Pagina 1/2",
+        _t_pageIndicator_Font, ALIGNMENT_CENTER ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _gr_mobilitySliders_residential_SetDynamicParams_xjal( this );
+      _t_pageIndicator_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+  }
+
+  @AnyLogicInternalCodegenAPI
+  private void _createPersistentElementsAP0_xjal() {
+    {
+    gr_mobilitySliders_companies = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 400.0, 0.0, 0.0, 0.0
+	
+	     , rect_mobilityDemandSliders_default
+	     , sl_companiesFossilFuelCars_pct
+	     , sl_companiesElectricTrucks_pct
+	     , txt_companiesFossilFuelCars_pct
+	     , txt_companiesFossilFuelCarsDescription
+	     , txt_companiesElectricTrucksDescription
+	     , txt_companiesElectricTrucks_pct
+	     , txt_companiesMobilityDemandReductionDescription
+	     , sl_companiesMobilityDemandReduction_pct
+	     , txt_companiesMobilityDemandReduction_pct
+	     , sl_companiesHydrogenTrucks_pct
+	     , txt_companiesHydrogenTrucksDescription
+	     , txt_companiesHydrogenTrucks_pct
+	     , sl_companiesFossilFuelTrucks_pct
+	     , txt_companiesFossilFuelTrucksDescription
+	     , t_fossilFuelTrucks_pct
+	     , t_trucksDescription
+	     , sl_companiesElectricCars_pct
+	     , txt_companiesElectricCarsDescription
+	     , txt_companiesElectricCars_pct
+	     , t_carsDescription
+	     , sl_companiesFossilFuelVans_pct
+	     , txt_companiesFossilFuelVans_pct
+	     , txt_companiesFossilFuelVansDescription
+	     , sl_companiesElectricVans_pct
+	     , txt_companiesElectricVansDescription
+	     , txt_companiesElectricVans_pct
+	     , t_vansDescription
+	     , i_companiesMobilityReduction
+	     , i_companiesElectricTruck
+	     , i_companiesHydrogenTruck
+	     , i_companiesFossilFuelTruck
+	     , i_companiesElectricVans
+	     , i_companiesFossilFuelVans
+	     , i_companiesElectricCars
+	     , i_companiesFossilFuelCars
+	     , cb_companiesSpreadChargingEVs
+	     , txt_companiesSpreadChargingEVsDescription
+	     , i_companiesMobilityChargingAttitude
+	     , txt_mobilitySlidersCompaniesDescription ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _gr_mobilitySliders_companies_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     }
-    gr_mobilitySliders_residential.setVisible( false );
+    gr_mobilitySliders_companies.setVisible( false );
+    {
+    gr_householdSettingsV2G_publicChargers = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 10.0, 300.0, 0.0, 0.0
+	
+	     , sl_householdChargersThatSupportV2G_pct
+	     , txt_chargersThatSupportV2GDescription
+	     , txt_householdChargersThatSupportV2G_pct
+	     , i_householdPublicChargersV2G );
+    }
+    gr_householdSettingsV2G_publicChargers.setVisible( false );
+    {
+    gr_householdSettingsV1G_publicChargers = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 5.0, 255.0, 0.0, 0.0
+	
+	     , sl_householdChargersThatSupportV1G_pct
+	     , txt_householdChargersThatSupportV1GDescription
+	     , txt_householdChargersThatSupportV1G_pct
+	     , i_householdPublicChargersV1G );
+    }
+    gr_householdSettingsV1G_publicChargers.setVisible( false );
+    {
+    gr_householdActivateV2GPrivateParkedCars = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 170.0, 140.0, 0.0, 0.0
+	
+	     , cb_householdActivateV2GPrivateParkedCars
+	     , i_householdActivateV2GPrivateParkedCars
+	     , txt_householdActivateV2GPrivateParkedCars );
+    }
+    gr_householdActivateV2GPrivateParkedCars.setVisible( false );
+    {
+    gr_householdActivateV2GPublicChargers = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 170.0, 295.0, 0.0, 0.0
+	
+	     , cb_householdActivateV2GPublicChargers
+	     , i_householdActivateV2GPrivatePublicChargers
+	     , txt_activateV2GPrivatePublicChargers );
+    }
+    gr_householdActivateV2GPublicChargers.setVisible( false );
+    {
+    gr_householdSettingsV2G_privateParkedCars = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 10.0, 145.0, 0.0, 0.0
+	
+	     , sl_householdEVsThatSupportV2G_pct
+	     , txt_householdEVsThatSupportV2GDescription
+	     , txt_householdEVsThatSupportV2G_pct
+	     , i_householdEVsThatSupportV2G );
+    }
+    gr_householdSettingsV2G_privateParkedCars.setVisible( false );
+    {
+    gr_mobilitySliders_households = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 0.0, 0.0, 0.0, 0.0
+	
+	     , rect_mobilityDemandSliders_residential
+	     , txt_privateParkedCars
+	     , txt_publicChargePoints
+	     , sl_householdPublicChargers_pct
+	     , txt_householdPublicEVsResidentialAreaDescription
+	     , txt_householdPublicEVs_pct
+	     , txt_householdPrivateEVsDescription
+	     , sl_householdPrivateEVs_pct
+	     , txt_householdPrivateEVs_pct
+	     , gr_householdSettingsV2G_publicChargers
+	     , i_householdPrivateEV
+	     , i_householdPublicChargers
+	     , gr_householdSettingsV1G_publicChargers
+	     , gr_householdActivateV2GPrivateParkedCars
+	     , txt_householdChargingStrategyPrivateParkedCars
+	     , cb_householdChargingStrategyPrivateParkedCars
+	     , i_householdChargingStrategyPrivateParkedCars
+	     , txt_chargingStrategyPublicChargers
+	     , cb_householdChargingStrategyPrivatePublicChargers
+	     , i_householdChargingStrategyPublicChargers
+	     , gr_householdActivateV2GPublicChargers
+	     , gr_householdSettingsV2G_privateParkedCars
+	     , txt_mobilitySlidersHousesholdsDescription ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _gr_mobilitySliders_households_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    }
+    gr_mobilitySliders_households.setVisible( false );
+    {
+    gr_pageIndicator = new ShapeGroup( tabMobility.this, SHAPE_DRAW_2D3D, true, 185.0, 20.0, 0.0, 0.0
+	
+	     , arrowLeftResidential
+	     , arrowRightResidential1
+	     , t_pageIndicator );
+    }
+    gr_pageIndicator.setVisible( false );
   }
 
   @AnyLogicInternalCodegenAPI
@@ -4868,19 +5559,19 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     setupInitialConditions_xjal( tabMobility.class );
     // Dynamic initialization of persistent elements
     _createPersistentElementsBS0_xjal();
-    sl_fossilFuelCars_pct.setValueToDefault();
-    sl_electricTrucks_pct.setValueToDefault();
-    sl_mobilityDemandReduction_pct.setValueToDefault();
-    sl_hydrogenTrucks_pct.setValueToDefault();
-    sl_fossilFuelTrucks_pct.setValueToDefault();
-    sl_electricCars_pct.setValueToDefault();
-    sl_fossilFuelVans_pct.setValueToDefault();
-    sl_electricVans_pct.setValueToDefault();
-    sl_publicChargersResidentialArea_pct.setValueToDefault();
-    sl_privateEVsResidentialArea_pct.setValueToDefault();
-    sl_chargersThatSupportV2G_pct.setValueToDefault();
-    sl_chargersThatSupportV1G_pct.setValueToDefault();
-    sl_EVsThatSupportV2G_pct.setValueToDefault();
+    sl_companiesFossilFuelCars_pct.setValueToDefault();
+    sl_companiesElectricTrucks_pct.setValueToDefault();
+    sl_companiesMobilityDemandReduction_pct.setValueToDefault();
+    sl_companiesHydrogenTrucks_pct.setValueToDefault();
+    sl_companiesFossilFuelTrucks_pct.setValueToDefault();
+    sl_companiesElectricCars_pct.setValueToDefault();
+    sl_companiesFossilFuelVans_pct.setValueToDefault();
+    sl_companiesElectricVans_pct.setValueToDefault();
+    sl_householdPublicChargers_pct.setValueToDefault();
+    sl_householdPrivateEVs_pct.setValueToDefault();
+    sl_householdChargersThatSupportV2G_pct.setValueToDefault();
+    sl_householdChargersThatSupportV1G_pct.setValueToDefault();
+    sl_householdEVsThatSupportV2G_pct.setValueToDefault();
   }
 
   @Override
@@ -4913,6 +5604,9 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 0 
 ;
     v_totalNumberOfGhostVehicle_Cars = 
+0 
+;
+    v_currentPageIndex = 
 0 
 ;
   }
@@ -4976,56 +5670,81 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 
   // Additional class code
 
-// Default Sliders
-public ShapeGroup getGr_mobilitySliders_default() {
-	return this.gr_mobilitySliders_default;
+// Page navigation
+public ShapeGroup getGroupPageIndicator() {
+	return this.gr_pageIndicator;
 }
 
-//Residential sliders
-public ShapeGroup getGr_mobilitySliders_residential() {
-	return this.gr_mobilitySliders_residential;
+public List<ShapeGroup> getLoadedPages() {
+	return this.c_loadedPageGroups;
 }
 
-public ShapeSlider getSliderMobilityDemandReduction_pct () {
-	return this.sl_mobilityDemandReduction_pct;
+public int getCurrentPageIndex() {
+	return this.v_currentPageIndex;
 }
 
-public ShapeSlider getSliderElectricTrucks_pct() {
-	return this.sl_electricTrucks_pct;
+// Slider groups
+public ShapeGroup getGroupMobilitySliders_Households() {
+	return this.gr_mobilitySliders_households;
 }
 
-public ShapeSlider getSliderHydrogenTrucks_pct() {
-	return this.sl_hydrogenTrucks_pct;
+public ShapeGroup getGroupMobilitySliders_Companies() {
+	return this.gr_mobilitySliders_companies;
 }
 
-public ShapeSlider getSliderFossilFuelTrucks_pct() {
-	return this.sl_fossilFuelTrucks_pct;
+//Household sliders
+public ShapeSlider getSliderHouseholdPrivateEVs_pct(){
+	return this.sl_householdPrivateEVs_pct;
 }
 
-public ShapeSlider getSliderElectricVans_pct() {
-	return this.sl_electricVans_pct;
+public ShapeSlider getSliderHouseholdEVsThatSupportV2G_pct(){
+	return this.sl_householdEVsThatSupportV2G_pct;
 }
 
-public ShapeSlider getSliderFossilFuelVans_pct() {
-	return this.sl_fossilFuelVans_pct;
+public ShapeSlider getSliderHouseholdPublicChargers_pct(){
+	return this.sl_householdPublicChargers_pct;
 }
 
-public ShapeSlider getSliderElectricCars_pct() {
-	return this.sl_electricCars_pct;
+public ShapeSlider getSliderHouseholdChargersThatSupportV1G_pct(){
+	return this.sl_householdChargersThatSupportV1G_pct;
 }
 
-public ShapeSlider getSliderFossilFuelCars_pct() {
-	return this.sl_fossilFuelCars_pct;
+public ShapeSlider getSliderHouseholdChargersThatSupportV2G_pct(){
+	return this.sl_householdChargersThatSupportV2G_pct;
 }
 
-public ShapeSlider getSl_privateEVsResidentialArea_pct(){
-	return this.sl_privateEVsResidentialArea_pct;
+// Company sliders
+public ShapeSlider getSliderCompaniesMobilityDemandReduction_pct () {
+	return this.sl_companiesMobilityDemandReduction_pct;
 }
 
-public ShapeSlider getSl_publicChargersResidentialArea_pct(){
-	return this.sl_publicChargersResidentialArea_pct;
+public ShapeSlider getSliderCompaniesElectricTrucks_pct() {
+	return this.sl_companiesElectricTrucks_pct;
 }
- 
+
+public ShapeSlider getSliderCompaniesHydrogenTrucks_pct() {
+	return this.sl_companiesHydrogenTrucks_pct;
+}
+
+public ShapeSlider getSliderCompaniesFossilFuelTrucks_pct() {
+	return this.sl_companiesFossilFuelTrucks_pct;
+}
+
+public ShapeSlider getSliderCompaniesElectricVans_pct() {
+	return this.sl_companiesElectricVans_pct;
+}
+
+public ShapeSlider getSliderCompaniesFossilFuelVans_pct() {
+	return this.sl_companiesFossilFuelVans_pct;
+}
+
+public ShapeSlider getSliderCompaniesElectricCars_pct() {
+	return this.sl_companiesElectricCars_pct;
+}
+
+public ShapeSlider getSliderCompaniesFossilFuelCars_pct() {
+	return this.sl_companiesFossilFuelCars_pct;
+} 
   // End of additional class code
 
 }

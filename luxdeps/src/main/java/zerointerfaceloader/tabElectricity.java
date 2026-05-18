@@ -267,11 +267,19 @@ double  p_currentTotalGridBatteryCapacity_MWh;
     }
     return result;
   }
+  // Plain Variables
+
+  public 
+int 
+ v_currentPageIndex;
 
   // Collection Variables
   public 
 ArrayList <
 GridConnection > c_electricityTabEASliderGCs = new ArrayList<GridConnection>();
+  public 
+ArrayList <
+ShapeGroup > c_loadedPageGroups = new ArrayList<ShapeGroup>();
 
   @AnyLogicInternalCodegenAPI
   private static Map<String, IElementDescriptor> elementDesciptors_xjal = createElementDescriptors( tabElectricity.class );
@@ -616,7 +624,7 @@ if ( pvAsset != null ) {
 } 
   }
 
-  public void f_setResidentialBatteries( double homeBatteries_pct, List<GCHouse> gcListHouses ) { 
+  public void f_setHouseholdBatteries( double homeBatteries_pct, List<GCHouse> gcListHouses ) { 
 
 // Setting houseBatteries
 double nbHouseBatteries = count(gcListHouses, h -> h.p_batteryAsset != null); //f_getEnergyAssets(), p -> p.energyAssetType == OL_EnergyAssetType.STORAGE_ELECTRIC && p.getParentAgent() instanceof GCHouse);
@@ -748,128 +756,56 @@ f_setDemandReduction(gcList, -demandReduction_pct);
 
   protected void f_updateSliders_Electricity(  ) { 
 
-if(gr_electricitySliders_default.isVisible()){
-	f_updateElectricitySliders_default();
+// Update all loaded pages
+for (ShapeGroup page : c_loadedPageGroups) {
+	if(page == gr_electricitySliders_households){
+		f_updateElectricitySliders_households();
+	}
+	else if(page == gr_electricitySliders_companies){
+		f_updateElectricitySliders_companies();
+	}
+	else if(page == gr_electricitySliders_collective){
+		f_updateElectricitySliders_collective();
+	}
+	else{
+		f_updateElectricitySliders_custom(); 
+	}
 }
-else if(gr_electricitySliders_businesspark.isVisible()){
-	f_updateElectricitySliders_businesspark();
-}
-else if(gr_electricitySliders_residential.isVisible()){
-	f_updateElectricitySliders_residential();
-}
-else{
-	f_updateElectricitySliders_custom();
-} 
+ 
   }
 
-  void f_updateElectricitySliders_default(  ) { 
+  protected void f_updateElectricitySliders_households(  ) { 
 
-List<GridConnection> allConsumerGridConnections = uI_Tabs.f_getActiveSliderGridConnections_consumption();
-
-
-//Savings
-double totalBaseConsumption_kWh = 0;
-double totalSavedConsumption_kWh = 0;
-for(GridConnection GC : allConsumerGridConnections){
-	if(GC.v_isActive){
-		List<J_EAProfile> profileEAs = findAll(GC.c_profileAssets, profile -> profile.getAssetFlowCategory() == OL_AssetFlowCategories.fixedConsumptionElectric_kW);
-		for(J_EAProfile profileEA : profileEAs){
-			double baseConsumption_kWh = profileEA.getBaseConsumption_kWh();
-			totalBaseConsumption_kWh += baseConsumption_kWh;
-			totalSavedConsumption_kWh += (1 - profileEA.getProfileScaling_fr()) * baseConsumption_kWh;
-		}
-	}
-}
-
-double electricitySavings_pct = totalBaseConsumption_kWh > 0 ? (totalSavedConsumption_kWh/totalBaseConsumption_kWh * 100) : 0;
-sl_electricityDemandReduction_pct.setValue(roundToInt(electricitySavings_pct), false);
-
-
-//Companies rooftop PV
-List<GCUtility> utilityGridConnections = uI_Tabs.f_getActiveSliderGridConnections_utilities();
-
-List<GridConnection> utilityGridConnections_GC = new ArrayList<>(utilityGridConnections);
-Pair<Double, Double> pair = f_getPVSystemPercentage( utilityGridConnections_GC );
-int PV_pct = roundToInt(100.0 * pair.getFirst() / pair.getSecond());
-sl_rooftopPVCompanies_pct.setValue(PV_pct, false);
-
-//Houses rooftop PV
+//Get the house grid connections
 List<GCHouse> houseGridConnections = uI_Tabs.f_getActiveSliderGridConnections_houses();
 
-List<GridConnection> houseGridConnections_GC = new ArrayList<>(utilityGridConnections);
-pair = f_getPVSystemPercentage( houseGridConnections_GC );
-PV_pct = roundToInt(100.0 * pair.getFirst() / pair.getSecond());
-sl_rooftopPVHouses_pct.setValue(PV_pct, false);
+//Rooftop PV
+int nbHouses = houseGridConnections.size();
+int nbHousesWithPV = count(houseGridConnections, x -> x.v_liveAssetsMetaData.activeAssetFlows.contains(OL_AssetFlowCategories.pvProductionElectric_kW));
+double pv_pct = 100.0 * nbHousesWithPV / nbHouses;
+sl_householdRooftopPV_pct.setValue(roundToInt(pv_pct), false);
 
-//Large scale EA production systems (PV on land And Wind)
-f_getCurrentPVOnLandAndWindturbineValues(); // Used for slider minimum: non adjustable GCProductions
-
-double totalPVOnLand_kW = 0; // Of movable slider GC
-double totalWind_kW = 0; // Of movable slider GC
-
-for(GridConnection productionGC : c_electricityTabEASliderGCs){
-	if(productionGC instanceof GCEnergyProduction && productionGC.v_isActive){
-		for(J_EAProduction productionEA : productionGC.c_productionAssets){
-			if(productionEA.getEAType() == OL_EnergyAssetType.PHOTOVOLTAIC){
-				totalPVOnLand_kW += productionEA.getCapacityElectric_kW();
-				break;
-			}
-			else if(productionEA.getEAType() == OL_EnergyAssetType.WINDMILL){
-				totalWind_kW += productionEA.getCapacityElectric_kW();
-				break;
-			}
-		}
-	}
+//Home batteries
+if ( nbHousesWithPV != 0 ) {
+	int nbHousesWithHomeBattery = count(houseGridConnections, x -> x.v_liveAssetsMetaData.activeAssetFlows.contains(OL_AssetFlowCategories.pvProductionElectric_kW) && x.p_batteryAsset != null);
+	double battery_pct = 100.0 * nbHousesWithHomeBattery / nbHousesWithPV;
+	sl_householdBatteries_pct.setValue(roundToInt(battery_pct), false);
 }
-sl_largeScalePV_ha.setRange(0, 1000); // Needed to prevent anylogic range bug
-sl_largeScalePV_ha.setValue((totalPVOnLand_kW/zero_Interface.energyModel.avgc_data.p_avgSolarFieldPower_kWppha) + p_currentPVOnLand_ha, false);
-sl_largeScaleWind_MW.setRange(0, 1000); // Needed to prevent anylogic range bug
-sl_largeScaleWind_MW.setValue((totalWind_kW/1000) + p_currentWindTurbines_MW, false);
 
-//Curtailment
+//Curtailment PV houses
 boolean curtailment = true;
-for(GridConnection GC : allConsumerGridConnections){
+for(GridConnection GC : houseGridConnections){
 	if(!GC.f_isAssetManagementActive(I_CurtailManagement.class)){
 		curtailment = false;
 		break;
 	}
 }
-cb_curtailment_default.setSelected(curtailment, false);
-
-
-//Large scale battery systems
-f_getCurrentGridBatterySize(); // Used for slider minimum: non adjustable GCGridBatteries
-
-double totalBatteryStorage_kWh = 0;
-for(GridConnection batteryGC : c_electricityTabEASliderGCs){
-	if(batteryGC instanceof GCGridBattery && batteryGC.v_isActive){
-		totalBatteryStorage_kWh += batteryGC.p_batteryAsset.getStorageCapacity_kWh();
-	}
-}
-sl_collectiveBattery_MWh_default.setRange(0, 1000);
-sl_collectiveBattery_MWh_default.setValue((totalBatteryStorage_kWh/1000.0) + p_currentTotalGridBatteryCapacity_MWh, false);
- 
-  }
-
-  protected void f_updateElectricitySliders_residential(  ) { 
-
-List<GCHouse> houseGridConnections = uI_Tabs.f_getActiveSliderGridConnections_houses();
-
-int nbHouses = houseGridConnections.size();
-int nbHousesWithPV = count(houseGridConnections, x -> x.v_liveAssetsMetaData.activeAssetFlows.contains(OL_AssetFlowCategories.pvProductionElectric_kW));
-double pv_pct = 100.0 * nbHousesWithPV / nbHouses;
-sl_householdPVResidentialArea_pct.setValue(roundToInt(pv_pct), false);
-
-if ( nbHousesWithPV != 0 ) {
-	int nbHousesWithHomeBattery = count(houseGridConnections, x -> x.v_liveAssetsMetaData.activeAssetFlows.contains(OL_AssetFlowCategories.pvProductionElectric_kW) && x.p_batteryAsset != null);
-	double battery_pct = 100.0 * nbHousesWithHomeBattery / nbHousesWithPV;
-	sl_householdBatteriesResidentialArea_pct.setValue(roundToInt(battery_pct), false);
-}
+cb_householdCurtailment.setSelected(curtailment, false);
 
 //Electric cooking
 int nbHousesWithElectricCooking = count(houseGridConnections, x -> x.p_cookingMethod == OL_HouseholdCookingMethod.ELECTRIC);
 double cooking_pct = 100.0 * nbHousesWithElectricCooking / nbHouses;
-sl_householdElectricCookingResidentialArea_pct.setValue(roundToInt(cooking_pct), false);
+sl_householdElectricCooking_pct.setValue(roundToInt(cooking_pct), false);
 
 //Consumption growth
 double totalBaseConsumption_kWh = 0;
@@ -886,58 +822,16 @@ for(GCHouse GC : houseGridConnections){
 }
 
 double electricityDemandIncrease_pct = totalBaseConsumption_kWh > 0 ? ( (- totalSavedConsumption_kWh)/totalBaseConsumption_kWh * 100) : 0;
-sl_electricityDemandIncreaseResidentialArea_pct.setValue(roundToInt(electricityDemandIncrease_pct), false);
-
-
-//Large scale EA production systems (PV on land And Wind)
-f_getCurrentPVOnLandAndWindturbineValues(); // Used for slider minimum: non adjustable GCProductions
-
-double totalPVOnLand_kW = 0; // Of movable slider GC
-double totalWind_kW = 0; // Of movable slider GC
-
-for(GridConnection productionGC : c_electricityTabEASliderGCs){
-	if(productionGC instanceof GCEnergyProduction && productionGC.v_isActive){
-		for(J_EAProduction productionEA : productionGC.c_productionAssets){
-			if(productionEA.getEAType() == OL_EnergyAssetType.PHOTOVOLTAIC){
-				totalPVOnLand_kW += productionEA.getCapacityElectric_kW();
-				break;
-			}
-			else if(productionEA.getEAType() == OL_EnergyAssetType.WINDMILL){
-				totalWind_kW += productionEA.getCapacityElectric_kW();
-				break;
-			}
-		}
-	}
-}
-sl_largeScalePV_ha_Residential.setRange(0, 1000); // Needed to prevent anylogic range bug
-sl_largeScalePV_ha_Residential.setValue((totalPVOnLand_kW/zero_Interface.energyModel.avgc_data.p_avgSolarFieldPower_kWppha) + p_currentPVOnLand_ha, false);
-sl_largeScaleWind_MW_Residential.setRange(0, 1000); // Needed to prevent anylogic range bug
-sl_largeScaleWind_MW_Residential.setValue((totalWind_kW/1000) + p_currentWindTurbines_MW, false);
-
-
-//Gridbatteries
-List<GCGridBattery> sliderGridBatteryGridConnections = new ArrayList<>();
-for(GridConnection sliderGC : c_electricityTabEASliderGCs){
-	if(sliderGC.v_isActive && sliderGC instanceof GCGridBattery sliderGridBattery){
-		sliderGridBatteryGridConnections.add(sliderGridBattery);
-	}
-}
-
-double averageNeighbourhoodBatterySize_kWh = 0;
-for (GCGridBattery gc : sliderGridBatteryGridConnections) {
-	averageNeighbourhoodBatterySize_kWh += gc.p_batteryAsset.getStorageCapacity_kWh()/sliderGridBatteryGridConnections.size();
-}
-sl_gridBatteriesResidentialArea_kWh.setValue(averageNeighbourhoodBatterySize_kWh, false);
+sl_householdElectricityDemandIncrease_pct.setValue(roundToInt(electricityDemandIncrease_pct), false);
  
   }
 
-  void f_updateElectricitySliders_businesspark(  ) { 
+  protected void f_updateElectricitySliders_companies(  ) { 
 
-//Get the utility connections
+//Get the utility grid connections
 List<GridConnection> utilityGridConnections = new ArrayList<>(uI_Tabs.f_getActiveSliderGridConnections_utilities());
 
-
-//Savings
+//Electricity savings
 double totalBaseConsumption_kWh = 0;
 double totalSavedConsumption_kWh = 0;
 for(GridConnection GC : utilityGridConnections){
@@ -952,39 +846,14 @@ for(GridConnection GC : utilityGridConnections){
 }
 
 double electricitySavings_pct = totalBaseConsumption_kWh > 0 ? (totalSavedConsumption_kWh/totalBaseConsumption_kWh * 100) : 0;
-sl_electricityDemandReduction_pct_Businesspark.setValue(roundToInt(electricitySavings_pct), false);
+sl_companiesElectricityDemandReduction_pct.setValue(roundToInt(electricitySavings_pct), false);
 
-// Rooftop PV SYSTEMS:
+// Rooftop PV:
 Pair<Double, Double> pair = f_getPVSystemPercentage( utilityGridConnections );
 int PV_pct = roundToInt(100.0 * pair.getFirst() / pair.getSecond());
-sl_rooftopPVCompanies_pct_Businesspark.setValue(PV_pct, false);
+sl_companiesRooftopPV_pct.setValue(PV_pct, false);
 
-//Large scale EA production systems (PV on land And Wind)
-f_getCurrentPVOnLandAndWindturbineValues(); // Used for slider minimum: non adjustable GCProductions
-
-double totalPVOnLand_kW = 0; // Of movable slider GC
-double totalWind_kW = 0; // Of movable slider GC
-
-for(GridConnection productionGC : c_electricityTabEASliderGCs){
-	if(productionGC instanceof GCEnergyProduction && productionGC.v_isActive){
-		for(J_EAProduction productionEA : productionGC.c_productionAssets){
-			if(productionEA.getEAType() == OL_EnergyAssetType.PHOTOVOLTAIC){
-				totalPVOnLand_kW += productionEA.getCapacityElectric_kW();
-				break;
-			}
-			else if(productionEA.getEAType() == OL_EnergyAssetType.WINDMILL){
-				totalWind_kW += productionEA.getCapacityElectric_kW();
-				break;
-			}
-		}
-	}
-}
-sl_largeScalePV_ha_Businesspark.setRange(0, 1000); // Needed to prevent anylogic range bug
-sl_largeScalePV_ha_Businesspark.setValue((totalPVOnLand_kW/zero_Interface.energyModel.avgc_data.p_avgSolarFieldPower_kWppha) + p_currentPVOnLand_ha, false);
-sl_largeScaleWind_MW_Businesspark.setRange(0, 1000); // Needed to prevent anylogic range bug
-sl_largeScaleWind_MW_Businesspark.setValue((totalWind_kW/1000) + p_currentWindTurbines_MW, false);
-
-//Curtailment
+//Curtailment PV companies
 boolean curtailment = true;
 for(GridConnection GC : utilityGridConnections){
 	if(!GC.f_isAssetManagementActive(I_CurtailManagement.class)){
@@ -992,29 +861,13 @@ for(GridConnection GC : utilityGridConnections){
 		break;
 	}
 }
-cb_curtailment_businesspark.setSelected(curtailment, false);
-
-
-//Large scale battery systems
-f_getCurrentGridBatterySize(); // Used for slider minimum: non adjustable GCGridBatteries
-
-double totalBatteryStorage_kWh = 0;
-for(GridConnection batteryGC : c_electricityTabEASliderGCs){
-	if(batteryGC instanceof GCGridBattery && batteryGC.v_isActive){
-		totalBatteryStorage_kWh += batteryGC.p_batteryAsset.getStorageCapacity_kWh();
-	}
-}
-sl_collectiveBattery_MWh_businesspark.setRange(0, 1000); // Needed to prevent anylogic range bug
-sl_collectiveBattery_MWh_businesspark.setValue((totalBatteryStorage_kWh/1000.0) + p_currentTotalGridBatteryCapacity_MWh, false);
-
- 
+cb_companiesCurtailment.setSelected(curtailment, false); 
   }
 
   protected void f_updateElectricitySliders_custom(  ) { 
 
-//If you have a custom tab, 
-//override this function to make it update automatically
-traceln("Forgot to override the update custom electricity sliders functionality"); 
+//If you have a custom tab, override this function to make it update automatically
+throw new RuntimeException("Forgot to override the update custom electricity sliders functionality"); 
   }
 
   public void f_setCurtailment( boolean activateCurtailment, List<GridConnection> gcList ) { 
@@ -1043,7 +896,9 @@ zero_Interface.f_resetSettings();
 c_electricityTabEASliderGCs.addAll(electricityTabEASliderGCs);
 
 f_getCurrentPVOnLandAndWindturbineValues();
-f_getCurrentGridBatterySize(); 
+f_getCurrentGridBatterySize();
+
+f_initializeElectricityPages(); 
   }
 
   public void f_getCurrentGridBatterySize(  ) { 
@@ -1079,52 +934,150 @@ switch (pvtOrientation){
 
 return profilePointer; 
   }
+
+  protected void f_goToPage( int pageIndex ) { 
+
+for (ShapeGroup group : c_loadedPageGroups) {
+    group.setVisible(false);
+}
+
+if (c_loadedPageGroups.isEmpty()) return;
+
+v_currentPageIndex = pageIndex;
+c_loadedPageGroups.get(v_currentPageIndex).setVisible(true); // Show the selected page group
+f_updatePageIndicator(); // Update the page indicator text 
+  }
+
+  protected void f_nextPage(  ) { 
+
+if (c_loadedPageGroups.isEmpty()) return;
+int nextIndex = (v_currentPageIndex + 1) % c_loadedPageGroups.size();
+f_goToPage(nextIndex); 
+  }
+
+  protected void f_previousPage(  ) { 
+
+if (c_loadedPageGroups.isEmpty()) return;
+int prevIndex = (v_currentPageIndex - 1 + c_loadedPageGroups.size()) % c_loadedPageGroups.size();
+f_goToPage(prevIndex); 
+  }
+
+  protected void f_updatePageIndicator(  ) { 
+
+t_pageIndicator.setText("Pagina " + (v_currentPageIndex + 1) + "/" + c_loadedPageGroups.size());
+presentation.remove(gr_pageIndicator);
+presentation.add(gr_pageIndicator); 
+  }
+
+  protected void f_updateElectricitySliders_collective(  ) { 
+
+List<GridConnection> productionGridConnections = new ArrayList<>(uI_Tabs.f_getAllSliderGridConnections_production());
+
+//Large scale EA production systems (PV/Wind on land)
+f_getCurrentPVOnLandAndWindturbineValues(); // Used for slider minimum: non adjustable GCProductions
+
+double totalPVOnLand_kW = 0; // Of movable slider GC
+double totalWind_kW = 0; // Of movable slider GC
+
+for(GridConnection productionGC : c_electricityTabEASliderGCs){
+	if(productionGC instanceof GCEnergyProduction && productionGC.v_isActive){
+		for(J_EAProduction productionEA : productionGC.c_productionAssets){
+			if(productionEA.getEAType() == OL_EnergyAssetType.PHOTOVOLTAIC){
+				totalPVOnLand_kW += productionEA.getCapacityElectric_kW();
+				break;
+			}
+			else if(productionEA.getEAType() == OL_EnergyAssetType.WINDMILL){
+				totalWind_kW += productionEA.getCapacityElectric_kW();
+				break;
+			}
+		}
+	}
+}
+sl_largeScalePV_ha.setRange(0, 1000); // Needed to prevent anylogic range bug
+sl_largeScalePV_ha.setValue((totalPVOnLand_kW/zero_Interface.energyModel.avgc_data.p_avgSolarFieldPower_kWppha) + p_currentPVOnLand_ha, false);
+sl_largeScaleWind_MW.setRange(0, 1000); // Needed to prevent anylogic range bug
+sl_largeScaleWind_MW.setValue((totalWind_kW/1000) + p_currentWindTurbines_MW, false);
+
+
+//Grid batteries
+List<GCGridBattery> sliderGridBatteryGridConnections = new ArrayList<>();
+for(GridConnection sliderGC : c_electricityTabEASliderGCs){
+	if(sliderGC.v_isActive && sliderGC instanceof GCGridBattery sliderGridBattery){
+		sliderGridBatteryGridConnections.add(sliderGridBattery);
+	}
+}
+
+double averageNeighbourhoodBatterySize_kWh = 0;
+for (GCGridBattery gc : sliderGridBatteryGridConnections) {
+	averageNeighbourhoodBatterySize_kWh += gc.p_batteryAsset.getStorageCapacity_kWh()/sliderGridBatteryGridConnections.size();
+}
+sl_gridBatteries_kWh.setValue(averageNeighbourhoodBatterySize_kWh, false);
+
+//Curtailment large scale PV and wind
+boolean curtailment = true;
+for(GridConnection GC : productionGridConnections){
+	if(!GC.f_isAssetManagementActive(I_CurtailManagement.class)){
+		curtailment = false;
+		break;
+	}
+}
+cb_gridCurtailment.setSelected(curtailment, false); 
+  }
+
+  protected void f_initializeElectricityPages(  ) { 
+
+// CHOOSE WHICH PAGES IN YOUR TAB YOU WANT TO BE ABLE TO SHOW FOR YOUR PROJECT 
+boolean hasHouses = uI_Tabs.f_getActiveSliderGridConnections_houses().size() > 0;
+boolean hasCompanies = uI_Tabs.f_getActiveSliderGridConnections_utilities().size() > 0;
+
+c_loadedPageGroups = new ArrayList<>();
+// Load in the existing pages you want to include in the tab
+if (hasHouses) {
+	c_loadedPageGroups.add(gr_electricitySliders_households);
+} 
+if (hasCompanies) {
+	c_loadedPageGroups.add(gr_electricitySliders_companies);
+}
+c_loadedPageGroups.add(gr_electricitySliders_collective);
+
+// If you have a custom page, add it by using f_addCustomPage:
+f_addCustomPage();
+
+// Show/hide page indicator based on number of pages
+if (c_loadedPageGroups.size() <= 1) {
+    gr_pageIndicator.setVisible(false);
+} else {
+    gr_pageIndicator.setVisible(true);
+}
+// Navigate to the first page
+if (!c_loadedPageGroups.isEmpty()) {
+    f_goToPage(0);
+} 
+  }
+
+  protected void f_addCustomPage(  ) { 
+
+// Override this function to add your custom page to c_loadedPageGroups, for instance, like this:
+//c_loadedPageGroups.add(gr_electricitySliders_custom); 
+  }
 private double _datasetUpdateTime_xjal() {
 	return time();
 }
   // View areas
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_curtailment_default_Font = new Font("Dialog", 0, 11 );
+  protected static final Font _cb_companiesCurtailment_Font = new Font("Dialog", 0, 11 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_curtailment_businesspark_Font = _cb_curtailment_default_Font;
+  protected static final Font _button_trafoReinforcement_Font = _cb_companiesCurtailment_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _button_trafoReinforcement_Font = _cb_curtailment_default_Font;
+  protected static final Font _cb_householdCurtailment_Font = _cb_companiesCurtailment_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_confirmTrafoReinforcement_Font = _cb_curtailment_default_Font;
+  protected static final Font _t_confirmTrafoReinforcement_Font = _cb_companiesCurtailment_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_resetTrafoReinforcement_Font = _cb_curtailment_default_Font;
+  protected static final Font _t_resetTrafoReinforcement_Font = _cb_companiesCurtailment_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_closeTrafoReinforcement_Font = new Font("Dialog", 0, 8 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricityDemandReduction_pct_Font = new Font("Dialog", 0, 14 );
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricityDemandReductionDescription_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_productionDescription_Font = new Font("Calibri", 1, 18 );
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_rooftopPVCompanies_pct_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_rooftopPVCompaniesDescription_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_largeScalePV_ha_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_largeScalePVDescription_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_batteryDescription_default_Font = _txt_productionDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_largeScaleWindDescription_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_largeScaleWind_MW_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_rooftopPVHouses_pct_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_rooftopPVHousesDescription_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_collectiveBatteries_default_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_curtailmentDescription_default_Font = _t_electricityDemandReduction_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_collectiveBatteryDescription_default_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _cb_gridCurtailment_Font = _cb_companiesCurtailment_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _txt_ProductionFunctionsDescription_Font = new Font("SansSerif", 0, 18 );
   @AnyLogicInternalCodegenAPI
@@ -1132,63 +1085,37 @@ private double _datasetUpdateTime_xjal() {
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_genericFunctions_Font = new Font("SansSerif", 0, 22 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricityDemandReduction_pct_Businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_companiesElectricityDemandReduction_pct_Font = new Font("Dialog", 0, 12 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_electricityDemandReductionDescription_Businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_companiesElectricityDemandReductionDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_productionDescription_Businesspark_Font = _txt_productionDescription_Font;
+  protected static final Font _txt_companiesRooftopPVCompanies_pct_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_rooftopPVCompanies_pct_Businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_companiesRooftopPVDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_rooftopPVCompaniesDescription_Businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_electricityDemandSlidersBusinessesDescription_Font = new Font("Dialog", 1, 22 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_largeScalePV_ha_Businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_companiesCurtailmentDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_largeScalePVDescription_Businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_electricityDemandIncrease_pct_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_batteryDescription_businesspark_Font = _txt_productionDescription_Font;
+  protected static final Font _txt_householdPV_pct_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_largeScaleWindDescription_Businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_householdPVDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_largeScaleWind_MW_Businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_electricityDemandSlidersHousesholdsDescription_Font = _txt_electricityDemandSlidersBusinessesDescription_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_curtailmentDescription_businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_householdBatteriesDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_collectiveBatteryDescription_businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_householdBatteriesResidentialArea_pct_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_collectiveBatteries_businesspark_Font = _t_electricityDemandReduction_pct_Font;
+  protected static final Font _txt_householdElectricityDemandIncreaseDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricityDemandIncreaseResidentialArea_pct_Font = new Font("Dialog", 0, 12 );
+  protected static final Font _txt_householdElectricCookingDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdPVResidentialArea_pct_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
+  protected static final Font _txt_householdElectricCookingResidentialArea_pct_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdPVResidentialAreaDescription_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_electricitDemandSlidersResidentialAreaDescription_Font = new Font("Dialog", 1, 14 );
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdBatteriesResidentialAreaDescription_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdBatteriesResidentialArea_pct_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_gridBatteriesResidentialAreaDescription_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_gridBatteriesResidentialArea_kW_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricityDemandIncreaseResidentialAreaDescription_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdElectricCookingResidentialAreaDescription_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdElectricCookingResidentialArea_pct_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_largeScalePV_ha_Residential_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_largeScalePVDescription_Residential_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_largeScaleWindDescription_Residential_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_largeScaleWind_MW_Residential_Font = _t_electricityDemandIncreaseResidentialArea_pct_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_electricityTabResidential_Collective_Font = _txt_electricitDemandSlidersResidentialAreaDescription_Font;
+  protected static final Font _txt_householdCurtailmentDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_addTrafoDescription_Font = new Font("SansSerif", 0, 11 );
   @AnyLogicInternalCodegenAPI
@@ -1204,235 +1131,189 @@ private double _datasetUpdateTime_xjal() {
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_batteryFunctionsDescription_Font = new Font("Dialog", 0, 18 );
   @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_electricityDemandSlidersCollectiveDescription_Font = _txt_electricityDemandSlidersBusinessesDescription_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_gridBatteriesDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_gridBatteries_kWh_Font = _txt_companiesElectricityDemandReduction_pct_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_largeScalePV_ha_Font = _txt_companiesElectricityDemandReduction_pct_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_largeScalePVDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_largeScaleWindDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_largeScaleWind_MW_Font = _txt_companiesElectricityDemandReduction_pct_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_gridCurtailmentDescription_Font = _txt_companiesElectricityDemandReduction_pct_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _t_pageIndicator_Font = new Font("Dialog", 0, 10 );
+  @AnyLogicInternalCodegenAPI
   protected static final int _rect_genericFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 1;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_electricityDemandSliders = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 2;
+  protected static final int _rect_PVFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 2;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricityDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 3;
+  protected static final int _txt_ProductionFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 3;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricityDemandReductionDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 4;
+  protected static final int _rect_demandFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 4;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_productionDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 5;
+  protected static final int _t_demandFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 5;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_rooftopPVCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 6;
+  protected static final int _t_genericFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 6;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_rooftopPVCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 7;
+  protected static final int _rect_electricityDemandSlidersCompanies = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 7;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_largeScalePV_ha = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 8;
+  protected static final int _txt_companiesElectricityDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 8;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_largeScalePVDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 9;
+  protected static final int _txt_companiesElectricityDemandReductionDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 9;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_batteryDescription_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 10;
+  protected static final int _txt_companiesRooftopPVCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 10;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_largeScaleWindDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 11;
+  protected static final int _txt_companiesRooftopPVDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 11;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_largeScaleWind_MW = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 12;
+  protected static final int _i_companiesRooftopPV = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 12;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_rooftopPVHouses_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 13;
+  protected static final int _i_companiesElectricityReduction = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 13;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_rooftopPVHousesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 14;
+  protected static final int _txt_electricityDemandSlidersBusinessesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 14;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdPV = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 15;
+  protected static final int _txt_companiesCurtailmentDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 15;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_landPV = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 16;
+  protected static final int _i_companiesCurtailment = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 16;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyPV = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 17;
+  protected static final int _gr_electricitySliders_companies = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 17;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_electricityReduction = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 18;
+  protected static final int _rect_electricityDemandSlidersHouseholds = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 18;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_landWind = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 19;
+  protected static final int _txt_electricityDemandIncrease_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 19;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_collectiveBatteries_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 20;
+  protected static final int _txt_householdPV_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 20;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_curtailmentDescription_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 21;
+  protected static final int _txt_householdPVDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 21;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_collectiveBatteryDescription_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 22;
+  protected static final int _txt_electricityDemandSlidersHousesholdsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 22;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_curtailment_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 23;
+  protected static final int _txt_householdBatteriesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 23;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_collectiveBatteries_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 24;
+  protected static final int _txt_householdBatteriesResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 24;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_electricitySliders_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 25;
+  protected static final int _txt_householdElectricityDemandIncreaseDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 25;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_PVFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 26;
+  protected static final int _txt_householdElectricCookingDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 26;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_ProductionFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 27;
+  protected static final int _txt_householdElectricCookingResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 27;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_demandFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 28;
+  protected static final int _i_householdPV = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 28;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_demandFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 29;
+  protected static final int _i_householdBatteries = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 29;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_genericFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 30;
+  protected static final int _i_householdElectricCooking = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 30;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_electricityDemandSliders_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 31;
+  protected static final int _i_householdElectricityGrowth = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 31;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricityDemandReduction_pct_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 32;
+  protected static final int _txt_householdCurtailmentDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 32;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_electricityDemandReductionDescription_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 33;
+  protected static final int _i_householdCurtailment = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 33;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_productionDescription_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 34;
+  protected static final int _gr_electricitySliders_households = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 34;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_rooftopPVCompanies_pct_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 35;
+  protected static final int _rect_trafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 35;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_rooftopPVCompaniesDescription_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 36;
+  protected static final int _t_addTrafoDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 36;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_largeScalePV_ha_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 37;
+  protected static final int _t_minTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 37;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_largeScalePVDescription_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 38;
+  protected static final int _t_maxTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 38;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_batteryDescription_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 39;
+  protected static final int _t_trafoReinforcementValue = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 39;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_largeScaleWindDescription_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 40;
+  protected static final int _t_currentTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 40;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_largeScaleWind_MW_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 41;
+  protected static final int _line_closeTrafoReinforcement1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 41;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_landPV_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 42;
+  protected static final int _line_closeTrafoReinforcement2 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 42;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyPV_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 43;
+  protected static final int _t_titleTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 43;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_electricityReduction_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 44;
+  protected static final int _gr_trafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 44;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_landWind_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 45;
+  protected static final int _rect_batteryFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 45;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_curtailmentDescription_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 46;
+  protected static final int _t_batteryFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 46;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_curtailment_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 47;
+  protected static final int _rect_electricityDemandSlidersCollective = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 47;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_collectiveBatteries_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 48;
+  protected static final int _txt_electricityDemandSlidersCollectiveDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 48;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_collectiveBatteryDescription_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 49;
+  protected static final int _txt_gridBatteriesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 49;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_collectiveBatteries_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 50;
+  protected static final int _txt_gridBatteries_kWh = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 50;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_electricitySliders_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 51;
+  protected static final int _i_gridBatteries = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 51;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_electricityDemandSlidersResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 52;
+  protected static final int _txt_largeScalePV_ha = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 52;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricityDemandIncreaseResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 53;
+  protected static final int _txt_largeScalePVDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 53;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdPVResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 54;
+  protected static final int _txt_largeScaleWindDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 54;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdPVResidentialAreaDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 55;
+  protected static final int _txt_largeScaleWind_MW = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 55;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_electricitDemandSlidersResidentialAreaDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 56;
+  protected static final int _i_largeScalePV = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 56;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdBatteriesResidentialAreaDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 57;
+  protected static final int _i_largeScaleWind = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 57;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdBatteriesResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 58;
+  protected static final int _txt_gridCurtailmentDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 58;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_gridBatteriesResidentialAreaDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 59;
+  protected static final int _i_gridCurtailment = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 59;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_gridBatteriesResidentialArea_kW = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 60;
+  protected static final int _gr_electricitySliders_collective = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 60;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricityDemandIncreaseResidentialAreaDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 61;
+  protected static final int _arrowLeftResidential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 61;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdElectricCookingResidentialAreaDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 62;
+  protected static final int _arrowRightResidential1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 62;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdElectricCookingResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 63;
+  protected static final int _t_pageIndicator = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 63;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdRooftopPV = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 64;
+  protected static final int _gr_pageIndicator = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 64;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdBatteries = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 65;
+  protected static final int _sl_companiesElectricityDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 65;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdElectricCooking = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 66;
+  protected static final int _sl_companiesRooftopPV_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 66;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdElectricityGrowth = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 67;
+  protected static final int _cb_companiesCurtailment = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 67;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdNeighbourhoodBatteries = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 68;
+  protected static final int _sl_householdRooftopPV_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 68;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_largeScalePV_ha_Residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 69;
+  protected static final int _sl_householdBatteries_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 69;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_largeScalePVDescription_Residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 70;
+  protected static final int _sl_householdElectricityDemandIncrease_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 70;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_largeScaleWindDescription_Residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 71;
+  protected static final int _sl_householdElectricCooking_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 71;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_largeScaleWind_MW_Residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 72;
+  protected static final int _button_trafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 72;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_landPV_Residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 73;
+  protected static final int _cb_householdCurtailment = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 73;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_landWind_Residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 74;
+  protected static final int _sl_trafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 74;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_electricityTabResidential_Collective = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 75;
+  protected static final int _t_confirmTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 75;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_electricitySliders_residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 76;
+  protected static final int _t_resetTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 76;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_trafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 77;
+  protected static final int _t_closeTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 77;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_addTrafoDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 78;
+  protected static final int _sl_gridBatteries_kWh = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 78;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_minTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 79;
+  protected static final int _sl_largeScalePV_ha = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 79;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_maxTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 80;
+  protected static final int _sl_largeScaleWind_MW = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 80;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_trafoReinforcementValue = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 81;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _t_currentTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 82;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _line_closeTrafoReinforcement1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 83;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _line_closeTrafoReinforcement2 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 84;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _t_titleTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 85;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _gr_trafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 86;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _rect_batteryFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 87;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _t_batteryFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 88;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricityDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 89;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_rooftopPVCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 90;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_largeScalePV_ha = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 91;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_largeScaleWind_MW = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 92;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_rooftopPVHouses_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 93;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_collectiveBattery_MWh_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 94;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _cb_curtailment_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 95;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricityDemandReduction_pct_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 96;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_rooftopPVCompanies_pct_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 97;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_largeScalePV_ha_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 98;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_largeScaleWind_MW_Businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 99;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _cb_curtailment_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 100;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_collectiveBattery_MWh_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 101;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_householdPVResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 102;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_householdBatteriesResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 103;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_gridBatteriesResidentialArea_kWh = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 104;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricityDemandIncreaseResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 105;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_householdElectricCookingResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 106;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _button_trafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 107;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_largeScalePV_ha_Residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 108;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_largeScaleWind_MW_Residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 109;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_trafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 110;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _t_confirmTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 111;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _t_resetTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 112;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _t_closeTrafoReinforcement = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 113;
+  protected static final int _cb_gridCurtailment = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 81;
 
   /** Internal constant, shouldn't be accessed by user */
   @AnyLogicInternalCodegenAPI
-  protected static final int _SHAPE_NEXT_ID_xjal = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 114;
+  protected static final int _SHAPE_NEXT_ID_xjal = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 82;
 
   @AnyLogicInternalCodegenAPI
   public boolean isPublicPresentationDefined() {
@@ -1445,109 +1326,39 @@ private double _datasetUpdateTime_xjal() {
   }
   @AnyLogicInternalCodegenAPI
   private void _initialize_level_xjal() {
-	  level.addAll(rect_genericFunctions, gr_electricitySliders_default, rect_PVFunctions, txt_ProductionFunctionsDescription, rect_demandFunctions, t_demandFunctionsDescription, t_genericFunctions, gr_electricitySliders_businesspark, gr_electricitySliders_residential, gr_trafoReinforcement, rect_batteryFunctions, t_batteryFunctionsDescription);
+	  level.addAll(rect_genericFunctions, rect_PVFunctions, txt_ProductionFunctionsDescription, rect_demandFunctions, t_demandFunctionsDescription, t_genericFunctions, gr_electricitySliders_companies, gr_electricitySliders_households, gr_trafoReinforcement, rect_batteryFunctions, t_batteryFunctionsDescription, gr_electricitySliders_collective, gr_pageIndicator);
   }
 
   @Override
   @AnyLogicInternalCodegenAPI
   public boolean onShapeClick( int _shape, int index, double clickx, double clicky ){
     switch( _shape ){
+      case _i_companiesRooftopPV:
+        if (true) {
+          ShapeImage self = this.i_companiesRooftopPV;
+          
+zero_Interface.f_setInfoText(i_companiesRooftopPV, zero_Interface.v_infoText.companyRooftopPV, i_companiesRooftopPV.getX() + uI_Tabs.v_presentationXOffset, i_companiesRooftopPV.getY() + uI_Tabs.v_presentationYOffset); 
+        }
+        break;
+      case _i_companiesElectricityReduction:
+        if (true) {
+          ShapeImage self = this.i_companiesElectricityReduction;
+          
+zero_Interface.f_setInfoText(i_companiesElectricityReduction, zero_Interface.v_infoText.electricityDemandReduction, i_companiesElectricityReduction.getX() + uI_Tabs.v_presentationXOffset, i_companiesElectricityReduction.getY() + uI_Tabs.v_presentationYOffset); 
+        }
+        break;
+      case _i_companiesCurtailment:
+        if (true) {
+          ShapeImage self = this.i_companiesCurtailment;
+          
+zero_Interface.f_setInfoText(i_companiesCurtailment, zero_Interface.v_infoText.curtailment, i_companiesCurtailment.getX() + uI_Tabs.v_presentationXOffset, i_companiesCurtailment.getY() + uI_Tabs.v_presentationYOffset); 
+        }
+        break;
       case _i_householdPV:
         if (true) {
           ShapeImage self = this.i_householdPV;
           
 zero_Interface.f_setInfoText(i_householdPV, zero_Interface.v_infoText.householdRooftopPV, i_householdPV.getX() + uI_Tabs.v_presentationXOffset, i_householdPV.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_landPV:
-        if (true) {
-          ShapeImage self = this.i_landPV;
-          
-zero_Interface.f_setInfoText(i_landPV, zero_Interface.v_infoText.landPV, i_landPV.getX() + uI_Tabs.v_presentationXOffset, i_landPV.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_companyPV:
-        if (true) {
-          ShapeImage self = this.i_companyPV;
-          
-zero_Interface.f_setInfoText(i_companyPV, zero_Interface.v_infoText.companyRooftopPV, i_companyPV.getX() + uI_Tabs.v_presentationXOffset, i_companyPV.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_electricityReduction:
-        if (true) {
-          ShapeImage self = this.i_electricityReduction;
-          
-zero_Interface.f_setInfoText(i_electricityReduction, zero_Interface.v_infoText.electricityDemandReduction, i_electricityReduction.getX() + uI_Tabs.v_presentationXOffset, i_electricityReduction.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_landWind:
-        if (true) {
-          ShapeImage self = this.i_landWind;
-          
-zero_Interface.f_setInfoText(i_landWind, zero_Interface.v_infoText.landWind, i_landWind.getX() + uI_Tabs.v_presentationXOffset, i_landWind.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_curtailment_default:
-        if (true) {
-          ShapeImage self = this.i_curtailment_default;
-          
-zero_Interface.f_setInfoText(i_curtailment_default, zero_Interface.v_infoText.curtailment, i_curtailment_default.getX() + uI_Tabs.v_presentationXOffset, i_curtailment_default.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_collectiveBatteries_default:
-        if (true) {
-          ShapeImage self = this.i_collectiveBatteries_default;
-          
-zero_Interface.f_setInfoText(i_collectiveBatteries_default, zero_Interface.v_infoText.gridBattery_default, i_collectiveBatteries_default.getX() + uI_Tabs.v_presentationXOffset, i_collectiveBatteries_default.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_landPV_Businesspark:
-        if (true) {
-          ShapeImage self = this.i_landPV_Businesspark;
-          
-zero_Interface.f_setInfoText(i_landPV_Businesspark, zero_Interface.v_infoText.landPV, i_landPV_Businesspark.getX() + uI_Tabs.v_presentationXOffset, i_landPV_Businesspark.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_companyPV_Businesspark:
-        if (true) {
-          ShapeImage self = this.i_companyPV_Businesspark;
-          
-zero_Interface.f_setInfoText(i_companyPV_Businesspark, zero_Interface.v_infoText.companyRooftopPV, i_companyPV_Businesspark.getX() + uI_Tabs.v_presentationXOffset, i_companyPV_Businesspark.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_electricityReduction_Businesspark:
-        if (true) {
-          ShapeImage self = this.i_electricityReduction_Businesspark;
-          
-zero_Interface.f_setInfoText(i_electricityReduction_Businesspark, zero_Interface.v_infoText.electricityDemandReduction, i_electricityReduction_Businesspark.getX() + uI_Tabs.v_presentationXOffset, i_electricityReduction_Businesspark.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_landWind_Businesspark:
-        if (true) {
-          ShapeImage self = this.i_landWind_Businesspark;
-          
-zero_Interface.f_setInfoText(i_landWind_Businesspark, zero_Interface.v_infoText.landWind, i_landWind_Businesspark.getX() + uI_Tabs.v_presentationXOffset, i_landWind_Businesspark.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_curtailment_businesspark:
-        if (true) {
-          ShapeImage self = this.i_curtailment_businesspark;
-          
-zero_Interface.f_setInfoText(i_curtailment_businesspark, zero_Interface.v_infoText.curtailment, i_curtailment_businesspark.getX() + uI_Tabs.v_presentationXOffset, i_curtailment_businesspark.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_collectiveBatteries_businesspark:
-        if (true) {
-          ShapeImage self = this.i_collectiveBatteries_businesspark;
-          
-zero_Interface.f_setInfoText(i_collectiveBatteries_businesspark, zero_Interface.v_infoText.gridBattery_default, i_collectiveBatteries_businesspark.getX() + uI_Tabs.v_presentationXOffset, i_collectiveBatteries_businesspark.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_householdRooftopPV:
-        if (true) {
-          ShapeImage self = this.i_householdRooftopPV;
-          
-zero_Interface.f_setInfoText(i_householdRooftopPV, zero_Interface.v_infoText.householdRooftopPV, i_householdRooftopPV.getX() + uI_Tabs.v_presentationXOffset, i_householdRooftopPV.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
       case _i_householdBatteries:
@@ -1571,25 +1382,53 @@ zero_Interface.f_setInfoText(i_householdElectricCooking, zero_Interface.v_infoTe
 zero_Interface.f_setInfoText(i_householdElectricityGrowth, zero_Interface.v_infoText.householdElectricityConsumptionGrowth, i_householdElectricityGrowth.getX() + uI_Tabs.v_presentationXOffset, i_householdElectricityGrowth.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_householdNeighbourhoodBatteries:
+      case _i_householdCurtailment:
         if (true) {
-          ShapeImage self = this.i_householdNeighbourhoodBatteries;
+          ShapeImage self = this.i_householdCurtailment;
           
-zero_Interface.f_setInfoText(i_householdNeighbourhoodBatteries, zero_Interface.v_infoText.gridBattery_residential, i_householdNeighbourhoodBatteries.getX() + uI_Tabs.v_presentationXOffset, i_householdNeighbourhoodBatteries.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_householdCurtailment, zero_Interface.v_infoText.curtailment, i_householdCurtailment.getX() + uI_Tabs.v_presentationXOffset, i_householdCurtailment.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_landPV_Residential:
+      case _i_gridBatteries:
         if (true) {
-          ShapeImage self = this.i_landPV_Residential;
+          ShapeImage self = this.i_gridBatteries;
           
-zero_Interface.f_setInfoText(i_landPV_Residential, zero_Interface.v_infoText.landPV, i_landPV_Residential.getX() + uI_Tabs.v_presentationXOffset, i_landPV_Residential.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_gridBatteries, zero_Interface.v_infoText.gridBattery_residential, i_gridBatteries.getX() + uI_Tabs.v_presentationXOffset, i_gridBatteries.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_landWind_Residential:
+      case _i_largeScalePV:
         if (true) {
-          ShapeImage self = this.i_landWind_Residential;
+          ShapeImage self = this.i_largeScalePV;
           
-zero_Interface.f_setInfoText(i_landWind_Residential, zero_Interface.v_infoText.landWind, i_landWind_Residential.getX() + uI_Tabs.v_presentationXOffset, i_landWind_Residential.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_largeScalePV, zero_Interface.v_infoText.landPV, i_largeScalePV.getX() + uI_Tabs.v_presentationXOffset, i_largeScalePV.getY() + uI_Tabs.v_presentationYOffset); 
+        }
+        break;
+      case _i_largeScaleWind:
+        if (true) {
+          ShapeImage self = this.i_largeScaleWind;
+          
+zero_Interface.f_setInfoText(i_largeScaleWind, zero_Interface.v_infoText.landWind, i_largeScaleWind.getX() + uI_Tabs.v_presentationXOffset, i_largeScaleWind.getY() + uI_Tabs.v_presentationYOffset); 
+        }
+        break;
+      case _i_gridCurtailment:
+        if (true) {
+          ShapeImage self = this.i_gridCurtailment;
+          
+zero_Interface.f_setInfoText(i_gridCurtailment, zero_Interface.v_infoText.curtailment, i_gridCurtailment.getX() + uI_Tabs.v_presentationXOffset, i_gridCurtailment.getY() + uI_Tabs.v_presentationYOffset); 
+        }
+        break;
+      case _arrowLeftResidential:
+        if (true) {
+          ShapeImage self = this.arrowLeftResidential;
+          
+f_previousPage(); 
+        }
+        break;
+      case _arrowRightResidential1:
+        if (true) {
+          ShapeImage self = this.arrowRightResidential1;
+          
+f_nextPage(); 
         }
         break;
       default: return super.onShapeClick( _shape, index, clickx, clicky );
@@ -1642,14 +1481,19 @@ gr_trafoReinforcement.setVisible(false);
   @AnyLogicInternalCodegenAPI
   public void executeShapeControlAction( int _shape, int index, boolean value ) {
     switch( _shape ) {
-      case _cb_curtailment_default: {
-          ShapeCheckBox self = this.cb_curtailment_default;
-f_setCurtailment(cb_curtailment_default.isSelected(), uI_Tabs.f_getActiveSliderGridConnections_consumption()); 
+      case _cb_companiesCurtailment: {
+          ShapeCheckBox self = this.cb_companiesCurtailment;
+f_setCurtailment(cb_companiesCurtailment.isSelected(), new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities())); 
 ;}
         break;
-      case _cb_curtailment_businesspark: {
-          ShapeCheckBox self = this.cb_curtailment_businesspark;
-f_setCurtailment(cb_curtailment_businesspark.isSelected(), new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities())); 
+      case _cb_householdCurtailment: {
+          ShapeCheckBox self = this.cb_householdCurtailment;
+f_setCurtailment(cb_householdCurtailment.isSelected(), new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses())); 
+;}
+        break;
+      case _cb_gridCurtailment: {
+          ShapeCheckBox self = this.cb_gridCurtailment;
+f_setCurtailment(cb_gridCurtailment.isSelected(), new ArrayList<GridConnection>(uI_Tabs.f_getAllSliderGridConnections_production())); 
 ;}
         break;
       default:
@@ -1662,18 +1506,64 @@ f_setCurtailment(cb_curtailment_businesspark.isSelected(), new ArrayList<GridCon
   @AnyLogicInternalCodegenAPI
   public void executeShapeControlAction( int _shape, int index, double value ) {
     switch( _shape ) {
-      case _sl_electricityDemandReduction_pct: {
-          ShapeSlider self = this.sl_electricityDemandReduction_pct;
-f_setDemandReduction( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_electricityDemandReduction_pct.getValue() ); 
+      case _sl_companiesElectricityDemandReduction_pct: {
+          ShapeSlider self = this.sl_companiesElectricityDemandReduction_pct;
+f_setDemandReduction( new ArrayList<GridConnection>(findAll(zero_Interface.energyModel.UtilityConnections, x -> true)), sl_companiesElectricityDemandReduction_pct.getValue() ); 
 ;}
         break;
-      case _sl_rooftopPVCompanies_pct: {
-          ShapeSlider self = this.sl_rooftopPVCompanies_pct;
-f_setPVSystemCompanies( uI_Tabs.f_getActiveSliderGridConnections_utilities(), sl_rooftopPVCompanies_pct.getValue(), sl_rooftopPVCompanies_pct );
+      case _sl_companiesRooftopPV_pct: {
+          ShapeSlider self = this.sl_companiesRooftopPV_pct;
+f_setPVSystemCompanies( uI_Tabs.f_getActiveSliderGridConnections_utilities(), sl_companiesRooftopPV_pct.getValue(), sl_companiesRooftopPV_pct );
 
-if(zero_Interface.rb_mapOverlay != null && zero_Interface.c_loadedMapOverlayTypes.get(zero_Interface.rb_mapOverlay.getValue()) == OL_MapOverlayTypes.PV_PRODUCTION){
+//If on pv map overlay, adjust colouring
+if(zero_Interface.rb_mapOverlay != null  && zero_Interface.c_loadedMapOverlayTypes.get(zero_Interface.rb_mapOverlay.getValue()) == OL_MapOverlayTypes.PV_PRODUCTION){
 	zero_Interface.rb_mapOverlay.setValue(zero_Interface.c_loadedMapOverlayTypes.indexOf(OL_MapOverlayTypes.PV_PRODUCTION),true);
 } 
+;}
+        break;
+      case _sl_householdRooftopPV_pct: {
+          ShapeSlider self = this.sl_householdRooftopPV_pct;
+f_setPVSystemHouses( uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdRooftopPV_pct.getValue() );
+
+//If on pv map overlay, adjust colouring
+if(zero_Interface.rb_mapOverlay != null && zero_Interface.c_loadedMapOverlayTypes.get(zero_Interface.rb_mapOverlay.getValue()) == OL_MapOverlayTypes.PV_PRODUCTION){
+	zero_Interface.rb_mapOverlay.setValue(zero_Interface.c_loadedMapOverlayTypes.indexOf(OL_MapOverlayTypes.PV_PRODUCTION),true);
+}
+
+// Also updates the home batteries
+f_setHouseholdBatteries( sl_householdBatteries_pct.getValue(), uI_Tabs.f_getActiveSliderGridConnections_houses() ); 
+;}
+        break;
+      case _sl_householdBatteries_pct: {
+          ShapeSlider self = this.sl_householdBatteries_pct;
+f_setHouseholdBatteries( sl_householdBatteries_pct.getValue(), uI_Tabs.f_getActiveSliderGridConnections_houses() ); 
+;}
+        break;
+      case _sl_householdElectricityDemandIncrease_pct: {
+          ShapeSlider self = this.sl_householdElectricityDemandIncrease_pct;
+f_setDemandIncrease( new ArrayList<GridConnection>(findAll(zero_Interface.energyModel.Houses, x -> true)), sl_householdElectricityDemandIncrease_pct.getValue() );
+ 
+;}
+        break;
+      case _sl_householdElectricCooking_pct: {
+          ShapeSlider self = this.sl_householdElectricCooking_pct;
+f_setElectricCooking(uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdElectricCooking_pct.getValue() ); 
+;}
+        break;
+      case _sl_gridBatteries_kWh: {
+          ShapeSlider self = this.sl_gridBatteries_kWh;
+List<GCGridBattery> gcListGridBatteries = new ArrayList<>();
+for(GridConnection gc : c_electricityTabEASliderGCs){
+	if(gc instanceof GCGridBattery gridbattery){
+		gcListGridBatteries.add(gridbattery);
+	}
+}
+
+if(gcListGridBatteries.size() == 0){
+	throw new IllegalStateException("Model does not contain any GCGridBattery agent");
+}
+
+f_setGridBatteries(sl_gridBatteries_kWh.getValue(), gcListGridBatteries); 
 ;}
         break;
       case _sl_largeScalePV_ha: {
@@ -1719,193 +1609,6 @@ if(sliderWindFarmGCList.size() == 0){
 f_setWindTurbines( sl_largeScaleWind_MW.getValue() - p_currentWindTurbines_MW, sliderWindFarmGCList); 
 ;}
         break;
-      case _sl_rooftopPVHouses_pct: {
-          ShapeSlider self = this.sl_rooftopPVHouses_pct;
-f_setPVSystemHouses( uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_rooftopPVHouses_pct.getValue() );
-
-if(zero_Interface.rb_mapOverlay != null  && zero_Interface.c_loadedMapOverlayTypes.get(zero_Interface.rb_mapOverlay.getValue()) == OL_MapOverlayTypes.PV_PRODUCTION){
-	zero_Interface.rb_mapOverlay.setValue(zero_Interface.c_loadedMapOverlayTypes.indexOf(OL_MapOverlayTypes.PV_PRODUCTION),true);
-} 
-;}
-        break;
-      case _sl_collectiveBattery_MWh_default: {
-          ShapeSlider self = this.sl_collectiveBattery_MWh_default;
-List<GCGridBattery> gcListGridBatteries = new ArrayList<>();
-for(GridConnection gc : c_electricityTabEASliderGCs){
-	if(gc instanceof GCGridBattery gridbattery){
-		gcListGridBatteries.add(gridbattery);
-	}
-}
-
-if(gcListGridBatteries.size() == 0){
-	throw new IllegalStateException("Model does not contain any GCGridBattery agent");
-}
-
-f_setGridBatteries(sl_collectiveBattery_MWh_default.getValue() * 1000, gcListGridBatteries); 
-;}
-        break;
-      case _sl_electricityDemandReduction_pct_Businesspark: {
-          ShapeSlider self = this.sl_electricityDemandReduction_pct_Businesspark;
-f_setDemandReduction( uI_Tabs.f_getActiveSliderGridConnections_consumption(), sl_electricityDemandReduction_pct_Businesspark.getValue() ); 
-;}
-        break;
-      case _sl_rooftopPVCompanies_pct_Businesspark: {
-          ShapeSlider self = this.sl_rooftopPVCompanies_pct_Businesspark;
-f_setPVSystemCompanies( uI_Tabs.f_getActiveSliderGridConnections_utilities(), sl_rooftopPVCompanies_pct_Businesspark.getValue(), sl_rooftopPVCompanies_pct_Businesspark );
-
-//If on pv map overlay, adjust colouring
-if(zero_Interface.rb_mapOverlay != null  && zero_Interface.c_loadedMapOverlayTypes.get(zero_Interface.rb_mapOverlay.getValue()) == OL_MapOverlayTypes.PV_PRODUCTION){
-	zero_Interface.rb_mapOverlay.setValue(zero_Interface.c_loadedMapOverlayTypes.indexOf(OL_MapOverlayTypes.PV_PRODUCTION),true);
-} 
-;}
-        break;
-      case _sl_largeScalePV_ha_Businesspark: {
-          ShapeSlider self = this.sl_largeScalePV_ha_Businesspark;
-List<GCEnergyProduction> sliderPVFarmGCList = new ArrayList<>();
-for(GridConnection gc : c_electricityTabEASliderGCs){
-	if(gc instanceof GCEnergyProduction energyProductionSite){
-		for(J_EAProduction j_ea : energyProductionSite.c_productionAssets) {
-			if (j_ea.getEAType() == OL_EnergyAssetType.PHOTOVOLTAIC) {
-				sliderPVFarmGCList.add(energyProductionSite);
-				break;
-			}
-		}
-	}
-}
-
-if(sliderPVFarmGCList.size() == 0){
-	throw new IllegalStateException("Model does not contain any PVFarmSliderGC agent");
-}
-
-
-f_setPVOnLand(sl_largeScalePV_ha_Businesspark.getValue() - p_currentPVOnLand_ha, sliderPVFarmGCList); 
-;}
-        break;
-      case _sl_largeScaleWind_MW_Businesspark: {
-          ShapeSlider self = this.sl_largeScaleWind_MW_Businesspark;
-List<GCEnergyProduction> sliderWindFarmGCList = new ArrayList<>();
-for(GridConnection gc : c_electricityTabEASliderGCs){
-	if(gc instanceof GCEnergyProduction energyProductionSite){
-		for(J_EAProduction j_ea : energyProductionSite.c_productionAssets) {
-			if (j_ea.getEAType() == OL_EnergyAssetType.WINDMILL) {
-				sliderWindFarmGCList.add(energyProductionSite);
-				break;
-			}
-		}
-	}
-}
-
-if(sliderWindFarmGCList.size() == 0){
-	throw new IllegalStateException("Model does not contain any sliderWindFarmGC agent");
-}
-
-f_setWindTurbines( sl_largeScaleWind_MW_Businesspark.getValue() - p_currentWindTurbines_MW, sliderWindFarmGCList); 
-;}
-        break;
-      case _sl_collectiveBattery_MWh_businesspark: {
-          ShapeSlider self = this.sl_collectiveBattery_MWh_businesspark;
-List<GCGridBattery> gcListGridBatteries = new ArrayList<>();
-for(GridConnection gc : c_electricityTabEASliderGCs){
-	if(gc instanceof GCGridBattery gridbattery){
-		gcListGridBatteries.add(gridbattery);
-	}
-}
-
-if(gcListGridBatteries.size() == 0){
-	throw new IllegalStateException("Model does not contain any GCGridBattery agent");
-}
-
-f_setGridBatteries(sl_collectiveBattery_MWh_businesspark.getValue() * 1000, gcListGridBatteries); 
-;}
-        break;
-      case _sl_householdPVResidentialArea_pct: {
-          ShapeSlider self = this.sl_householdPVResidentialArea_pct;
-f_setPVSystemHouses( uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdPVResidentialArea_pct.getValue() );
-
-//If on pv map overlay, adjust colouring
-if(zero_Interface.rb_mapOverlay != null && zero_Interface.c_loadedMapOverlayTypes.get(zero_Interface.rb_mapOverlay.getValue()) == OL_MapOverlayTypes.PV_PRODUCTION){
-	zero_Interface.rb_mapOverlay.setValue(zero_Interface.c_loadedMapOverlayTypes.indexOf(OL_MapOverlayTypes.PV_PRODUCTION),true);
-}
-
-// Also updates the home batteries
-f_setResidentialBatteries( sl_householdBatteriesResidentialArea_pct.getValue(), uI_Tabs.f_getActiveSliderGridConnections_houses() ); 
-;}
-        break;
-      case _sl_householdBatteriesResidentialArea_pct: {
-          ShapeSlider self = this.sl_householdBatteriesResidentialArea_pct;
-f_setResidentialBatteries( sl_householdBatteriesResidentialArea_pct.getValue(), uI_Tabs.f_getActiveSliderGridConnections_houses() ); 
-;}
-        break;
-      case _sl_gridBatteriesResidentialArea_kWh: {
-          ShapeSlider self = this.sl_gridBatteriesResidentialArea_kWh;
-List<GCGridBattery> gcListGridBatteries = new ArrayList<>();
-for(GridConnection gc : c_electricityTabEASliderGCs){
-	if(gc instanceof GCGridBattery gridbattery){
-		gcListGridBatteries.add(gridbattery);
-	}
-}
-
-if(gcListGridBatteries.size() == 0){
-	throw new IllegalStateException("Model does not contain any GCGridBattery agent");
-}
-
-f_setGridBatteries(sl_gridBatteriesResidentialArea_kWh.getValue(), gcListGridBatteries); 
-;}
-        break;
-      case _sl_electricityDemandIncreaseResidentialArea_pct: {
-          ShapeSlider self = this.sl_electricityDemandIncreaseResidentialArea_pct;
-f_setDemandIncrease( new ArrayList<GridConnection>(findAll(zero_Interface.energyModel.Houses, x -> true)), sl_electricityDemandIncreaseResidentialArea_pct.getValue() );
- 
-;}
-        break;
-      case _sl_householdElectricCookingResidentialArea_pct: {
-          ShapeSlider self = this.sl_householdElectricCookingResidentialArea_pct;
-f_setElectricCooking(uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdElectricCookingResidentialArea_pct.getValue() ); 
-;}
-        break;
-      case _sl_largeScalePV_ha_Residential: {
-          ShapeSlider self = this.sl_largeScalePV_ha_Residential;
-List<GCEnergyProduction> sliderPVFarmGCList = new ArrayList<>();
-for(GridConnection gc : c_electricityTabEASliderGCs){
-	if(gc instanceof GCEnergyProduction energyProductionSite){
-		for(J_EAProduction j_ea : energyProductionSite.c_productionAssets) {
-			if (j_ea.getEAType() == OL_EnergyAssetType.PHOTOVOLTAIC) {
-				sliderPVFarmGCList.add(energyProductionSite);
-				break;
-			}
-		}
-	}
-}
-
-if(sliderPVFarmGCList.size() == 0){
-	throw new IllegalStateException("Model does not contain any PVFarmSliderGC agent");
-}
-
-
-f_setPVOnLand(sl_largeScalePV_ha_Residential.getValue() - p_currentPVOnLand_ha, sliderPVFarmGCList); 
-;}
-        break;
-      case _sl_largeScaleWind_MW_Residential: {
-          ShapeSlider self = this.sl_largeScaleWind_MW_Residential;
-List<GCEnergyProduction> sliderWindFarmGCList = new ArrayList<>();
-for(GridConnection gc : c_electricityTabEASliderGCs){
-	if(gc instanceof GCEnergyProduction energyProductionSite){
-		for(J_EAProduction j_ea : energyProductionSite.c_productionAssets) {
-			if (j_ea.getEAType() == OL_EnergyAssetType.WINDMILL) {
-				sliderWindFarmGCList.add(energyProductionSite);
-				break;
-			}
-		}
-	}
-}
-
-if(sliderWindFarmGCList.size() == 0){
-	throw new IllegalStateException("Model does not contain any sliderWindFarmGC agent");
-}
-
-f_setWindTurbines( sl_largeScaleWind_MW_Residential.getValue() - p_currentWindTurbines_MW, sliderWindFarmGCList); 
-;}
-        break;
       default:
         super.executeShapeControlAction( _shape, index, value );
         break;
@@ -1916,61 +1619,34 @@ f_setWindTurbines( sl_largeScaleWind_MW_Residential.getValue() - p_currentWindTu
   @AnyLogicInternalCodegenAPI
   public double getShapeControlDefaultValueDouble( int _shape, int index ) {
     switch(_shape) {
-      case _sl_electricityDemandReduction_pct: return 
+      case _sl_companiesElectricityDemandReduction_pct: return 
 0 
 ;
-      case _sl_rooftopPVCompanies_pct: return 
+      case _sl_companiesRooftopPV_pct: return 
+0 
+;
+      case _sl_householdRooftopPV_pct: return 
+0 
+;
+      case _sl_householdBatteries_pct: return 
+0 
+;
+      case _sl_householdElectricityDemandIncrease_pct: return 
+0 
+;
+      case _sl_householdElectricCooking_pct: return 
+0 
+;
+      case _sl_trafoReinforcement: return 
+0 
+;
+      case _sl_gridBatteries_kWh: return 
 0 
 ;
       case _sl_largeScalePV_ha: return 
 0 
 ;
       case _sl_largeScaleWind_MW: return 
-0 
-;
-      case _sl_rooftopPVHouses_pct: return 
-0 
-;
-      case _sl_collectiveBattery_MWh_default: return 
-0 
-;
-      case _sl_electricityDemandReduction_pct_Businesspark: return 
-0 
-;
-      case _sl_rooftopPVCompanies_pct_Businesspark: return 
-0 
-;
-      case _sl_largeScalePV_ha_Businesspark: return 
-0 
-;
-      case _sl_largeScaleWind_MW_Businesspark: return 
-0 
-;
-      case _sl_collectiveBattery_MWh_businesspark: return 
-0 
-;
-      case _sl_householdPVResidentialArea_pct: return 
-0 
-;
-      case _sl_householdBatteriesResidentialArea_pct: return 
-0 
-;
-      case _sl_gridBatteriesResidentialArea_kWh: return 
-0 
-;
-      case _sl_electricityDemandIncreaseResidentialArea_pct: return 
-0 
-;
-      case _sl_householdElectricCookingResidentialArea_pct: return 
-0 
-;
-      case _sl_largeScalePV_ha_Residential: return 
-0 
-;
-      case _sl_largeScaleWind_MW_Residential: return 
-0 
-;
-      case _sl_trafoReinforcement: return 
 0 
 ;
       default: return super.getShapeControlDefaultValueDouble( _shape, index );
@@ -1982,7 +1658,7 @@ f_setWindTurbines( sl_largeScaleWind_MW_Residential.getValue() - p_currentWindTu
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_electricityDemandReduction_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesElectricityDemandReduction_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -1994,13 +1670,13 @@ f_setWindTurbines( sl_largeScaleWind_MW_Residential.getValue() - p_currentWindTu
     }
   }
   
-  protected ShapeSlider sl_electricityDemandReduction_pct;
+  protected ShapeSlider sl_companiesElectricityDemandReduction_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_rooftopPVCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesRooftopPV_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2012,7 +1688,138 @@ f_setWindTurbines( sl_largeScaleWind_MW_Residential.getValue() - p_currentWindTu
     }
   }
   
-  protected ShapeSlider sl_rooftopPVCompanies_pct;
+  protected ShapeSlider sl_companiesRooftopPV_pct;
+  protected ShapeCheckBox cb_companiesCurtailment;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _sl_householdRooftopPV_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+    {
+      @AnyLogicInternalCodegenAPI
+      double _min = 
+0 ;
+      @AnyLogicInternalCodegenAPI
+      double _max = 
+100 ;
+      shape.setRange( _min, _max );
+    }
+  }
+  
+  protected ShapeSlider sl_householdRooftopPV_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _sl_householdBatteries_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+    {
+      @AnyLogicInternalCodegenAPI
+      double _min = 
+0 ;
+      @AnyLogicInternalCodegenAPI
+      double _max = 
+100 ;
+      shape.setRange( _min, _max );
+    }
+  }
+  
+  protected ShapeSlider sl_householdBatteries_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _sl_householdElectricityDemandIncrease_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+    {
+      @AnyLogicInternalCodegenAPI
+      double _min = 
+-50 ;
+      @AnyLogicInternalCodegenAPI
+      double _max = 
+50 ;
+      shape.setRange( _min, _max );
+    }
+  }
+  
+  protected ShapeSlider sl_householdElectricityDemandIncrease_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _sl_householdElectricCooking_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+    {
+      @AnyLogicInternalCodegenAPI
+      double _min = 
+0 ;
+      @AnyLogicInternalCodegenAPI
+      double _max = 
+100 ;
+      shape.setRange( _min, _max );
+    }
+  }
+  
+  protected ShapeSlider sl_householdElectricCooking_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _button_trafoReinforcement_SetDynamicParams_xjal( ShapeButton shape ) {
+    boolean _visible = 
+false; // DOESNT WORK PROPERLY 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setEnabled(
+zero_Interface.v_clickedGridNode != null 
+);
+ 	}
+  }
+  
+  protected ShapeButton button_trafoReinforcement;
+  protected ShapeCheckBox cb_householdCurtailment;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _sl_trafoReinforcement_SetDynamicParams_xjal( ShapeSlider shape ) {
+    {
+      @AnyLogicInternalCodegenAPI
+      double _min = 
+0 ;
+      @AnyLogicInternalCodegenAPI
+      double _max = 
+1000 ;
+      shape.setRange( _min, _max );
+    }
+  }
+  
+  protected ShapeSlider sl_trafoReinforcement;
+  protected ShapeButton t_confirmTrafoReinforcement;
+  protected ShapeButton t_resetTrafoReinforcement;
+  protected ShapeButton t_closeTrafoReinforcement;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _sl_gridBatteries_kWh_SetDynamicParams_xjal( ShapeSlider shape ) {
+    {
+      @AnyLogicInternalCodegenAPI
+      double _min = 
+0 ;
+      @AnyLogicInternalCodegenAPI
+      double _max = 
+1000 ;
+      shape.setRange( _min, _max );
+    }
+  }
+  
+  protected ShapeSlider sl_gridBatteries_kWh;
   
   /**
    * <i>This method should not be called by user</i>
@@ -2049,388 +1856,233 @@ p_currentWindTurbines_MW + 10 ;
   }
   
   protected ShapeSlider sl_largeScaleWind_MW;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_rooftopPVHouses_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_rooftopPVHouses_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_collectiveBattery_MWh_default_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-p_currentTotalGridBatteryCapacity_MWh ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-p_currentTotalGridBatteryCapacity_MWh + 50 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_collectiveBattery_MWh_default;
-  protected ShapeCheckBox cb_curtailment_default;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_electricityDemandReduction_pct_Businesspark_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
--50 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-50 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_electricityDemandReduction_pct_Businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_rooftopPVCompanies_pct_Businesspark_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_rooftopPVCompanies_pct_Businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_largeScalePV_ha_Businesspark_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-p_currentPVOnLand_ha ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-p_currentPVOnLand_ha + 50 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_largeScalePV_ha_Businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_largeScaleWind_MW_Businesspark_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-p_currentWindTurbines_MW ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-p_currentWindTurbines_MW + 10 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_largeScaleWind_MW_Businesspark;
-  protected ShapeCheckBox cb_curtailment_businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_collectiveBattery_MWh_businesspark_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-p_currentTotalGridBatteryCapacity_MWh ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-p_currentTotalGridBatteryCapacity_MWh + 50 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_collectiveBattery_MWh_businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_householdPVResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_householdPVResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_householdBatteriesResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_householdBatteriesResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_gridBatteriesResidentialArea_kWh_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-1000 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_gridBatteriesResidentialArea_kWh;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_electricityDemandIncreaseResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
--50 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-50 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_electricityDemandIncreaseResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_householdElectricCookingResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_householdElectricCookingResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _button_trafoReinforcement_SetDynamicParams_xjal( ShapeButton shape ) {
-    boolean _visible = 
-false; // DOESNT WORK PROPERLY 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    shape.setEnabled(
-zero_Interface.v_clickedGridNode != null 
-);
- 	}
-  }
-  
-  protected ShapeButton button_trafoReinforcement;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_largeScalePV_ha_Residential_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-p_currentPVOnLand_ha ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-p_currentPVOnLand_ha + 50 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_largeScalePV_ha_Residential;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_largeScaleWind_MW_Residential_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-p_currentWindTurbines_MW ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-p_currentWindTurbines_MW + 10 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_largeScaleWind_MW_Residential;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_trafoReinforcement_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-1000 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_trafoReinforcement;
-  protected ShapeButton t_confirmTrafoReinforcement;
-  protected ShapeButton t_resetTrafoReinforcement;
-  protected ShapeButton t_closeTrafoReinforcement;
+  protected ShapeCheckBox cb_gridCurtailment;
   protected ShapeRectangle rect_genericFunctions;
-  protected ShapeRectangle rect_electricityDemandSliders;
+  protected ShapeRectangle rect_PVFunctions;
+  protected ShapeText txt_ProductionFunctionsDescription;
+  protected ShapeRectangle rect_demandFunctions;
+  protected ShapeText t_demandFunctionsDescription;
+  protected ShapeText t_genericFunctions;
+  protected ShapeRectangle rect_electricityDemandSlidersCompanies;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_electricityDemandReduction_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesElectricityDemandReduction_pct_SetDynamicParams_xjal( ShapeText shape ) {
     shape.setText(
-sl_electricityDemandReduction_pct.getIntValue() + "%" 
+sl_companiesElectricityDemandReduction_pct.getIntValue() + "%" 
 );
   }
   
-  protected ShapeText t_electricityDemandReduction_pct;
-  protected ShapeText t_electricityDemandReductionDescription;
-  protected ShapeText txt_productionDescription;
+  protected ShapeText txt_companiesElectricityDemandReduction_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_rooftopPVCompanies_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_rooftopPVCompanies_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_rooftopPVCompanies_pct;
-  protected ShapeText t_rooftopPVCompaniesDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_largeScalePV_ha_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_largeScalePV_ha.getValue() + " ha" 
-);
-  }
-  
-  protected ShapeText t_largeScalePV_ha;
-  protected ShapeText t_largeScalePVDescription;
-  protected ShapeText txt_batteryDescription_default;
-  protected ShapeText t_largeScaleWindDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_largeScaleWind_MW_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_largeScaleWind_MW.getValue() + " MW" 
-);
-  }
-  
-  protected ShapeText t_largeScaleWind_MW;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_rooftopPVHouses_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesElectricityDemandReductionDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_rooftopPVHouses_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    shape.setText(
-sl_rooftopPVHouses_pct.getIntValue() + "%" 
-);
- 	}
-  }
-  
-  protected ShapeText t_rooftopPVHouses_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_rooftopPVHousesDescription_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_rooftopPVHouses_pct.isVisible() 
+sl_companiesElectricityDemandReduction_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText t_rooftopPVHousesDescription;
+  protected ShapeText txt_companiesElectricityDemandReductionDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesRooftopPVCompanies_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    shape.setText(
+sl_companiesRooftopPV_pct.getIntValue() + "%" 
+);
+  }
+  
+  protected ShapeText txt_companiesRooftopPVCompanies_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesRooftopPVDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesRooftopPV_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesRooftopPVDescription;
+  protected ShapeImage i_companiesRooftopPV;
+  protected ShapeImage i_companiesElectricityReduction;
+  protected ShapeText txt_electricityDemandSlidersBusinessesDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesCurtailmentDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+cb_companiesCurtailment.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesCurtailmentDescription;
+  protected ShapeImage i_companiesCurtailment;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _gr_electricitySliders_companies_SetDynamicParams_xjal( ShapeGroup shape ) {
+    shape.setX(
+0 
+);
+  }
+  
+  protected ShapeGroup gr_electricitySliders_companies;
+  protected ShapeRectangle rect_electricityDemandSlidersHouseholds;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_electricityDemandIncrease_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_householdElectricityDemandIncrease_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_householdElectricityDemandIncrease_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_electricityDemandIncrease_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_householdPV_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_householdRooftopPV_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_householdRooftopPV_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_householdPV_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_householdPVDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_householdRooftopPV_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_householdPVDescription;
+  protected ShapeText txt_electricityDemandSlidersHousesholdsDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_householdBatteriesDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_householdBatteries_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_householdBatteriesDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_householdBatteriesResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_householdBatteries_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_householdBatteries_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_householdBatteriesResidentialArea_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_householdElectricityDemandIncreaseDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_householdElectricityDemandIncrease_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_householdElectricityDemandIncreaseDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_householdElectricCookingDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_householdElectricCooking_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_householdElectricCookingDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_householdElectricCookingResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_householdElectricCooking_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_householdElectricCooking_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_householdElectricCookingResidentialArea_pct;
   
   /**
    * <i>This method should not be called by user</i>
@@ -2438,7 +2090,7 @@ sl_rooftopPVHouses_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdPV_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_rooftopPVHouses_pct.isVisible() 
+sl_householdRooftopPV_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -2446,301 +2098,6 @@ sl_rooftopPVHouses_pct.isVisible()
   }
   
   protected ShapeImage i_householdPV;
-  protected ShapeImage i_landPV;
-  protected ShapeImage i_companyPV;
-  protected ShapeImage i_electricityReduction;
-  protected ShapeImage i_landWind;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_collectiveBatteries_default_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_collectiveBattery_MWh_default.getIntValue() + " MWh" 
-);
-  }
-  
-  protected ShapeText t_collectiveBatteries_default;
-  protected ShapeText txt_curtailmentDescription_default;
-  protected ShapeText txt_collectiveBatteryDescription_default;
-  protected ShapeImage i_curtailment_default;
-  protected ShapeImage i_collectiveBatteries_default;
-  protected ShapeGroup gr_electricitySliders_default;
-  protected ShapeRectangle rect_PVFunctions;
-  protected ShapeText txt_ProductionFunctionsDescription;
-  protected ShapeRectangle rect_demandFunctions;
-  protected ShapeText t_demandFunctionsDescription;
-  protected ShapeText t_genericFunctions;
-  protected ShapeRectangle rect_electricityDemandSliders_Businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_electricityDemandReduction_pct_Businesspark_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_electricityDemandReduction_pct_Businesspark.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_electricityDemandReduction_pct_Businesspark;
-  protected ShapeText txt_electricityDemandReductionDescription_Businesspark;
-  protected ShapeText txt_productionDescription_Businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_rooftopPVCompanies_pct_Businesspark_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_rooftopPVCompanies_pct_Businesspark.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_rooftopPVCompanies_pct_Businesspark;
-  protected ShapeText txt_rooftopPVCompaniesDescription_Businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_largeScalePV_ha_Businesspark_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_largeScalePV_ha_Businesspark.getValue() + " ha" 
-);
-  }
-  
-  protected ShapeText t_largeScalePV_ha_Businesspark;
-  protected ShapeText txt_largeScalePVDescription_Businesspark;
-  protected ShapeText txt_batteryDescription_businesspark;
-  protected ShapeText txt_largeScaleWindDescription_Businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_largeScaleWind_MW_Businesspark_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_largeScaleWind_MW_Businesspark.getValue() + " MW" 
-);
-  }
-  
-  protected ShapeText t_largeScaleWind_MW_Businesspark;
-  protected ShapeImage i_landPV_Businesspark;
-  protected ShapeImage i_companyPV_Businesspark;
-  protected ShapeImage i_electricityReduction_Businesspark;
-  protected ShapeImage i_landWind_Businesspark;
-  protected ShapeText txt_curtailmentDescription_businesspark;
-  protected ShapeImage i_curtailment_businesspark;
-  protected ShapeImage i_collectiveBatteries_businesspark;
-  protected ShapeText txt_collectiveBatteryDescription_businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_collectiveBatteries_businesspark_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_collectiveBattery_MWh_businesspark.getIntValue() + " MWh" 
-);
-  }
-  
-  protected ShapeText t_collectiveBatteries_businesspark;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _gr_electricitySliders_businesspark_SetDynamicParams_xjal( ShapeGroup shape ) {
-    shape.setX(
-0 
-);
-  }
-  
-  protected ShapeGroup gr_electricitySliders_businesspark;
-  protected ShapeRectangle rect_electricityDemandSlidersResidentialArea;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_electricityDemandIncreaseResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_electricityDemandIncreaseResidentialArea_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    shape.setText(
-sl_electricityDemandIncreaseResidentialArea_pct.getIntValue() + "%" 
-);
- 	}
-  }
-  
-  protected ShapeText t_electricityDemandIncreaseResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_householdPVResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_householdPVResidentialArea_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    shape.setText(
-sl_householdPVResidentialArea_pct.getIntValue() + "%" 
-);
- 	}
-  }
-  
-  protected ShapeText t_householdPVResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_householdPVResidentialAreaDescription_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_householdPVResidentialArea_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeText t_householdPVResidentialAreaDescription;
-  protected ShapeText txt_electricitDemandSlidersResidentialAreaDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_householdBatteriesResidentialAreaDescription_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_householdBatteriesResidentialArea_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeText t_householdBatteriesResidentialAreaDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_householdBatteriesResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_householdBatteriesResidentialArea_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    shape.setText(
-sl_householdBatteriesResidentialArea_pct.getIntValue() + "%" 
-);
- 	}
-  }
-  
-  protected ShapeText t_householdBatteriesResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_gridBatteriesResidentialAreaDescription_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_gridBatteriesResidentialArea_kWh.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeText t_gridBatteriesResidentialAreaDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_gridBatteriesResidentialArea_kW_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_gridBatteriesResidentialArea_kWh.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    shape.setText(
-sl_gridBatteriesResidentialArea_kWh.getIntValue() + " kWh" 
-);
- 	}
-  }
-  
-  protected ShapeText t_gridBatteriesResidentialArea_kW;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_electricityDemandIncreaseResidentialAreaDescription_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_electricityDemandIncreaseResidentialArea_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeText t_electricityDemandIncreaseResidentialAreaDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_householdElectricCookingResidentialAreaDescription_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_householdElectricCookingResidentialArea_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeText t_householdElectricCookingResidentialAreaDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_householdElectricCookingResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_householdElectricCookingResidentialArea_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    shape.setText(
-sl_householdElectricCookingResidentialArea_pct.getIntValue() + "%" 
-);
- 	}
-  }
-  
-  protected ShapeText t_householdElectricCookingResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _i_householdRooftopPV_SetDynamicParams_xjal( ShapeImage shape ) {
-    boolean _visible = 
-sl_householdPVResidentialArea_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeImage i_householdRooftopPV;
   
   /**
    * <i>This method should not be called by user</i>
@@ -2748,7 +2105,7 @@ sl_householdPVResidentialArea_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdBatteries_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_householdBatteriesResidentialArea_pct.isVisible() 
+sl_householdBatteries_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -2763,7 +2120,7 @@ sl_householdBatteriesResidentialArea_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdElectricCooking_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_householdElectricCookingResidentialArea_pct.isVisible() 
+sl_householdElectricCooking_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -2778,7 +2135,7 @@ sl_householdElectricCookingResidentialArea_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdElectricityGrowth_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_electricityDemandIncreaseResidentialArea_pct.isVisible() 
+sl_householdElectricityDemandIncrease_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -2791,57 +2148,29 @@ sl_electricityDemandIncreaseResidentialArea_pct.isVisible()
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _i_householdNeighbourhoodBatteries_SetDynamicParams_xjal( ShapeImage shape ) {
+  private void _txt_householdCurtailmentDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_gridBatteriesResidentialArea_kWh.isVisible() 
+cb_householdCurtailment.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeImage i_householdNeighbourhoodBatteries;
+  protected ShapeText txt_householdCurtailmentDescription;
+  protected ShapeImage i_householdCurtailment;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_largeScalePV_ha_Residential_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_largeScalePV_ha_Residential.getValue() + " ha" 
-);
-  }
-  
-  protected ShapeText t_largeScalePV_ha_Residential;
-  protected ShapeText txt_largeScalePVDescription_Residential;
-  protected ShapeText txt_largeScaleWindDescription_Residential;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_largeScaleWind_MW_Residential_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_largeScaleWind_MW_Residential.getValue() + " MW" 
-);
-  }
-  
-  protected ShapeText t_largeScaleWind_MW_Residential;
-  protected ShapeImage i_landPV_Residential;
-  protected ShapeImage i_landWind_Residential;
-  protected ShapeText txt_electricityTabResidential_Collective;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _gr_electricitySliders_residential_SetDynamicParams_xjal( ShapeGroup shape ) {
+  private void _gr_electricitySliders_households_SetDynamicParams_xjal( ShapeGroup shape ) {
     shape.setX(
 0 
 );
   }
   
-  protected ShapeGroup gr_electricitySliders_residential;
+  protected ShapeGroup gr_electricitySliders_households;
   protected ShapeRectangle rect_trafoReinforcement;
   protected ShapeText t_addTrafoDescription;
   
@@ -2909,6 +2238,116 @@ sl_trafoReinforcement.getIntValue() + " kVA"
   protected ShapeGroup gr_trafoReinforcement;
   protected ShapeRectangle rect_batteryFunctions;
   protected ShapeText t_batteryFunctionsDescription;
+  protected ShapeRectangle rect_electricityDemandSlidersCollective;
+  protected ShapeText txt_electricityDemandSlidersCollectiveDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_gridBatteriesDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_gridBatteries_kWh.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_gridBatteriesDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_gridBatteries_kWh_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_gridBatteries_kWh.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_gridBatteries_kWh.getIntValue() + " kWh" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_gridBatteries_kWh;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_gridBatteries_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_gridBatteries_kWh.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_gridBatteries;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_largeScalePV_ha_SetDynamicParams_xjal( ShapeText shape ) {
+    shape.setText(
+sl_largeScalePV_ha.getValue() + " ha" 
+);
+  }
+  
+  protected ShapeText txt_largeScalePV_ha;
+  protected ShapeText txt_largeScalePVDescription;
+  protected ShapeText txt_largeScaleWindDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_largeScaleWind_MW_SetDynamicParams_xjal( ShapeText shape ) {
+    shape.setText(
+sl_largeScaleWind_MW.getValue() + " MW" 
+);
+  }
+  
+  protected ShapeText txt_largeScaleWind_MW;
+  protected ShapeImage i_largeScalePV;
+  protected ShapeImage i_largeScaleWind;
+  protected ShapeText txt_gridCurtailmentDescription;
+  protected ShapeImage i_gridCurtailment;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _gr_electricitySliders_collective_SetDynamicParams_xjal( ShapeGroup shape ) {
+    shape.setX(
+0 
+);
+    shape.setY(
+0 
+);
+  }
+  
+  protected ShapeGroup gr_electricitySliders_collective;
+  protected ShapeImage arrowLeftResidential;
+  protected ShapeImage arrowRightResidential1;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _t_pageIndicator_SetDynamicParams_xjal( ShapeText shape ) {
+    shape.setText(
+"Pagina " + (v_currentPageIndex + 1) + "/" + c_loadedPageGroups.size() 
+);
+  }
+  
+  protected ShapeText t_pageIndicator;
+  protected ShapeGroup gr_pageIndicator;
   protected com.anylogic.engine.markup.Level level;
 
   private com.anylogic.engine.markup.Level[] _getLevels_xjal;
@@ -2920,8 +2359,8 @@ sl_trafoReinforcement.getIntValue() + " kVA"
 
   @AnyLogicInternalCodegenAPI
   private void _createPersistentElementsBP0_xjal() {
-    sl_electricityDemandReduction_pct = new ShapeSlider(
-tabElectricity.this, true, 260.0, 15.0,
+    sl_companiesElectricityDemandReduction_pct = new ShapeSlider(
+tabElectricity.this, true, 260.0, 55.0,
 			100.0, 30.0,
             true, false,
             -50
@@ -2933,7 +2372,7 @@ tabElectricity.this, true, 260.0, 15.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_electricityDemandReduction_pct_SetDynamicParams_xjal( this );
+      _sl_companiesElectricityDemandReduction_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -2942,16 +2381,16 @@ tabElectricity.this, true, 260.0, 15.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_electricityDemandReduction_pct, 0, value );
+        executeShapeControlAction( _sl_companiesElectricityDemandReduction_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_electricityDemandReduction_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesElectricityDemandReduction_pct, 0 ), getMax() ) );
       }
     };
-    sl_rooftopPVCompanies_pct = new ShapeSlider(
-tabElectricity.this, true, 260.0, 75.0,
+    sl_companiesRooftopPV_pct = new ShapeSlider(
+tabElectricity.this, true, 260.0, 85.0,
 			100.0, 30.0,
             true, false,
             0
@@ -2963,7 +2402,7 @@ tabElectricity.this, true, 260.0, 75.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_rooftopPVCompanies_pct_SetDynamicParams_xjal( this );
+      _sl_companiesRooftopPV_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -2972,179 +2411,29 @@ tabElectricity.this, true, 260.0, 75.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_rooftopPVCompanies_pct, 0, value );
+        executeShapeControlAction( _sl_companiesRooftopPV_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_rooftopPVCompanies_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesRooftopPV_pct, 0 ), getMax() ) );
       }
     };
-    sl_largeScalePV_ha = new ShapeSlider(
-tabElectricity.this, true, 260.0, 140.0,
-			100.0, 30.0,
-            true, false,
-            p_currentPVOnLand_ha
-            , p_currentPVOnLand_ha + 50
-            , 0.1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_largeScalePV_ha_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_largeScalePV_ha, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_largeScalePV_ha, 0 ), getMax() ) );
-      }
-    };
-    sl_largeScaleWind_MW = new ShapeSlider(
-tabElectricity.this, true, 260.0, 170.0,
-			100.0, 30.0,
-            true, false,
-            p_currentWindTurbines_MW
-            , p_currentWindTurbines_MW + 10
-            , 0.1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_largeScaleWind_MW_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_largeScaleWind_MW, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_largeScaleWind_MW, 0 ), getMax() ) );
-      }
-    };
-    sl_rooftopPVHouses_pct = new ShapeSlider(
-tabElectricity.this, true, 260.0, 105.0,
-			100.0, 30.0,
-            true, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_rooftopPVHouses_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_rooftopPVHouses_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_rooftopPVHouses_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_collectiveBattery_MWh_default = new ShapeSlider(
-tabElectricity.this, true, 260.0, 270.0,
-			100.0, 30.0,
-            true, false,
-            p_currentTotalGridBatteryCapacity_MWh
-            , p_currentTotalGridBatteryCapacity_MWh + 50
-            , 0.1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_collectiveBattery_MWh_default_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_collectiveBattery_MWh_default, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_collectiveBattery_MWh_default, 0 ), getMax() ) );
-      }
-    };
-    cb_curtailment_default = new ShapeCheckBox(
-tabElectricity.this,true,300.0, 202.0,
+    cb_companiesCurtailment = new ShapeCheckBox(
+tabElectricity.this,true,302.0, 112.0,
 		40.0, 30.0,
             black, true,
-            _cb_curtailment_default_Font,
+            _cb_companiesCurtailment_Font,
 			"" ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _cb_curtailment_default, 0, value );
+        executeShapeControlAction( _cb_companiesCurtailment, 0, value );
       }
     };
-    sl_electricityDemandReduction_pct_Businesspark = new ShapeSlider(
-tabElectricity.this, true, 260.0, 15.0,
-			100.0, 30.0,
-            true, false,
-            -50
-            , 50
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_electricityDemandReduction_pct_Businesspark_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_electricityDemandReduction_pct_Businesspark, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_electricityDemandReduction_pct_Businesspark, 0 ), getMax() ) );
-      }
-    };
-    sl_rooftopPVCompanies_pct_Businesspark = new ShapeSlider(
-tabElectricity.this, true, 260.0, 75.0,
+    sl_householdRooftopPV_pct = new ShapeSlider(
+tabElectricity.this, true, 260.0, 55.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3156,7 +2445,7 @@ tabElectricity.this, true, 260.0, 75.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_rooftopPVCompanies_pct_Businesspark_SetDynamicParams_xjal( this );
+      _sl_householdRooftopPV_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3165,149 +2454,16 @@ tabElectricity.this, true, 260.0, 75.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_rooftopPVCompanies_pct_Businesspark, 0, value );
+        executeShapeControlAction( _sl_householdRooftopPV_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_rooftopPVCompanies_pct_Businesspark, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdRooftopPV_pct, 0 ), getMax() ) );
       }
     };
-    sl_largeScalePV_ha_Businesspark = new ShapeSlider(
-tabElectricity.this, true, 260.0, 110.0,
-			100.0, 30.0,
-            true, false,
-            p_currentPVOnLand_ha
-            , p_currentPVOnLand_ha + 50
-            , 0.1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_largeScalePV_ha_Businesspark_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_largeScalePV_ha_Businesspark, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_largeScalePV_ha_Businesspark, 0 ), getMax() ) );
-      }
-    };
-    sl_largeScaleWind_MW_Businesspark = new ShapeSlider(
-tabElectricity.this, true, 260.0, 145.0,
-			100.0, 30.0,
-            true, false,
-            p_currentWindTurbines_MW
-            , p_currentWindTurbines_MW + 10
-            , 0.1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_largeScaleWind_MW_Businesspark_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_largeScaleWind_MW_Businesspark, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_largeScaleWind_MW_Businesspark, 0 ), getMax() ) );
-      }
-    };
-    cb_curtailment_businesspark = new ShapeCheckBox(
-tabElectricity.this,true,300.0, 177.0,
-		40.0, 30.0,
-            black, true,
-            _cb_curtailment_businesspark_Font,
-			"" ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _cb_curtailment_businesspark, 0, value );
-      }
-    };
-    sl_collectiveBattery_MWh_businesspark = new ShapeSlider(
-tabElectricity.this, true, 260.0, 255.0,
-			100.0, 30.0,
-            true, false,
-            p_currentTotalGridBatteryCapacity_MWh
-            , p_currentTotalGridBatteryCapacity_MWh + 50
-            , 0.1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_collectiveBattery_MWh_businesspark_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_collectiveBattery_MWh_businesspark, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_collectiveBattery_MWh_businesspark, 0 ), getMax() ) );
-      }
-    };
-    sl_householdPVResidentialArea_pct = new ShapeSlider(
-tabElectricity.this, true, 265.0, 45.0,
-			100.0, 30.0,
-            true, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_householdPVResidentialArea_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_householdPVResidentialArea_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdPVResidentialArea_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_householdBatteriesResidentialArea_pct = new ShapeSlider(
-tabElectricity.this, true, 265.0, 75.0,
+    sl_householdBatteries_pct = new ShapeSlider(
+tabElectricity.this, true, 260.0, 85.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3319,7 +2475,7 @@ tabElectricity.this, true, 265.0, 75.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_householdBatteriesResidentialArea_pct_SetDynamicParams_xjal( this );
+      _sl_householdBatteries_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3328,46 +2484,16 @@ tabElectricity.this, true, 265.0, 75.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_householdBatteriesResidentialArea_pct, 0, value );
+        executeShapeControlAction( _sl_householdBatteries_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdBatteriesResidentialArea_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdBatteries_pct, 0 ), getMax() ) );
       }
     };
-    sl_gridBatteriesResidentialArea_kWh = new ShapeSlider(
-tabElectricity.this, true, 266.0, 300.0,
-			100.0, 30.0,
-            true, false,
-            0
-            , 1000
-            , 10
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_gridBatteriesResidentialArea_kWh_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_gridBatteriesResidentialArea_kWh, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_gridBatteriesResidentialArea_kWh, 0 ), getMax() ) );
-      }
-    };
-    sl_electricityDemandIncreaseResidentialArea_pct = new ShapeSlider(
-tabElectricity.this, true, 265.0, 155.0,
+    sl_householdElectricityDemandIncrease_pct = new ShapeSlider(
+tabElectricity.this, true, 260.0, 175.0,
 			100.0, 30.0,
             true, false,
             -50
@@ -3379,7 +2505,7 @@ tabElectricity.this, true, 265.0, 155.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_electricityDemandIncreaseResidentialArea_pct_SetDynamicParams_xjal( this );
+      _sl_householdElectricityDemandIncrease_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3388,16 +2514,16 @@ tabElectricity.this, true, 265.0, 155.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_electricityDemandIncreaseResidentialArea_pct, 0, value );
+        executeShapeControlAction( _sl_householdElectricityDemandIncrease_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_electricityDemandIncreaseResidentialArea_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdElectricityDemandIncrease_pct, 0 ), getMax() ) );
       }
     };
-    sl_householdElectricCookingResidentialArea_pct = new ShapeSlider(
-tabElectricity.this, true, 265.0, 115.0,
+    sl_householdElectricCooking_pct = new ShapeSlider(
+tabElectricity.this, true, 260.0, 145.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3409,7 +2535,7 @@ tabElectricity.this, true, 265.0, 115.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_householdElectricCookingResidentialArea_pct_SetDynamicParams_xjal( this );
+      _sl_householdElectricCooking_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3418,12 +2544,12 @@ tabElectricity.this, true, 265.0, 115.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_householdElectricCookingResidentialArea_pct, 0, value );
+        executeShapeControlAction( _sl_householdElectricCooking_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdElectricCookingResidentialArea_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdElectricCooking_pct, 0 ), getMax() ) );
       }
     };
     button_trafoReinforcement = new ShapeButton(
@@ -3449,64 +2575,17 @@ _button_trafoReinforcement_Font,
         executeShapeControlAction( _button_trafoReinforcement, 0 );
       }
     };
-    sl_largeScalePV_ha_Residential = new ShapeSlider(
-tabElectricity.this, true, 265.0, 230.0,
-			100.0, 30.0,
-            true, false,
-            p_currentPVOnLand_ha
-            , p_currentPVOnLand_ha + 50
-            , 0.1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_largeScalePV_ha_Residential_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
+    cb_householdCurtailment = new ShapeCheckBox(
+tabElectricity.this,true,302.0, 112.0,
+		40.0, 30.0,
+            black, true,
+            _cb_householdCurtailment_Font,
+			"" ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_largeScalePV_ha_Residential, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_largeScalePV_ha_Residential, 0 ), getMax() ) );
-      }
-    };
-    sl_largeScaleWind_MW_Residential = new ShapeSlider(
-tabElectricity.this, true, 265.0, 265.0,
-			100.0, 30.0,
-            true, false,
-            p_currentWindTurbines_MW
-            , p_currentWindTurbines_MW + 10
-            , 0.1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_largeScaleWind_MW_Residential_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_largeScaleWind_MW_Residential, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_largeScaleWind_MW_Residential, 0 ), getMax() ) );
+        executeShapeControlAction( _cb_householdCurtailment, 0, value );
       }
     };
     sl_trafoReinforcement = new ShapeSlider(
@@ -3572,238 +2651,113 @@ _t_closeTrafoReinforcement_Font,
         executeShapeControlAction( _t_closeTrafoReinforcement, 0 );
       }
     };
+    sl_gridBatteries_kWh = new ShapeSlider(
+tabElectricity.this, true, 260.0, 115.0,
+			100.0, 30.0,
+            true, false,
+            0
+            , 1000
+            , 10
+            , ShapeControl.TYPE_DOUBLE ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _sl_gridBatteries_kWh_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _sl_gridBatteries_kWh, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_gridBatteries_kWh, 0 ), getMax() ) );
+      }
+    };
+    sl_largeScalePV_ha = new ShapeSlider(
+tabElectricity.this, true, 260.0, 55.0,
+			100.0, 30.0,
+            true, false,
+            p_currentPVOnLand_ha
+            , p_currentPVOnLand_ha + 50
+            , 0.1
+            , ShapeControl.TYPE_DOUBLE ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _sl_largeScalePV_ha_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _sl_largeScalePV_ha, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_largeScalePV_ha, 0 ), getMax() ) );
+      }
+    };
+    sl_largeScaleWind_MW = new ShapeSlider(
+tabElectricity.this, true, 260.0, 85.0,
+			100.0, 30.0,
+            true, false,
+            p_currentWindTurbines_MW
+            , p_currentWindTurbines_MW + 10
+            , 0.1
+            , ShapeControl.TYPE_DOUBLE ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _sl_largeScaleWind_MW_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _sl_largeScaleWind_MW, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_largeScaleWind_MW, 0 ), getMax() ) );
+      }
+    };
+    cb_gridCurtailment = new ShapeCheckBox(
+tabElectricity.this,true,302.0, 142.0,
+		40.0, 30.0,
+            black, true,
+            _cb_gridCurtailment_Font,
+			"" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_gridCurtailment, 0, value );
+      }
+    };
     rect_genericFunctions = new ShapeRectangle(
        SHAPE_DRAW_2D3D, false,10.0, 480.0, 0.0, 0.0,
             silver, white,
 			370.0, 730.0, 10.0, 3.0, LINE_STYLE_SOLID );
-    rect_electricityDemandSliders = new ShapeRectangle(
-       SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
-            null, lightYellow,
-			370.0, 350.0, 10.0, 3.0, LINE_STYLE_SOLID );
-    t_electricityDemandReduction_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 20.0, 0.0, 0.0,
-        black,"#",
-        _t_electricityDemandReduction_pct_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_electricityDemandReduction_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_electricityDemandReductionDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,10.0, 20.0, 0.0, 0.0,
-        black,"Besparing verbruik",
-        _t_electricityDemandReductionDescription_Font, ALIGNMENT_LEFT );
-    txt_productionDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 55.0, 0.0, 0.0,
-        black,"Opwek",
-        _txt_productionDescription_Font, ALIGNMENT_LEFT );
-    t_rooftopPVCompanies_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 80.0, 0.0, 0.0,
-        black,"#",
-        _t_rooftopPVCompanies_pct_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_rooftopPVCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_rooftopPVCompaniesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 80.0, 0.0, 0.0,
-        black,"Zon op dak bedrijven",
-        _t_rooftopPVCompaniesDescription_Font, ALIGNMENT_LEFT );
-    t_largeScalePV_ha = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 145.0, 0.0, 0.0,
-        black,"#",
-        _t_largeScalePV_ha_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_largeScalePV_ha_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_largeScalePVDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 145.0, 0.0, 0.0,
-        black,"Zon op land",
-        _t_largeScalePVDescription_Font, ALIGNMENT_LEFT );
-    txt_batteryDescription_default = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 250.0, 0.0, 0.0,
-        black,"Batterijen",
-        _txt_batteryDescription_default_Font, ALIGNMENT_LEFT );
-    t_largeScaleWindDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 175.0, 0.0, 0.0,
-        black,"Wind op land",
-        _t_largeScaleWindDescription_Font, ALIGNMENT_LEFT );
-    t_largeScaleWind_MW = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 175.0, 0.0, 0.0,
-        black,"#",
-        _t_largeScaleWind_MW_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_largeScaleWind_MW_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_rooftopPVHouses_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 110.0, 0.0, 0.0,
-        black,"#",
-        _t_rooftopPVHouses_pct_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_rooftopPVHouses_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_rooftopPVHousesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 110.0, 0.0, 0.0,
-        black,"Zon op dak huizen",
-        _t_rooftopPVHousesDescription_Font, ALIGNMENT_LEFT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_rooftopPVHousesDescription_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    i_householdPV = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 110.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _i_householdPV_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_householdPV, 0, clickx, clicky );
-      }
-    };
-    i_landPV = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 145.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_landPV, 0, clickx, clicky );
-      }
-    };
-    i_companyPV = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 80.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_companyPV, 0, clickx, clicky );
-      }
-    };
-    i_electricityReduction = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 20.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_electricityReduction, 0, clickx, clicky );
-      }
-    };
-    i_landWind = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 175.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_landWind, 0, clickx, clicky );
-      }
-    };
-    t_collectiveBatteries_default = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 275.0, 0.0, 0.0,
-        black,"#",
-        _t_collectiveBatteries_default_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_collectiveBatteries_default_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    txt_curtailmentDescription_default = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 210.0, 0.0, 0.0,
-        black,"Curtailment opwek",
-        _txt_curtailmentDescription_default_Font, ALIGNMENT_LEFT );
-    txt_collectiveBatteryDescription_default = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 275.0, 0.0, 0.0,
-        black,"Collectieve batterijen",
-        _txt_collectiveBatteryDescription_default_Font, ALIGNMENT_LEFT );
-    i_curtailment_default = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 210.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_curtailment_default, 0, clickx, clicky );
-      }
-    };
-    i_collectiveBatteries_default = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 275.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_collectiveBatteries_default, 0, clickx, clicky );
-      }
-    };
     rect_PVFunctions = new ShapeRectangle(
        SHAPE_DRAW_2D3D, false,40.0, 670.0, 0.0, 0.0,
             gold, white,
@@ -3824,343 +2778,252 @@ _t_closeTrafoReinforcement_Font,
         SHAPE_DRAW_2D, false,100.0, 500.0, 0.0, 0.0,
         black,"Generic Functions",
         _t_genericFunctions_Font, ALIGNMENT_LEFT );
-    rect_electricityDemandSliders_Businesspark = new ShapeRectangle(
+    rect_electricityDemandSlidersCompanies = new ShapeRectangle(
        SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
             null, lightYellow,
 			370.0, 350.0, 10.0, 3.0, LINE_STYLE_SOLID );
-    t_electricityDemandReduction_pct_Businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 20.0, 0.0, 0.0,
+    txt_companiesElectricityDemandReduction_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 60.0, 0.0, 0.0,
         black,"#",
-        _t_electricityDemandReduction_pct_Businesspark_Font, ALIGNMENT_RIGHT ) {
+        _txt_companiesElectricityDemandReduction_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_electricityDemandReduction_pct_Businesspark_SetDynamicParams_xjal( this );
+      _txt_companiesElectricityDemandReduction_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    txt_electricityDemandReductionDescription_Businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,10.0, 20.0, 0.0, 0.0,
+    txt_companiesElectricityDemandReductionDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 60.0, 0.0, 0.0,
         black,"Besparing verbruik",
-        _txt_electricityDemandReductionDescription_Businesspark_Font, ALIGNMENT_LEFT );
-    txt_productionDescription_Businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 55.0, 0.0, 0.0,
-        black,"Opwek",
-        _txt_productionDescription_Businesspark_Font, ALIGNMENT_LEFT );
-    t_rooftopPVCompanies_pct_Businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 80.0, 0.0, 0.0,
-        black,"#",
-        _t_rooftopPVCompanies_pct_Businesspark_Font, ALIGNMENT_RIGHT ) {
+        _txt_companiesElectricityDemandReductionDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_rooftopPVCompanies_pct_Businesspark_SetDynamicParams_xjal( this );
+      _txt_companiesElectricityDemandReductionDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    txt_rooftopPVCompaniesDescription_Businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 80.0, 0.0, 0.0,
+    txt_companiesRooftopPVCompanies_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 90.0, 0.0, 0.0,
+        black,"#",
+        _txt_companiesRooftopPVCompanies_pct_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesRooftopPVCompanies_pct_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesRooftopPVDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 90.0, 0.0, 0.0,
         black,"Zon op dak bedrijven",
-        _txt_rooftopPVCompaniesDescription_Businesspark_Font, ALIGNMENT_LEFT );
-    t_largeScalePV_ha_Businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 115.0, 0.0, 0.0,
-        black,"#",
-        _t_largeScalePV_ha_Businesspark_Font, ALIGNMENT_RIGHT ) {
+        _txt_companiesRooftopPVDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_largeScalePV_ha_Businesspark_SetDynamicParams_xjal( this );
+      _txt_companiesRooftopPVDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    txt_largeScalePVDescription_Businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 115.0, 0.0, 0.0,
-        black,"Zon op land",
-        _txt_largeScalePVDescription_Businesspark_Font, ALIGNMENT_LEFT );
-    txt_batteryDescription_businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 230.0, 0.0, 0.0,
-        black,"Batterijen",
-        _txt_batteryDescription_businesspark_Font, ALIGNMENT_LEFT );
-    txt_largeScaleWindDescription_Businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 150.0, 0.0, 0.0,
-        black,"Wind op land",
-        _txt_largeScaleWindDescription_Businesspark_Font, ALIGNMENT_LEFT );
-    t_largeScaleWind_MW_Businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 150.0, 0.0, 0.0,
-        black,"#",
-        _t_largeScaleWind_MW_Businesspark_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_largeScaleWind_MW_Businesspark_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    i_landPV_Businesspark = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 115.0, 0.0, 0.0,
+    i_companiesRooftopPV = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 88.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_landPV_Businesspark, 0, clickx, clicky );
+        return onShapeClick( _i_companiesRooftopPV, 0, clickx, clicky );
       }
     };
-    i_companyPV_Businesspark = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 80.0, 0.0, 0.0,
+    i_companiesElectricityReduction = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 58.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_companyPV_Businesspark, 0, clickx, clicky );
+        return onShapeClick( _i_companiesElectricityReduction, 0, clickx, clicky );
       }
     };
-    i_electricityReduction_Businesspark = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 20.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_electricityReduction_Businesspark, 0, clickx, clicky );
-      }
-    };
-    i_landWind_Businesspark = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 150.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_landWind_Businesspark, 0, clickx, clicky );
-      }
-    };
-    txt_curtailmentDescription_businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 185.0, 0.0, 0.0,
+    txt_electricityDemandSlidersBusinessesDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 20.0, 0.0, 0.0,
+        black,"Bedrijven",
+        _txt_electricityDemandSlidersBusinessesDescription_Font, ALIGNMENT_LEFT );
+    txt_companiesCurtailmentDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 120.0, 0.0, 0.0,
         black,"Curtailment opwek",
-        _txt_curtailmentDescription_businesspark_Font, ALIGNMENT_LEFT );
-    i_curtailment_businesspark = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 185.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_curtailment_businesspark, 0, clickx, clicky );
-      }
-    };
-    i_collectiveBatteries_businesspark = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 260.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_collectiveBatteries_businesspark, 0, clickx, clicky );
-      }
-    };
-    txt_collectiveBatteryDescription_businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 260.0, 0.0, 0.0,
-        black,"Collectieve batterijen",
-        _txt_collectiveBatteryDescription_businesspark_Font, ALIGNMENT_LEFT );
-    t_collectiveBatteries_businesspark = new ShapeText(
-        SHAPE_DRAW_2D, true,240.0, 260.0, 0.0, 0.0,
-        black,"#",
-        _t_collectiveBatteries_businesspark_Font, ALIGNMENT_RIGHT ) {
+        _txt_companiesCurtailmentDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_collectiveBatteries_businesspark_SetDynamicParams_xjal( this );
+      _txt_companiesCurtailmentDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    rect_electricityDemandSlidersResidentialArea = new ShapeRectangle(
+    i_companiesCurtailment = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 118.0, 0.0, 0.0,
+20.0, 20.0, "/zerointerfaceloader/",
+			new String[]{"icon_i.png",} ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _i_companiesCurtailment, 0, clickx, clicky );
+      }
+    };
+    rect_electricityDemandSlidersHouseholds = new ShapeRectangle(
        SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
             null, lightYellow,
 			370.0, 350.0, 10.0, 5.0, LINE_STYLE_SOLID );
-    t_electricityDemandIncreaseResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,250.0, 160.0, 0.0, 0.0,
+    txt_electricityDemandIncrease_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 180.0, 0.0, 0.0,
         black,"0%",
-        _t_electricityDemandIncreaseResidentialArea_pct_Font, ALIGNMENT_RIGHT ) {
+        _txt_electricityDemandIncrease_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_electricityDemandIncreaseResidentialArea_pct_SetDynamicParams_xjal( this );
+      _txt_electricityDemandIncrease_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdPVResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,250.0, 50.0, 0.0, 0.0,
+    txt_householdPV_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 60.0, 0.0, 0.0,
         black,"10%",
-        _t_householdPVResidentialArea_pct_Font, ALIGNMENT_RIGHT ) {
+        _txt_householdPV_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdPVResidentialArea_pct_SetDynamicParams_xjal( this );
+      _txt_householdPV_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdPVResidentialAreaDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 50.0, 0.0, 0.0,
+    txt_householdPVDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 60.0, 0.0, 0.0,
         black,"Aandeel huizen met PV",
-        _t_householdPVResidentialAreaDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_householdPVDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdPVResidentialAreaDescription_SetDynamicParams_xjal( this );
+      _txt_householdPVDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    txt_electricitDemandSlidersResidentialAreaDescription = new ShapeText(
+    txt_electricityDemandSlidersHousesholdsDescription = new ShapeText(
         SHAPE_DRAW_2D, true,20.0, 20.0, 0.0, 0.0,
         black,"Huizen",
-        _txt_electricitDemandSlidersResidentialAreaDescription_Font, ALIGNMENT_LEFT );
-    t_householdBatteriesResidentialAreaDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 80.0, 0.0, 0.0,
+        _txt_electricityDemandSlidersHousesholdsDescription_Font, ALIGNMENT_LEFT );
+    txt_householdBatteriesDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,30.0, 90.0, 0.0, 0.0,
         black,"Welke een batterij hebben",
-        _t_householdBatteriesResidentialAreaDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_householdBatteriesDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdBatteriesResidentialAreaDescription_SetDynamicParams_xjal( this );
+      _txt_householdBatteriesDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdBatteriesResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,250.0, 80.0, 0.0, 0.0,
+    txt_householdBatteriesResidentialArea_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 90.0, 0.0, 0.0,
         black,"0%",
-        _t_householdBatteriesResidentialArea_pct_Font, ALIGNMENT_RIGHT ) {
+        _txt_householdBatteriesResidentialArea_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdBatteriesResidentialArea_pct_SetDynamicParams_xjal( this );
+      _txt_householdBatteriesResidentialArea_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_gridBatteriesResidentialAreaDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 306.0, 0.0, 0.0,
-        black,"Trafo batterij capaciteit",
-        _t_gridBatteriesResidentialAreaDescription_Font, ALIGNMENT_LEFT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_gridBatteriesResidentialAreaDescription_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_gridBatteriesResidentialArea_kW = new ShapeText(
-        SHAPE_DRAW_2D, true,251.0, 305.0, 0.0, 0.0,
-        black,"0 kWh",
-        _t_gridBatteriesResidentialArea_kW_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_gridBatteriesResidentialArea_kW_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_electricityDemandIncreaseResidentialAreaDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 160.0, 0.0, 0.0,
+    txt_householdElectricityDemandIncreaseDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 180.0, 0.0, 0.0,
         black,"Groei in elektr. consumptie",
-        _t_electricityDemandIncreaseResidentialAreaDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_householdElectricityDemandIncreaseDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_electricityDemandIncreaseResidentialAreaDescription_SetDynamicParams_xjal( this );
+      _txt_householdElectricityDemandIncreaseDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdElectricCookingResidentialAreaDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 120.0, 0.0, 0.0,
+    txt_householdElectricCookingDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 150.0, 0.0, 0.0,
         black,"Aandeel die elektrisch koken",
-        _t_householdElectricCookingResidentialAreaDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_householdElectricCookingDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdElectricCookingResidentialAreaDescription_SetDynamicParams_xjal( this );
+      _txt_householdElectricCookingDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdElectricCookingResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,250.0, 120.0, 0.0, 0.0,
+    txt_householdElectricCookingResidentialArea_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 150.0, 0.0, 0.0,
         black,"0%",
-        _t_householdElectricCookingResidentialArea_pct_Font, ALIGNMENT_RIGHT ) {
+        _txt_householdElectricCookingResidentialArea_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdElectricCookingResidentialArea_pct_SetDynamicParams_xjal( this );
+      _txt_householdElectricCookingResidentialArea_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    i_householdRooftopPV = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 50.0, 0.0, 0.0,
+    i_householdPV = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 58.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4168,7 +3031,7 @@ _t_closeTrafoReinforcement_Font,
 	
       public void updateDynamicProperties() {
 	
-      _i_householdRooftopPV_SetDynamicParams_xjal( this );
+      _i_householdPV_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -4177,11 +3040,11 @@ _t_closeTrafoReinforcement_Font,
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_householdRooftopPV, 0, clickx, clicky );
+        return onShapeClick( _i_householdPV, 0, clickx, clicky );
       }
     };
     i_householdBatteries = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 80.0, 0.0, 0.0,
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 88.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4202,7 +3065,7 @@ _t_closeTrafoReinforcement_Font,
       }
     };
     i_householdElectricCooking = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 120.0, 0.0, 0.0,
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 148.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4223,7 +3086,7 @@ _t_closeTrafoReinforcement_Font,
       }
     };
     i_householdElectricityGrowth = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 160.0, 0.0, 0.0,
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 178.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4243,99 +3106,36 @@ _t_closeTrafoReinforcement_Font,
         return onShapeClick( _i_householdElectricityGrowth, 0, clickx, clicky );
       }
     };
-    i_householdNeighbourhoodBatteries = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 305.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
+    txt_householdCurtailmentDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 120.0, 0.0, 0.0,
+        black,"Curtailment opwek",
+        _txt_householdCurtailmentDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _i_householdNeighbourhoodBatteries_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_householdNeighbourhoodBatteries, 0, clickx, clicky );
-      }
-    };
-    t_largeScalePV_ha_Residential = new ShapeText(
-        SHAPE_DRAW_2D, true,250.0, 235.0, 0.0, 0.0,
-        black,"0 ha",
-        _t_largeScalePV_ha_Residential_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_largeScalePV_ha_Residential_SetDynamicParams_xjal( this );
+      _txt_householdCurtailmentDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    txt_largeScalePVDescription_Residential = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 235.0, 0.0, 0.0,
-        black,"Zon op land",
-        _txt_largeScalePVDescription_Residential_Font, ALIGNMENT_LEFT );
-    txt_largeScaleWindDescription_Residential = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 270.0, 0.0, 0.0,
-        black,"Wind op land",
-        _txt_largeScaleWindDescription_Residential_Font, ALIGNMENT_LEFT );
-    t_largeScaleWind_MW_Residential = new ShapeText(
-        SHAPE_DRAW_2D, true,250.0, 270.0, 0.0, 0.0,
-        black,"0 MW",
-        _t_largeScaleWind_MW_Residential_Font, ALIGNMENT_RIGHT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_largeScaleWind_MW_Residential_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    i_landPV_Residential = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 235.0, 0.0, 0.0,
+    i_householdCurtailment = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 180.0, 118.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_landPV_Residential, 0, clickx, clicky );
+        return onShapeClick( _i_householdCurtailment, 0, clickx, clicky );
       }
     };
-    i_landWind_Residential = new ShapeImage(
-		tabElectricity.this, SHAPE_DRAW_2D3D, true, 160.0, 270.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_landWind_Residential, 0, clickx, clicky );
-      }
-    };
-    txt_electricityTabResidential_Collective = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 205.0, 0.0, 0.0,
-        black,"Collectief",
-        _txt_electricityTabResidential_Collective_Font, ALIGNMENT_LEFT );
     rect_trafoReinforcement = new ShapeRectangle(
        SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
             null, lightYellow,
 			370.0, 350.0, 10.0, 1.0, LINE_STYLE_SOLID );
-  }
-  
-  @AnyLogicInternalCodegenAPI
-  private void _createPersistentElementsBP1_xjal() {
     t_addTrafoDescription = new ShapeText(
         SHAPE_DRAW_2D, true,10.0, 70.0, 0.0, 0.0,
         black,"Trafostation uitbreiden/bijplaatsen",
@@ -4418,135 +3218,248 @@ _t_closeTrafoReinforcement_Font,
         SHAPE_DRAW_2D, false,189.0, 996.0, 0.0, 0.0,
         black,"Battery Functions",
         _t_batteryFunctionsDescription_Font, ALIGNMENT_CENTER );
+    rect_electricityDemandSlidersCollective = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
+            null, lightYellow,
+			370.0, 350.0, 10.0, 5.0, LINE_STYLE_SOLID );
+    txt_electricityDemandSlidersCollectiveDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 20.0, 0.0, 0.0,
+        black,"Collectief",
+        _txt_electricityDemandSlidersCollectiveDescription_Font, ALIGNMENT_LEFT );
+    txt_gridBatteriesDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 120.0, 0.0, 0.0,
+        black,"Trafo batterij capaciteit",
+        _txt_gridBatteriesDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_gridBatteriesDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_gridBatteries_kWh = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 120.0, 0.0, 0.0,
+        black,"0 kWh",
+        _txt_gridBatteries_kWh_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_gridBatteries_kWh_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    i_gridBatteries = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 165.0, 118.0, 0.0, 0.0,
+20.0, 20.0, "/zerointerfaceloader/",
+			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_gridBatteries_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _i_gridBatteries, 0, clickx, clicky );
+      }
+    };
+    txt_largeScalePV_ha = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 60.0, 0.0, 0.0,
+        black,"0 ha",
+        _txt_largeScalePV_ha_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_largeScalePV_ha_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_largeScalePVDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 60.0, 0.0, 0.0,
+        black,"Zon op land",
+        _txt_largeScalePVDescription_Font, ALIGNMENT_LEFT );
+    txt_largeScaleWindDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 90.0, 0.0, 0.0,
+        black,"Wind op land",
+        _txt_largeScaleWindDescription_Font, ALIGNMENT_LEFT );
+    txt_largeScaleWind_MW = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 90.0, 0.0, 0.0,
+        black,"0 MW",
+        _txt_largeScaleWind_MW_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_largeScaleWind_MW_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    i_largeScalePV = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 165.0, 58.0, 0.0, 0.0,
+20.0, 20.0, "/zerointerfaceloader/",
+			new String[]{"icon_i.png",} ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _i_largeScalePV, 0, clickx, clicky );
+      }
+    };
+    i_largeScaleWind = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 165.0, 88.0, 0.0, 0.0,
+20.0, 20.0, "/zerointerfaceloader/",
+			new String[]{"icon_i.png",} ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _i_largeScaleWind, 0, clickx, clicky );
+      }
+    };
+    txt_gridCurtailmentDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 150.0, 0.0, 0.0,
+        black,"Curtailment opwek",
+        _txt_gridCurtailmentDescription_Font, ALIGNMENT_LEFT );
+    i_gridCurtailment = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 165.0, 148.0, 0.0, 0.0,
+20.0, 20.0, "/zerointerfaceloader/",
+			new String[]{"icon_i.png",} ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _i_gridCurtailment, 0, clickx, clicky );
+      }
+    };
+    arrowLeftResidential = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, -35.0, -12.0, 0.0, 1.5707963267948966,
+12.0, 12.0, "/zerointerfaceloader/",
+			new String[]{"icon_arrow.png",} ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _arrowLeftResidential, 0, clickx, clicky );
+      }
+    };
+    arrowRightResidential1 = new ShapeImage(
+		tabElectricity.this, SHAPE_DRAW_2D3D, true, 35.0, 0.0, 0.0, 4.71238898038469,
+12.0, 12.0, "/zerointerfaceloader/",
+			new String[]{"icon_arrow.png",} ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _arrowRightResidential1, 0, clickx, clicky );
+      }
+    };
+    t_pageIndicator = new ShapeText(
+        SHAPE_DRAW_2D, true,0.0, -12.0, 0.0, 0.0,
+        black,"Pagina 1/2",
+        _t_pageIndicator_Font, ALIGNMENT_CENTER ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _t_pageIndicator_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
   }
 
   @AnyLogicInternalCodegenAPI
   private void _createPersistentElementsAP0_xjal() {
     {
-    gr_electricitySliders_default = new ShapeGroup( tabElectricity.this, SHAPE_DRAW_2D3D, true, -10.0, 0.0, 0.0, 0.0
+    gr_electricitySliders_companies = new ShapeGroup( tabElectricity.this, SHAPE_DRAW_2D3D, true, 400.0, 0.0, 0.0, 0.0
 	
-	     , rect_electricityDemandSliders
-	     , t_electricityDemandReduction_pct
-	     , sl_electricityDemandReduction_pct
-	     , t_electricityDemandReductionDescription
-	     , txt_productionDescription
-	     , t_rooftopPVCompanies_pct
-	     , sl_rooftopPVCompanies_pct
-	     , t_rooftopPVCompaniesDescription
-	     , t_largeScalePV_ha
-	     , sl_largeScalePV_ha
-	     , t_largeScalePVDescription
-	     , txt_batteryDescription_default
-	     , sl_largeScaleWind_MW
-	     , t_largeScaleWindDescription
-	     , t_largeScaleWind_MW
-	     , t_rooftopPVHouses_pct
-	     , sl_rooftopPVHouses_pct
-	     , t_rooftopPVHousesDescription
-	     , i_householdPV
-	     , i_landPV
-	     , i_companyPV
-	     , i_electricityReduction
-	     , i_landWind
-	     , t_collectiveBatteries_default
-	     , sl_collectiveBattery_MWh_default
-	     , txt_curtailmentDescription_default
-	     , txt_collectiveBatteryDescription_default
-	     , cb_curtailment_default
-	     , i_curtailment_default
-	     , i_collectiveBatteries_default );
-    }
-    gr_electricitySliders_default.setVisible( false );
-    {
-    gr_electricitySliders_businesspark = new ShapeGroup( tabElectricity.this, SHAPE_DRAW_2D3D, true, 400.0, 0.0, 0.0, 0.0
-	
-	     , rect_electricityDemandSliders_Businesspark
-	     , t_electricityDemandReduction_pct_Businesspark
-	     , sl_electricityDemandReduction_pct_Businesspark
-	     , txt_electricityDemandReductionDescription_Businesspark
-	     , txt_productionDescription_Businesspark
-	     , t_rooftopPVCompanies_pct_Businesspark
-	     , sl_rooftopPVCompanies_pct_Businesspark
-	     , txt_rooftopPVCompaniesDescription_Businesspark
-	     , t_largeScalePV_ha_Businesspark
-	     , sl_largeScalePV_ha_Businesspark
-	     , txt_largeScalePVDescription_Businesspark
-	     , txt_batteryDescription_businesspark
-	     , sl_largeScaleWind_MW_Businesspark
-	     , txt_largeScaleWindDescription_Businesspark
-	     , t_largeScaleWind_MW_Businesspark
-	     , i_landPV_Businesspark
-	     , i_companyPV_Businesspark
-	     , i_electricityReduction_Businesspark
-	     , i_landWind_Businesspark
-	     , txt_curtailmentDescription_businesspark
-	     , cb_curtailment_businesspark
-	     , i_curtailment_businesspark
-	     , i_collectiveBatteries_businesspark
-	     , txt_collectiveBatteryDescription_businesspark
-	     , t_collectiveBatteries_businesspark
-	     , sl_collectiveBattery_MWh_businesspark ) {
+	     , rect_electricityDemandSlidersCompanies
+	     , txt_companiesElectricityDemandReduction_pct
+	     , sl_companiesElectricityDemandReduction_pct
+	     , txt_companiesElectricityDemandReductionDescription
+	     , txt_companiesRooftopPVCompanies_pct
+	     , sl_companiesRooftopPV_pct
+	     , txt_companiesRooftopPVDescription
+	     , i_companiesRooftopPV
+	     , i_companiesElectricityReduction
+	     , txt_electricityDemandSlidersBusinessesDescription
+	     , txt_companiesCurtailmentDescription
+	     , cb_companiesCurtailment
+	     , i_companiesCurtailment ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _gr_electricitySliders_businesspark_SetDynamicParams_xjal( this );
+      _gr_electricitySliders_companies_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     }
-    gr_electricitySliders_businesspark.setVisible( false );
+    gr_electricitySliders_companies.setVisible( false );
     {
-    gr_electricitySliders_residential = new ShapeGroup( tabElectricity.this, SHAPE_DRAW_2D3D, true, 800.0, 0.0, 0.0, 0.0
+    gr_electricitySliders_households = new ShapeGroup( tabElectricity.this, SHAPE_DRAW_2D3D, true, 0.0, 0.0, 0.0, 0.0
 	
-	     , rect_electricityDemandSlidersResidentialArea
-	     , t_electricityDemandIncreaseResidentialArea_pct
-	     , t_householdPVResidentialArea_pct
-	     , sl_householdPVResidentialArea_pct
-	     , t_householdPVResidentialAreaDescription
-	     , txt_electricitDemandSlidersResidentialAreaDescription
-	     , t_householdBatteriesResidentialAreaDescription
-	     , sl_householdBatteriesResidentialArea_pct
-	     , t_householdBatteriesResidentialArea_pct
-	     , sl_gridBatteriesResidentialArea_kWh
-	     , t_gridBatteriesResidentialAreaDescription
-	     , t_gridBatteriesResidentialArea_kW
-	     , t_electricityDemandIncreaseResidentialAreaDescription
-	     , sl_electricityDemandIncreaseResidentialArea_pct
-	     , t_householdElectricCookingResidentialAreaDescription
-	     , sl_householdElectricCookingResidentialArea_pct
-	     , t_householdElectricCookingResidentialArea_pct
+	     , rect_electricityDemandSlidersHouseholds
+	     , txt_electricityDemandIncrease_pct
+	     , txt_householdPV_pct
+	     , sl_householdRooftopPV_pct
+	     , txt_householdPVDescription
+	     , txt_electricityDemandSlidersHousesholdsDescription
+	     , txt_householdBatteriesDescription
+	     , sl_householdBatteries_pct
+	     , txt_householdBatteriesResidentialArea_pct
+	     , txt_householdElectricityDemandIncreaseDescription
+	     , sl_householdElectricityDemandIncrease_pct
+	     , txt_householdElectricCookingDescription
+	     , sl_householdElectricCooking_pct
+	     , txt_householdElectricCookingResidentialArea_pct
 	     , button_trafoReinforcement
-	     , i_householdRooftopPV
+	     , i_householdPV
 	     , i_householdBatteries
 	     , i_householdElectricCooking
 	     , i_householdElectricityGrowth
-	     , i_householdNeighbourhoodBatteries
-	     , t_largeScalePV_ha_Residential
-	     , sl_largeScalePV_ha_Residential
-	     , txt_largeScalePVDescription_Residential
-	     , sl_largeScaleWind_MW_Residential
-	     , txt_largeScaleWindDescription_Residential
-	     , t_largeScaleWind_MW_Residential
-	     , i_landPV_Residential
-	     , i_landWind_Residential
-	     , txt_electricityTabResidential_Collective ) {
+	     , txt_householdCurtailmentDescription
+	     , cb_householdCurtailment
+	     , i_householdCurtailment ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _gr_electricitySliders_residential_SetDynamicParams_xjal( this );
+      _gr_electricitySliders_households_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     }
-    gr_electricitySliders_residential.setVisible( false );
+    gr_electricitySliders_households.setVisible( false );
     {
     gr_trafoReinforcement = new ShapeGroup( tabElectricity.this, SHAPE_DRAW_2D3D, true, 1200.0, 0.0, 0.0, 0.0
 	
@@ -4576,6 +3489,47 @@ _t_closeTrafoReinforcement_Font,
     };
     }
     gr_trafoReinforcement.setVisible( false );
+    {
+    gr_electricitySliders_collective = new ShapeGroup( tabElectricity.this, SHAPE_DRAW_2D3D, true, 800.0, 0.0, 0.0, 0.0
+	
+	     , rect_electricityDemandSlidersCollective
+	     , txt_electricityDemandSlidersCollectiveDescription
+	     , sl_gridBatteries_kWh
+	     , txt_gridBatteriesDescription
+	     , txt_gridBatteries_kWh
+	     , i_gridBatteries
+	     , txt_largeScalePV_ha
+	     , sl_largeScalePV_ha
+	     , txt_largeScalePVDescription
+	     , sl_largeScaleWind_MW
+	     , txt_largeScaleWindDescription
+	     , txt_largeScaleWind_MW
+	     , i_largeScalePV
+	     , i_largeScaleWind
+	     , txt_gridCurtailmentDescription
+	     , cb_gridCurtailment
+	     , i_gridCurtailment ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _gr_electricitySliders_collective_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    }
+    gr_electricitySliders_collective.setVisible( false );
+    {
+    gr_pageIndicator = new ShapeGroup( tabElectricity.this, SHAPE_DRAW_2D3D, true, 185.0, 20.0, 0.0, 0.0
+	
+	     , arrowLeftResidential
+	     , arrowRightResidential1
+	     , t_pageIndicator );
+    }
+    gr_pageIndicator.setVisible( false );
   }
 
   @AnyLogicInternalCodegenAPI
@@ -4590,7 +3544,6 @@ _t_closeTrafoReinforcement_Font,
 	_getLevels_xjal = concatenateArrays( super.getLevels(), 
       level );
     _createPersistentElementsBP0_xjal();
-    _createPersistentElementsBP1_xjal();
   }
 
   @Override
@@ -4680,25 +3633,16 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     setupInitialConditions_xjal( tabElectricity.class );
     // Dynamic initialization of persistent elements
     _createPersistentElementsBS0_xjal();
-    sl_electricityDemandReduction_pct.setValueToDefault();
-    sl_rooftopPVCompanies_pct.setValueToDefault();
+    sl_companiesElectricityDemandReduction_pct.setValueToDefault();
+    sl_companiesRooftopPV_pct.setValueToDefault();
+    sl_householdRooftopPV_pct.setValueToDefault();
+    sl_householdBatteries_pct.setValueToDefault();
+    sl_householdElectricityDemandIncrease_pct.setValueToDefault();
+    sl_householdElectricCooking_pct.setValueToDefault();
+    sl_trafoReinforcement.setValueToDefault();
+    sl_gridBatteries_kWh.setValueToDefault();
     sl_largeScalePV_ha.setValueToDefault();
     sl_largeScaleWind_MW.setValueToDefault();
-    sl_rooftopPVHouses_pct.setValueToDefault();
-    sl_collectiveBattery_MWh_default.setValueToDefault();
-    sl_electricityDemandReduction_pct_Businesspark.setValueToDefault();
-    sl_rooftopPVCompanies_pct_Businesspark.setValueToDefault();
-    sl_largeScalePV_ha_Businesspark.setValueToDefault();
-    sl_largeScaleWind_MW_Businesspark.setValueToDefault();
-    sl_collectiveBattery_MWh_businesspark.setValueToDefault();
-    sl_householdPVResidentialArea_pct.setValueToDefault();
-    sl_householdBatteriesResidentialArea_pct.setValueToDefault();
-    sl_gridBatteriesResidentialArea_kWh.setValueToDefault();
-    sl_electricityDemandIncreaseResidentialArea_pct.setValueToDefault();
-    sl_householdElectricCookingResidentialArea_pct.setValueToDefault();
-    sl_largeScalePV_ha_Residential.setValueToDefault();
-    sl_largeScaleWind_MW_Residential.setValueToDefault();
-    sl_trafoReinforcement.setValueToDefault();
   }
 
   @Override
@@ -4724,6 +3668,9 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
    */
   @AnyLogicInternalCodegenAPI
   private void setupPlainVariables_tabElectricity_xjal() {
+    v_currentPageIndex = 
+0 
+;
   }
 
   // User API -----------------------------------------------------
@@ -4785,65 +3732,67 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 
   // Additional class code
 
-// Default Sliders
-public ShapeGroup getGroupElectricityDemandSliders() {
-	return this.gr_electricitySliders_default;
+// Page navigation
+public ShapeGroup getGroupPageIndicator() {
+	return this.gr_pageIndicator;
+}
+public List<ShapeGroup> getLoadedPages() {
+	return this.c_loadedPageGroups;
+}
+public int getCurrentPageIndex() {
+	return this.v_currentPageIndex;
 }
 
-public ShapeGroup getGroupElectricityDemandSliders_Businesspark() {
-	return this.gr_electricitySliders_businesspark;
+// Slider groups
+public ShapeGroup getGroupElectricityDemandSliders_Households() {
+	return this.gr_electricitySliders_households;
 }
 
-public ShapeGroup getGroupElectricityDemandSliders_ResidentialArea() {
-	return this.gr_electricitySliders_residential;
-}
-public ShapeSlider getSliderElectricityDemandReduction_pct() {
-	return this.sl_electricityDemandReduction_pct;
+public ShapeGroup getGroupElectricityDemandSliders_Companies() {
+	return this.gr_electricitySliders_companies;
 }
 
-public ShapeSlider getSliderRooftopPVCompanies_pct(){
-	return this.sl_rooftopPVCompanies_pct;
+public ShapeGroup getGroupElectricityDemandSliders_Collective() {
+	return this.gr_electricitySliders_collective;
 }
 
+//Households
+public ShapeSlider getSliderHouseholdRooftopPV_pct(){
+	return this.sl_householdRooftopPV_pct;
+}
+
+public ShapeSlider getSliderHouseholdBatteries_pct(){
+	return this.sl_householdBatteries_pct;
+}
+
+public ShapeSlider getSliderHouseholdElectricCooking_pct(){
+	return this.sl_householdElectricCooking_pct;
+}
+
+public ShapeSlider getSliderHouseholdElectricityDemandIncrease_pct(){
+	return this.sl_householdElectricityDemandIncrease_pct;
+}
+
+//Companies
+public ShapeSlider getSliderCompaniesElectricityDemandReduction_pct() {
+	return this.sl_companiesElectricityDemandReduction_pct;
+}
+
+public ShapeSlider getSliderCompaniesRooftopPV_pct(){
+	return this.sl_companiesRooftopPV_pct;
+}
+
+//Collective
 public ShapeSlider getSliderLargeScalePV_ha(){
 	return this.sl_largeScalePV_ha;
 }
 
-public ShapeSlider getSliderLargeScalePV_ha_Businesspark(){
-	return this.sl_largeScalePV_ha_Businesspark;
-}
-
-public ShapeSlider getWindSlider(){
+public ShapeSlider getSliderLargeScaleWind(){
 	return this.sl_largeScaleWind_MW;
 }
 
-public ShapeSlider getSl_rooftopPVCompanies_pct_Businesspark(){
-	return this.sl_rooftopPVCompanies_pct_Businesspark;
-}
-
-//Households/Residential Area
-public ShapeSlider getSliderRooftopPVHouses_pct(){
-	return this.sl_rooftopPVHouses_pct;
-}
-
-public ShapeSlider getSliderHouseholdPVResidentialArea_pct(){
-	return this.sl_householdPVResidentialArea_pct;
-}
-
-public ShapeSlider getSliderHouseholdBatteriesResidentialArea_pct(){
-	return this.sl_householdBatteriesResidentialArea_pct;
-}
-
-public ShapeSlider getSliderHouseholdElectricCookingResidentialArea_pct(){
-	return this.sl_householdElectricCookingResidentialArea_pct;
-}
-
-public ShapeSlider getSliderElectricityDemandIncreaseResidentialArea_pct(){
-	return this.sl_electricityDemandIncreaseResidentialArea_pct;
-}
-
-public ShapeSlider getSliderGridBatteriesResidentialArea_kWh(){
-	return this.sl_gridBatteriesResidentialArea_kWh;
+public ShapeSlider getSliderGridBatteries(){
+	return this.sl_gridBatteries_kWh;
 } 
   // End of additional class code
 

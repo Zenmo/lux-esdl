@@ -7,6 +7,8 @@ import esdl.PVInstallation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zero_engine.GridConnection;
+import zero_engine.OL_EnergyAssetType;
+import zero_engine.OL_GridConnectionHeatingType;
 import zero_engine.OL_PVOrientation;
 import zerointerfaceloader.Zero_Loader;
 
@@ -23,12 +25,14 @@ public class GridConnectionAssetLoader {
     static void loadEVChargingStation(
             EVChargingStation evStation, Zero_Loader luxLoader, GridConnection gridConnection
     ) {
-        logger.warn("EVChargingStation loading not implemented (requires trip data files), id={}", evStation.getId());
+        var maxChargingPowerKw = evStation.getPower() * 0.001;
+        luxLoader.f_addElectricVehicle(gridConnection, OL_EnergyAssetType.ELECTRIC_VEHICLE, true, 8_000, maxChargingPowerKw);
     }
 
     static void loadHybridHeatPump(
             HybridHeatPump heatPump, Zero_Loader luxLoader, GridConnection gridConnection
     ) {
-        logger.error("HybridHeatPump loading not implemented, id={}", heatPump.getId());
+        var maxThermalPowerKw = heatPump.getGasHeaterThermalPower() * 0.001;
+        luxLoader.f_addHeatAsset(gridConnection, OL_GridConnectionHeatingType.HYBRID_HEATPUMP, maxThermalPowerKw);
     }
 }

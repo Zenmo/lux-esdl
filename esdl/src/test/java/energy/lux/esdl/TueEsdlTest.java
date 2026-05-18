@@ -64,6 +64,11 @@ public class TueEsdlTest {
         var connectionHome2 = findGridConnectionById(luxEngine, "1412f71f-a9d2-4c66-a834-385cf91c3767");
         assertNotNull(connectionHome2, "ConnectionHome2 not found");
         assertEquals(transformerGridNode.p_gridNodeID, connectionHome2.p_parentNodeElectricID);
+
+        // PV + EV + fixed consumption + heat pump + gas burner (hybrid configuration)
+        assertEquals(5, connectionHome1.c_energyAssets.size());
+        // fixed consumption
+        assertEquals(1, connectionHome2.c_energyAssets.size());
     }
 
     private GridNode findGridNodeById(EnergyModel energyModel, String gridNodeId) {

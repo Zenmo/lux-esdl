@@ -73,6 +73,10 @@ public class LuxModelFactory {
         loader.defaultProfiles_data = ExcelProfileReader.loadDefaultProfiles2025();
         loader.f_setEngineProfiles();
 
+        energyModel.p_truckTripsCsv = loader.inputCSVtruckTrips;
+        energyModel.p_householdTripsCsv = loader.inputCSVhouseholdTrips;
+        energyModel.p_cookingPatternCsv = loader.inputCSVcookingActivities;
+
         return loader;
     }
 }

@@ -81,6 +81,16 @@ import zeroPackage.ZeroMath;
 public class tabHeating extends zerointerfaceloader.tabArea
 {
   // Parameters
+  // Plain Variables
+
+  public 
+int 
+ v_currentPageIndex;
+
+  // Collection Variables
+  public 
+ArrayList <
+ShapeGroup > c_loadedPageGroups = new ArrayList<ShapeGroup>();
 
   @AnyLogicInternalCodegenAPI
   private static Map<String, IElementDescriptor> elementDesciptors_xjal = createElementDescriptors( tabHeating.class );
@@ -613,163 +623,23 @@ f_setHeatingSystems(gcList, orderedHeatingSystemGCList, changedSliderHeatingType
 
   protected void f_updateSliders_Heating(  ) { 
 
-if(gr_heatingSliders_default.isVisible()){
-	f_updateHeatingSliders_default();
-}
-else if(gr_heatingSliders_businesspark.isVisible()){
-	f_updateHeatingSliders_businesspark();
-}
-else if(gr_heatingSliders_residential.isVisible()){
-	f_updateHeatingSliders_residential();
-}
-else{
-	f_updateHeatingSliders_custom();
+// Update all loaded pages
+for (ShapeGroup page : c_loadedPageGroups) {
+	if(page == gr_heatingSliders_households){
+		f_updateHeatingSliders_households();
+	}
+	else if(page == gr_heatingSliders_companies){
+		f_updateHeatingSliders_companies();
+	}
+	else{
+		f_updateHeatingSliders_custom(); 
+	}
 } 
   }
 
-  void f_updateHeatingSliders_default(  ) { 
-
-////Companies
-List<GCUtility> utilityGridConnections = uI_Tabs.f_getActiveSliderGridConnections_utilities();
-
-//Savings (IN PROGRESS, WHAT ABOUT THERMAL BUILDINGS?????)
-double totalBaseConsumption_kWh = 0;
-double totalSavedConsumption_kWh = 0;
-for(GridConnection GC : utilityGridConnections){
-	if(GC.v_isActive){
-		List<J_EAProfile> profileEAs = findAll(GC.c_profileAssets, profile -> profile.getEnergyCarrier() == OL_EnergyCarriers.HEAT && !(profile instanceof J_EAProduction));
-		for(J_EAProfile profileEA : profileEAs){
-			double baseConsumption_kWh = profileEA.getBaseConsumption_kWh();
-			totalBaseConsumption_kWh += baseConsumption_kWh;
-			totalSavedConsumption_kWh += (1 - profileEA.getProfileScaling_fr()) * baseConsumption_kWh;
-		}		
-		if(GC.p_BuildingThermalAsset != null){
-			traceln("WARNING: SLIDER SAVINGS UPDATE FUNCTION IS NOT FUNCTIONAL YET FOR COMPANIES WITH THERMAL BUILDING ASSETS");
-		}
-	}
-}
-
-double heatSavings_pct = totalBaseConsumption_kWh > 0 ? (totalSavedConsumption_kWh/totalBaseConsumption_kWh * 100) : 0;
-sl_heatDemandReductionCompanies_pct.setValue(roundToInt(heatSavings_pct), false);
-
-
-//Heating assets
-//Heating type
-int totalCompaniesWithHeating = 0;
-int nbOfCompaniesWithGasBurners = 0;
-int nbOfCompaniesWithHybridHeatpumps = 0;
-int nbOfCompaniesWithElectricHeatpumps = 0;
-int nbOfCompaniesOnHTHeatGrid = 0;
-int nbOfCompaniesOnLTHeatGrid = 0;
-
-for(GCUtility GC : utilityGridConnections){
-	if(GC.v_isActive && GC.f_getCurrentHeatingType() != OL_GridConnectionHeatingType.NONE){
-		totalCompaniesWithHeating++;
-		switch(GC.f_getCurrentHeatingType()){
-			case GAS_BURNER:
-				nbOfCompaniesWithGasBurners++;
-				break;
-			case HYBRID_HEATPUMP:
-				nbOfCompaniesWithHybridHeatpumps++;
-				break;
-			case ELECTRIC_HEATPUMP:
-				nbOfCompaniesWithElectricHeatpumps++;
-				break;
-			case DISTRICTHEAT:
-				nbOfCompaniesOnHTHeatGrid++;
-				break;
-			case LT_DISTRICTHEAT:
-				nbOfCompaniesOnLTHeatGrid++;
-				break;
-		}
-	}
-}
-
-int companiesWithGasBurners_pct = roundToInt(100.0 * nbOfCompaniesWithGasBurners / totalCompaniesWithHeating);
-int companiesWithHybridHeatpump_pct = roundToInt(100.0 * nbOfCompaniesWithHybridHeatpumps / totalCompaniesWithHeating);
-int companiesWithElectricHeatpump_pct = roundToInt(100.0 * nbOfCompaniesWithElectricHeatpumps / totalCompaniesWithHeating);
-int companiesWithHTDistrictHeat_pct = roundToInt(100.0 * nbOfCompaniesOnHTHeatGrid / totalCompaniesWithHeating);
-
-sl_gasBurnerCompanies_pct.setValue(companiesWithGasBurners_pct, false);
-sl_hybridHeatPumpCompanies_pct.setValue(companiesWithHybridHeatpump_pct, false);
-sl_electricHeatPumpCompanies_pct.setValue(companiesWithElectricHeatpump_pct, false);
-sl_districtHeatingCompanies_pct.setValue(companiesWithHTDistrictHeat_pct, false);
-
-
-////Houses
-List<GCHouse> houseGridConnections = uI_Tabs.f_getActiveSliderGridConnections_houses();
-
-//Savings
-double averageScalingFactor = 0;
-double totalScalingFactors = 0;
-for(GCHouse GC : houseGridConnections){
-	if(GC.v_isActive){
-		List<J_EAProfile> profileEAs = findAll(GC.c_profileAssets, profile -> profile.getEnergyCarrier() == OL_EnergyCarriers.HEAT && !(profile instanceof J_EAProduction));
-		for(J_EAProfile profileEA : profileEAs){
-			double totalScalingFactorValue = averageScalingFactor*totalScalingFactors;
-			double newTotalScalingFactorValue = totalScalingFactorValue + profileEA.getProfileScaling_fr();
-			totalScalingFactors++;
-			averageScalingFactor = newTotalScalingFactorValue/totalScalingFactors;
-		}	
-		if(GC.p_BuildingThermalAsset != null){
-			double totalScalingFactorValue = averageScalingFactor*totalScalingFactors;
-			double newTotalScalingFactorValue = totalScalingFactorValue + GC.p_BuildingThermalAsset.getLossScalingFactor_fr();
-			totalScalingFactors++;
-			averageScalingFactor = newTotalScalingFactorValue/totalScalingFactors;
-		}
-	}
-}
-double averageSavingsFactor_pct = (1-averageScalingFactor)*100.0;
-sl_heatDemandReductionHouseholds_pct.setValue(roundToInt(averageSavingsFactor_pct), false);
-
-
-//Heating type
-int totalHousesWithHeating = 0;
-int nbOfHousesWithGasBurners = 0;
-int nbOfHousesWithHybridHeatpumps = 0;
-int nbOfHousesWithElectricHeatpumps = 0;
-int nbOfHousesOnHTHeatGrid = 0;
-int nbOfHousesOnLTHeatGrid = 0;
-
-for(GCHouse GC : houseGridConnections){
-	if(GC.v_isActive && GC.f_getCurrentHeatingType() != OL_GridConnectionHeatingType.NONE){
-		totalHousesWithHeating++;
-		switch(GC.f_getCurrentHeatingType()){
-			case GAS_BURNER:
-				nbOfHousesWithGasBurners++;
-				break;
-			case HYBRID_HEATPUMP:
-				nbOfHousesWithHybridHeatpumps++;
-				break;
-			case ELECTRIC_HEATPUMP:
-				nbOfHousesWithElectricHeatpumps++;
-				break;
-			case DISTRICTHEAT:
-				nbOfHousesOnHTHeatGrid++;
-				break;
-			case LT_DISTRICTHEAT:
-				nbOfHousesOnLTHeatGrid++;
-				break;
-		}
-	}
-}
-
-int housesWithGasBurners_pct = roundToInt(100.0 * nbOfHousesWithGasBurners / totalHousesWithHeating);
-int housesWithHybridHeatpump_pct = roundToInt(100.0 * nbOfHousesWithHybridHeatpumps / totalHousesWithHeating);
-int housesWithElectricHeatpump_pct = roundToInt(100.0 * nbOfHousesWithElectricHeatpumps / totalHousesWithHeating);
-int housesWithHTDistrictHeat_pct = roundToInt(100.0 * nbOfHousesOnHTHeatGrid / totalHousesWithHeating);
-
-sl_gasBurnerHouseholds_pct.setValue(housesWithGasBurners_pct, false);
-sl_hybridHeatPumpHouseholds_pct.setValue(housesWithHybridHeatpump_pct, false);
-sl_electricHeatPumpHouseholds_pct.setValue(housesWithElectricHeatpump_pct, false);
-sl_districtHeatingHouseholds_pct.setValue(housesWithHTDistrictHeat_pct, false);
- 
-  }
-
-  void f_updateHeatingSliders_residential(  ) { 
+  protected void f_updateHeatingSliders_households(  ) { 
 
 List<GCHouse> houseGridConnections = uI_Tabs.f_getActiveSliderGridConnections_houses();
-
 
 //Heating type
 int totalHousesWithHeating = 0;
@@ -806,40 +676,40 @@ int housesWithGasBurners_pct = roundToInt(100.0 * nbOfHousesWithGasBurners / tot
 int housesWithHybridHeatpump_pct = roundToInt(100.0 * nbOfHousesWithHybridHeatpumps / totalHousesWithHeating);
 int housesWithElectricHeatpump_pct = roundToInt(100.0 * nbOfHousesWithElectricHeatpumps / totalHousesWithHeating);
 
-sl_householdGasBurnerResidentialArea_pct.setValue(housesWithGasBurners_pct, false);
-sl_householdHybridHeatpumpResidentialArea.setValue(housesWithHybridHeatpump_pct, false);
-sl_householdElectricHeatPumpResidentialArea_pct.setValue(housesWithElectricHeatpump_pct, false);
-cb_householdHTDistrictHeatingResidentialArea.setSelected(false, false);
-cb_householdLTDistrictHeatingResidentialArea.setSelected(false, false);
+sl_householdGasBurner_pct.setValue(housesWithGasBurners_pct, false);
+sl_householdHybridHeatpump_pct.setValue(housesWithHybridHeatpump_pct, false);
+sl_householdElectricHeatPump_pct.setValue(housesWithElectricHeatpump_pct, false);
+cb_householdHTDistrictHeating.setSelected(false, false);
+cb_householdLTDistrictHeating.setSelected(false, false);
 
 if(nbOfHousesOnHTHeatGrid == totalHousesWithHeating){
-	cb_householdHTDistrictHeatingResidentialArea.setSelected(true, false);
+	cb_householdHTDistrictHeating.setSelected(true, false);
 }
 if(nbOfHousesOnLTHeatGrid == totalHousesWithHeating){
-	cb_householdLTDistrictHeatingResidentialArea.setSelected(true, false);
+	cb_householdLTDistrictHeating.setSelected(true, false);
 }
 
 //Houses with Airco
 double nbHouses = houseGridConnections.size();
 double nbHousesWithAirco = count(houseGridConnections, x -> x.p_airco != null);
 double pctOfHousesWithAirco = (nbHousesWithAirco*100.0)/nbHouses;
-sl_householdAircoResidentialArea_pct.setValue(pctOfHousesWithAirco, false);
+sl_householdAirco_pct.setValue(pctOfHousesWithAirco, false);
 
 
 //Houses with better isolation
 int nbHousesThatCanGetImprovedIsolation = count(houseGridConnections, x -> x.p_insulationLabel != OL_GridConnectionInsulationLabel.A);
 int nbHousesWithImprovedInsulation = count(houseGridConnections, x -> x.p_BuildingThermalAsset.getLossScalingFactor_fr() < 1 && x.p_insulationLabel != OL_GridConnectionInsulationLabel.A);
 double pctOfHousesWithImprovedInsulation = 100.0 * ((double)nbHousesWithImprovedInsulation)/nbHousesThatCanGetImprovedIsolation;
-sl_householdHeatDemandReductionResidentialArea_pct.setValue(roundToInt(pctOfHousesWithImprovedInsulation), false);
+sl_householdHeatDemandReduction_pct.setValue(roundToInt(pctOfHousesWithImprovedInsulation), false);
 
 
 //PT
 int nbHousesWithPT = count(houseGridConnections, x -> x.v_liveAssetsMetaData.activeAssetFlows.contains(OL_AssetFlowCategories.ptProductionHeat_kW));
 
-sl_rooftopPTHouses_pct.setValue(roundToInt((nbHousesWithPT*100.0)/nbHouses), false); 
+sl_householdRooftopPT_pct.setValue(roundToInt((nbHousesWithPT*100.0)/nbHouses), false); 
   }
 
-  void f_updateHeatingSliders_businesspark(  ) { 
+  protected void f_updateHeatingSliders_companies(  ) { 
 
 List<GCUtility> utilityGridConnections = uI_Tabs.f_getActiveSliderGridConnections_utilities();
 
@@ -861,7 +731,7 @@ for(GridConnection GC : utilityGridConnections){
 }
 
 double heatSavings_pct = totalBaseConsumption_kWh > 0 ? (totalSavedConsumption_kWh/totalBaseConsumption_kWh * 100) : 0;
-sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct.setValue(roundToInt(heatSavings_pct), false);
+sl_companiesHeatDemandReduction_pct.setValue(roundToInt(heatSavings_pct), false);
 
 
 //Heating type
@@ -907,20 +777,19 @@ int companiesWithLTDistrictHeat_pct = roundToInt(100.0 * nbOfCompaniesOnLTHeatGr
 int companiesWithCustomHeating_pct = roundToInt(100.0 * nbOfCompaniesWithCustomHeating / totalCompaniesWithHeating);
 
 
-sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct.setValue(companiesWithGasBurners_pct, false);
-sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct.setValue(companiesWithHybridHeatpump_pct, false);
-sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct.setValue(companiesWithElectricHeatpump_pct, false);
-sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct.setValue(companiesWithHTDistrictHeat_pct, false);
-//sl_heatDemandSlidersCompaniesLTDistrictHeatingCompanies_pct.setValue(companiesWithLTDistrictHeat_pct, false); Doesnt exist (yet) for companies
-sl_heatingTypeSlidersCompaniesCustom_pct.setValue(companiesWithCustomHeating_pct, false);
+sl_companiesGasBurner_pct.setValue(companiesWithGasBurners_pct, false);
+sl_companiesHybridHeatPump_pct.setValue(companiesWithHybridHeatpump_pct, false);
+sl_companiesElectricHeatPump_pct.setValue(companiesWithElectricHeatpump_pct, false);
+sl_companiesDistrictHeating_pct.setValue(companiesWithHTDistrictHeat_pct, false);
+//sl_companiesLTDistrictHeating_pct.setValue(companiesWithLTDistrictHeat_pct, false); Doesnt exist (yet) for companies
+sl_companiesCustom_pct.setValue(companiesWithCustomHeating_pct, false);
  
   }
 
   protected void f_updateHeatingSliders_custom(  ) { 
 
-//If you have a custom tab, 
-//override this function to make it update automatically
-traceln("Forgot to override the update custom heating sliders functionality"); 
+//If you have a custom tab, override this function to make it update automatically
+throw new RuntimeException("Forgot to override the update custom heating sliders functionality"); 
   }
 
   public void f_setHeatingSystems( List<GridConnection> gcList, List<GridConnection> orderedHeatingSystemGCList, OL_GridConnectionHeatingType changedSliderHeatingType, double sliderGoal_pct ) { 
@@ -1183,7 +1052,7 @@ GridNode GN_heat = zero_Interface.energyModel.add_pop_gridNodes();
 zero_Interface.energyModel.f_getGridNodesTopLevel().add(GN_heat);
 GN_heat.p_gridNodeID = "Heatgrid";
 
-// Check wether transformer capacity is known or estimated
+// Check whether transformer capacity is known or estimated
 GN_heat.p_capacity_kW = 1000000;	
 GN_heat.p_realCapacityAvailable = false;
 
@@ -1204,362 +1073,313 @@ zero_Interface.f_setErrorScreen("LET OP: Er is nu een 'warmtenet' gecreëerd. Ma
 
 return GN_heat; 
   }
+
+  protected void f_initializeHeatingPages(  ) { 
+
+// CHOOSE WHICH PAGES IN YOUR TAB YOU WANT TO BE ABLE TO SHOW FOR YOUR PROJECT 
+boolean hasHouses = uI_Tabs.f_getActiveSliderGridConnections_houses().size() > 0;
+boolean hasCompanies = uI_Tabs.f_getActiveSliderGridConnections_utilities().size() > 0;
+
+c_loadedPageGroups = new ArrayList<>();
+// Load in the existing pages you want to include in the tab
+if (hasHouses) {
+	c_loadedPageGroups.add(gr_heatingSliders_households);
+} 
+if (hasCompanies) {
+	c_loadedPageGroups.add(gr_heatingSliders_companies);
+}
+
+// If you have a custom page, add it by using f_addCustomPage:
+f_addCustomPage();
+
+// Show/hide page indicator based on number of pages
+if (c_loadedPageGroups.size() <= 1) {
+    gr_pageIndicator.setVisible(false);
+} else {
+    gr_pageIndicator.setVisible(true);
+}
+// Navigate to the first page
+if (!c_loadedPageGroups.isEmpty()) {
+    f_goToPage(0);
+} 
+  }
+
+  protected void f_goToPage( int pageIndex ) { 
+
+for (ShapeGroup group : c_loadedPageGroups) {
+    group.setVisible(false);
+}
+
+if (c_loadedPageGroups.isEmpty()) return;
+
+v_currentPageIndex = pageIndex;
+c_loadedPageGroups.get(v_currentPageIndex).setVisible(true); // Show the selected page group
+f_updatePageIndicator(); // Update the page indicator text 
+  }
+
+  protected void f_nextPage(  ) { 
+
+if (c_loadedPageGroups.isEmpty()) return;
+int nextIndex = (v_currentPageIndex + 1) % c_loadedPageGroups.size();
+f_goToPage(nextIndex); 
+  }
+
+  protected void f_previousPage(  ) { 
+
+if (c_loadedPageGroups.isEmpty()) return;
+int prevIndex = (v_currentPageIndex - 1 + c_loadedPageGroups.size()) % c_loadedPageGroups.size();
+f_goToPage(prevIndex); 
+  }
+
+  protected void f_updatePageIndicator(  ) { 
+
+t_pageIndicator.setText("Pagina " + (v_currentPageIndex + 1) + "/" + c_loadedPageGroups.size());
+presentation.remove(gr_pageIndicator);
+presentation.add(gr_pageIndicator); 
+  }
+
+  protected void f_initializeTab_Heating(  ) { 
+
+f_initializeHeatingPages(); 
+  }
+
+  protected void f_addCustomPage(  ) { 
+
+// Override this function to add your custom page to c_loadedPageGroups, for instance, like this:
+//c_loadedPageGroups.add(gr_heatingSliders_custom); 
+  }
 private double _datasetUpdateTime_xjal() {
 	return time();
 }
   // View areas
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_householdHTDistrictHeatingResidentialArea_Font = new Font("Dialog", 0, 12 );
+  protected static final Font _cb_householdHTDistrictHeating_Font = new Font("Dialog", 0, 12 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _cb_householdLTDistrictHeatingResidentialArea_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _cb_householdLTDistrictHeating_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _t_genericFunctions_Font = new Font("SansSerif", 0, 22 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_gasBurnerHouseholdsDescription_Font = new Font("Dialog", 0, 14 );
+  protected static final Font _txt_companiesHeatDemandReductionDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_hybridHeatPumpHouseholdsDescription_Font = new Font("SansSerif", 0, 14 );
+  protected static final Font _txt_companiesHeatDemandReduction_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricHeatPumpHouseholdsDescription_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesGasBurnerDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_districtHeatingHouseholdsDescription_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesHybridHeatPumpDescription_Font = new Font("SansSerif", 0, 12 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricHeatPumpHouseholds_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesElectricHeatPumpDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_gasBurnerHouseholds_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesDistrictHeatingCompaniesDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_districtHeatingHouseholds_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesElectricHeatPump_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_hybridHeatPumpHouseholds_pct_Font = _t_hybridHeatPumpHouseholdsDescription_Font;
+  protected static final Font _txt_companiesGasBurner_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_heatDemandReductionHouseholds_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesDistrictHeating_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_heatDemandReductionHouseholdsDescription_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesHybridHeatPump_pct_Font = _txt_companiesHybridHeatPumpDescription_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdsDescription_Font = new Font("Calibri", 1, 18 );
+  protected static final Font _txt_heatingDemandSlidersCompaniesDescription_Font = new Font("Dialog", 1, 22 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_heatDemandReductionCompaniesDescription_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesEBoiler_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_heatDemandReductionCompanies_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesEBoilerDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_gasBurnerCompaniesDescription_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesCustom_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_hybridHeatPumpCompaniesDescription_Font = _t_hybridHeatPumpHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricHeatPumpCompaniesDescription_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_districtHeatingCompaniesDescription_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricHeatPumpCompanies_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_gasBurnerCompanies_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_districtHeatingCompanies_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_hybridHeatPumpCompanies_pct_Font = _t_hybridHeatPumpHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_companiesDescription_Font = _t_householdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_heatDemandReductionCompaniesDescription1_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_heatDemandReductionCompanies_pct1_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_gasBurnerCompaniesDescription1_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_hybridHeatPumpCompaniesDescription1_Font = _t_hybridHeatPumpHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricHeatPumpCompaniesDescription1_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_districtHeatingCompaniesDescription1_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_electricHeatPumpCompanies_pct1_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_gasBurnerCompanies_pct1_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_districtHeatingCompanies_pct1_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_hybridHeatPumpCompanies_pct1_Font = _t_hybridHeatPumpHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_companiesDescription1_Font = _t_householdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_eBoilerCompanies_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_eBoilerCompaniesDescription_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _t_customHeatingTypeCompanies_pct_Font = _t_gasBurnerHouseholdsDescription_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_customHeatingDemandCompaniesDescription_Font = _t_gasBurnerHouseholdsDescription_Font;
+  protected static final Font _txt_companiesCustomDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _txt_demandFunctionsDescription_Font = new Font("SansSerif", 0, 18 );
   @AnyLogicInternalCodegenAPI
   protected static final Font _txt_heatingFunctionsDescription_Font = _txt_demandFunctionsDescription_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdGasBurnerDescriptionResidentialArea_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _txt_householdGasBurnerDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdElectricHeatPumpDescriptionResidentialArea_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _txt_householdElectricHeatPumpDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdElectricHeatPumpResidentialArea_pct_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _txt_householdElectricHeatPump_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdGasBurnerResidentialArea_pct_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _t_householdGasBurner_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdHeatDemandReductionResidentialArea_pct_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _txt_householdHeatDemandReduction_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdHeatDemandReductionDescriptionResidentialArea_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _txt_householdHeatDemandReductionDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdHeatingTypeDescriptionResidentialArea_Font = new Font("Dialog", 1, 14 );
+  protected static final Font _txt_heatingDemandSlidersHousesholdsDescription_Font = _txt_heatingDemandSlidersCompaniesDescription_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdAircoDescriptionResidentialArea_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _txt_householdAircoDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdAircoResidentialArea_pct_Font = new Font("SansSerif", 0, 12 );
+  protected static final Font _txt_householdAirco_pct_Font = _txt_companiesHybridHeatPumpDescription_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_rooftopPTHouses_pct_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _txt_householdRooftopPT_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_rooftopPTHousesDescription_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _txt_householdRooftopPTDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _txt_householdHybridHeatpumpDescriptionResidentialArea_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _txt_householdHybridHeatpumpDescription_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
-  protected static final Font _t_householdElectricHeatPumpResidentialArea_pct1_Font = _cb_householdHTDistrictHeatingResidentialArea_Font;
+  protected static final Font _t_householdHybridHeatPump_pct_Font = _cb_householdHTDistrictHeating_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _txt_districtheatingFunctionsDescription_Font = _txt_demandFunctionsDescription_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _txt_heatingProductionFunctionsDescription_Font = _txt_demandFunctionsDescription_Font;
   @AnyLogicInternalCodegenAPI
+  protected static final Font _t_pageIndicator_Font = new Font("Dialog", 0, 10 );
+  @AnyLogicInternalCodegenAPI
   protected static final int _rect_genericFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 1;
   @AnyLogicInternalCodegenAPI
   protected static final int _t_genericFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 2;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_heatDemandSliders = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 3;
+  protected static final int _rect_heatDemandSliders1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 3;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_gasBurnerHouseholdsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 4;
+  protected static final int _txt_companiesHeatDemandReductionDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 4;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_hybridHeatPumpHouseholdsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 5;
+  protected static final int _txt_companiesHeatDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 5;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricHeatPumpHouseholdsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 6;
+  protected static final int _txt_companiesGasBurnerDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 6;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_districtHeatingHouseholdsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 7;
+  protected static final int _txt_companiesHybridHeatPumpDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 7;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricHeatPumpHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 8;
+  protected static final int _txt_companiesElectricHeatPumpDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 8;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_gasBurnerHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 9;
+  protected static final int _txt_companiesDistrictHeatingCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 9;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_districtHeatingHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 10;
+  protected static final int _txt_companiesElectricHeatPump_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 10;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_hybridHeatPumpHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 11;
+  protected static final int _txt_companiesGasBurner_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 11;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_heatDemandReductionHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 12;
+  protected static final int _txt_companiesDistrictHeating_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 12;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_heatDemandReductionHouseholdsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 13;
+  protected static final int _txt_companiesHybridHeatPump_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 13;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 14;
+  protected static final int _txt_heatingDemandSlidersCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 14;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_heatDemandReductionCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 15;
+  protected static final int _txt_companiesEBoiler_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 15;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_heatDemandReductionCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 16;
+  protected static final int _txt_companiesEBoilerDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 16;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_gasBurnerCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 17;
+  protected static final int _i_companyReduction = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 17;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_hybridHeatPumpCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 18;
+  protected static final int _i_companyGasBoiler = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 18;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricHeatPumpCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 19;
+  protected static final int _i_companyElectricHeatpump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 19;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_districtHeatingCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 20;
+  protected static final int _i_companyHybridHeatpump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 20;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricHeatPumpCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 21;
+  protected static final int _i_companyHeatGrid = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 21;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_gasBurnerCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 22;
+  protected static final int _i_companyEBoiler = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 22;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_districtHeatingCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 23;
+  protected static final int _txt_companiesCustom_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 23;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_hybridHeatPumpCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 24;
+  protected static final int _txt_companiesCustomDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 24;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_companiesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 25;
+  protected static final int _i_companyCustom = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 25;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyReduction = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 26;
+  protected static final int _gr_heatingSliders_companies = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 26;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyGasBoiler = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 27;
+  protected static final int _rect_demandFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 27;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyElectricHeatpump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 28;
+  protected static final int _txt_demandFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 28;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyHybridHeatpump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 29;
+  protected static final int _rect_heatingFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 29;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyHeatGrid = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 30;
+  protected static final int _txt_heatingFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 30;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdElectricHeatpump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 31;
+  protected static final int _rect_heatDeandSlidersResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 31;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdReduction = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 32;
+  protected static final int _txt_householdGasBurnerDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 32;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdGasBoiler = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 33;
+  protected static final int _txt_householdElectricHeatPumpDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 33;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdHeatGrid = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 34;
+  protected static final int _txt_householdElectricHeatPump_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 34;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdHybridHeatpump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 35;
+  protected static final int _t_householdGasBurner_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 35;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_heatingSliders_default = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 36;
+  protected static final int _txt_householdHeatDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 36;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_heatDemandSliders1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 37;
+  protected static final int _txt_householdHeatDemandReductionDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 37;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_heatDemandReductionCompaniesDescription1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 38;
+  protected static final int _txt_heatingDemandSlidersHousesholdsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 38;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_heatDemandReductionCompanies_pct1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 39;
+  protected static final int _txt_householdAircoDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 39;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_gasBurnerCompaniesDescription1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 40;
+  protected static final int _txt_householdAirco_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 40;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_hybridHeatPumpCompaniesDescription1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 41;
+  protected static final int _i_householdGasBurner = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 41;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricHeatPumpCompaniesDescription1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 42;
+  protected static final int _i_householdHeatPump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 42;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_districtHeatingCompaniesDescription1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 43;
+  protected static final int _i_householdHTDistrictHeating = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 43;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_electricHeatPumpCompanies_pct1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 44;
+  protected static final int _i_householdLTDistrictHeating = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 44;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_gasBurnerCompanies_pct1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 45;
+  protected static final int _i_householdAirconditioning = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 45;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_districtHeatingCompanies_pct1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 46;
+  protected static final int _i_householdAdditionalInsulation = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 46;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_hybridHeatPumpCompanies_pct1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 47;
+  protected static final int _txt_householdRooftopPT_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 47;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_companiesDescription1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 48;
+  protected static final int _txt_householdRooftopPTDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 48;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_eBoilerCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 49;
+  protected static final int _i_householdPT = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 49;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_eBoilerCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 50;
+  protected static final int _txt_householdHybridHeatpumpDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 50;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyReduction_Company = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 51;
+  protected static final int _i_householdHybridHeatPump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 51;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyGasBoiler_Company = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 52;
+  protected static final int _t_householdHybridHeatPump_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 52;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyElectricHeatpump_Company = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 53;
+  protected static final int _gr_heatingSliders_households = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 53;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyHybridHeatpump_Company = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 54;
+  protected static final int _rect_districtHeatingFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 54;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyHeatGrid_Company = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 55;
+  protected static final int _txt_districtheatingFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 55;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyEBoiler_Company = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 56;
+  protected static final int _rect_heatingProductionFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 56;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_customHeatingTypeCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 57;
+  protected static final int _txt_heatingProductionFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 57;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_customHeatingDemandCompaniesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 58;
+  protected static final int _arrowLeftResidential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 58;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_companyCustomHeatingType_Company = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 59;
+  protected static final int _arrowRightResidential1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 59;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_heatingSliders_businesspark = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 60;
+  protected static final int _t_pageIndicator = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 60;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_demandFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 61;
+  protected static final int _gr_pageIndicator = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 61;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_demandFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 62;
+  protected static final int _sl_companiesHeatDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 62;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_heatingFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 63;
+  protected static final int _sl_companiesDistrictHeating_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 63;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_heatingFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 64;
+  protected static final int _sl_companiesGasBurner_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 64;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_heatDeandSlidersResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 65;
+  protected static final int _sl_companiesHybridHeatPump_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 65;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdGasBurnerDescriptionResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 66;
+  protected static final int _sl_companiesElectricHeatPump_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 66;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdElectricHeatPumpDescriptionResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 67;
+  protected static final int _sl_companiesEBoiler_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 67;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdElectricHeatPumpResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 68;
+  protected static final int _sl_companiesCustom_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 68;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdGasBurnerResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 69;
+  protected static final int _sl_householdGasBurner_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 69;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdHeatDemandReductionResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 70;
+  protected static final int _sl_householdElectricHeatPump_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 70;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdHeatDemandReductionDescriptionResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 71;
+  protected static final int _sl_householdHeatDemandReduction_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 71;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdHeatingTypeDescriptionResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 72;
+  protected static final int _sl_householdAirco_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 72;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdAircoDescriptionResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 73;
+  protected static final int _cb_householdHTDistrictHeating = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 73;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdAircoResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 74;
+  protected static final int _cb_householdLTDistrictHeating = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 74;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdGasBurner = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 75;
+  protected static final int _sl_householdRooftopPT_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 75;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdHeatPump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 76;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdHTDistrictHeating = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 77;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdLTDistrictHeating = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 78;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdAirconditioning = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 79;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdAdditionalInsulation = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 80;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _gr_ptSlidersHouses = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 81;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _t_rooftopPTHouses_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 82;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _txt_rooftopPTHousesDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 83;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdPT = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 84;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _txt_householdHybridHeatpumpDescriptionResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 85;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _i_householdHybridHeatPump = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 86;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _t_householdElectricHeatPumpResidentialArea_pct1 = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 87;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _gr_heatingSliders_residential = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 88;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _rect_districtHeatingFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 89;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _txt_districtheatingFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 90;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _rect_heatingProductionFunctions = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 91;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _txt_heatingProductionFunctionsDescription = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 92;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_districtHeatingHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 93;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_gasBurnerHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 94;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_hybridHeatPumpHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 95;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricHeatPumpHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 96;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatDemandReductionHouseholds_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 97;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatDemandReductionCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 98;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_districtHeatingCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 99;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_gasBurnerCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 100;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_hybridHeatPumpCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 101;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricHeatPumpCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 102;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 103;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 104;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 105;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 106;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 107;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatDemandSlidersCompaniesEBoiler_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 108;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatingTypeSlidersCompaniesCustom_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 109;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_householdGasBurnerResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 110;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_householdElectricHeatPumpResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 111;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_householdHeatDemandReductionResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 112;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_householdAircoResidentialArea_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 113;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _cb_householdHTDistrictHeatingResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 114;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _cb_householdLTDistrictHeatingResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 115;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_rooftopPTHouses_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 116;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _sl_householdHybridHeatpumpResidentialArea = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 117;
+  protected static final int _sl_householdHybridHeatpump_pct = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 76;
 
   /** Internal constant, shouldn't be accessed by user */
   @AnyLogicInternalCodegenAPI
-  protected static final int _SHAPE_NEXT_ID_xjal = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 118;
+  protected static final int _SHAPE_NEXT_ID_xjal = zerointerfaceloader.tabArea._SHAPE_NEXT_ID_xjal + 77;
 
   @AnyLogicInternalCodegenAPI
   public boolean isPublicPresentationDefined() {
@@ -1572,7 +1392,7 @@ private double _datasetUpdateTime_xjal() {
   }
   @AnyLogicInternalCodegenAPI
   private void _initialize_level_xjal() {
-	  level.addAll(rect_genericFunctions, t_genericFunctions, gr_heatingSliders_default, gr_heatingSliders_businesspark, rect_demandFunctions, txt_demandFunctionsDescription, rect_heatingFunctions, txt_heatingFunctionsDescription, gr_heatingSliders_residential, rect_districtHeatingFunctions, txt_districtheatingFunctionsDescription, rect_heatingProductionFunctions, txt_heatingProductionFunctionsDescription);
+	  level.addAll(rect_genericFunctions, t_genericFunctions, gr_heatingSliders_companies, rect_demandFunctions, txt_demandFunctionsDescription, rect_heatingFunctions, txt_heatingFunctionsDescription, gr_heatingSliders_households, rect_districtHeatingFunctions, txt_districtheatingFunctionsDescription, rect_heatingProductionFunctions, txt_heatingProductionFunctionsDescription, gr_pageIndicator);
   }
 
   @Override
@@ -1614,88 +1434,18 @@ zero_Interface.f_setInfoText(i_companyHybridHeatpump, zero_Interface.v_infoText.
 zero_Interface.f_setInfoText(i_companyHeatGrid, zero_Interface.v_infoText.companyHeatGrid, i_companyHeatGrid.getX() + uI_Tabs.v_presentationXOffset, i_companyHeatGrid.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_householdElectricHeatpump:
+      case _i_companyEBoiler:
         if (true) {
-          ShapeImage self = this.i_householdElectricHeatpump;
+          ShapeImage self = this.i_companyEBoiler;
           
-zero_Interface.f_setInfoText(i_householdElectricHeatpump, zero_Interface.v_infoText.householdElectricHeatpump, i_householdElectricHeatpump.getX() + uI_Tabs.v_presentationXOffset, i_householdElectricHeatpump.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companyEBoiler, zero_Interface.v_infoText.companyElectricBoiler, i_companyEBoiler.getX() + uI_Tabs.v_presentationXOffset, i_companyEBoiler.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
-      case _i_householdReduction:
+      case _i_companyCustom:
         if (true) {
-          ShapeImage self = this.i_householdReduction;
+          ShapeImage self = this.i_companyCustom;
           
-zero_Interface.f_setInfoText(i_householdReduction, zero_Interface.v_infoText.householdHeatDemandReduction, i_householdReduction.getX() + uI_Tabs.v_presentationXOffset, i_householdReduction.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_householdGasBoiler:
-        if (true) {
-          ShapeImage self = this.i_householdGasBoiler;
-          
-zero_Interface.f_setInfoText(i_householdGasBoiler, zero_Interface.v_infoText.householdGasBoiler, i_householdGasBoiler.getX() + uI_Tabs.v_presentationXOffset, i_householdGasBoiler.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_householdHeatGrid:
-        if (true) {
-          ShapeImage self = this.i_householdHeatGrid;
-          
-zero_Interface.f_setInfoText(i_householdHeatGrid, zero_Interface.v_infoText.householdHeatGrid, i_householdHeatGrid.getX() + uI_Tabs.v_presentationXOffset, i_householdHeatGrid.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_householdHybridHeatpump:
-        if (true) {
-          ShapeImage self = this.i_householdHybridHeatpump;
-          
-zero_Interface.f_setInfoText(i_householdHybridHeatpump, zero_Interface.v_infoText.householdHybridHeatpump, i_householdHybridHeatpump.getX() + uI_Tabs.v_presentationXOffset, i_householdHybridHeatpump.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_companyReduction_Company:
-        if (true) {
-          ShapeImage self = this.i_companyReduction_Company;
-          
-zero_Interface.f_setInfoText(i_companyReduction_Company, zero_Interface.v_infoText.companyHeatDemandReduction, i_companyReduction_Company.getX() + uI_Tabs.v_presentationXOffset, i_companyReduction_Company.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_companyGasBoiler_Company:
-        if (true) {
-          ShapeImage self = this.i_companyGasBoiler_Company;
-          
-zero_Interface.f_setInfoText(i_companyGasBoiler_Company, zero_Interface.v_infoText.companyGasBoiler, i_companyGasBoiler_Company.getX() + uI_Tabs.v_presentationXOffset, i_companyGasBoiler_Company.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_companyElectricHeatpump_Company:
-        if (true) {
-          ShapeImage self = this.i_companyElectricHeatpump_Company;
-          
-zero_Interface.f_setInfoText(i_companyElectricHeatpump_Company, zero_Interface.v_infoText.companyElectricHeatpump, i_companyElectricHeatpump_Company.getX() + uI_Tabs.v_presentationXOffset, i_companyElectricHeatpump_Company.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_companyHybridHeatpump_Company:
-        if (true) {
-          ShapeImage self = this.i_companyHybridHeatpump_Company;
-          
-zero_Interface.f_setInfoText(i_companyHybridHeatpump_Company, zero_Interface.v_infoText.companyHybridHeatpump, i_companyHybridHeatpump_Company.getX() + uI_Tabs.v_presentationXOffset, i_companyHybridHeatpump_Company.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_companyHeatGrid_Company:
-        if (true) {
-          ShapeImage self = this.i_companyHeatGrid_Company;
-          
-zero_Interface.f_setInfoText(i_companyHeatGrid_Company, zero_Interface.v_infoText.companyHeatGrid, i_companyHeatGrid_Company.getX() + uI_Tabs.v_presentationXOffset, i_companyHeatGrid_Company.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_companyEBoiler_Company:
-        if (true) {
-          ShapeImage self = this.i_companyEBoiler_Company;
-          
-zero_Interface.f_setInfoText(i_companyEBoiler_Company, zero_Interface.v_infoText.companyElectricBoiler, i_companyEBoiler_Company.getX() + uI_Tabs.v_presentationXOffset, i_companyEBoiler_Company.getY() + uI_Tabs.v_presentationYOffset); 
-        }
-        break;
-      case _i_companyCustomHeatingType_Company:
-        if (true) {
-          ShapeImage self = this.i_companyCustomHeatingType_Company;
-          
-zero_Interface.f_setInfoText(i_companyCustomHeatingType_Company, zero_Interface.v_infoText.companyCustomHeating, i_companyCustomHeatingType_Company.getX() + uI_Tabs.v_presentationXOffset, i_companyCustomHeatingType_Company.getY() + uI_Tabs.v_presentationYOffset); 
+zero_Interface.f_setInfoText(i_companyCustom, zero_Interface.v_infoText.companyCustomHeating, i_companyCustom.getX() + uI_Tabs.v_presentationXOffset, i_companyCustom.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
       case _i_householdGasBurner:
@@ -1754,6 +1504,20 @@ zero_Interface.f_setInfoText(i_householdPT, zero_Interface.v_infoText.householdR
 zero_Interface.f_setInfoText(i_householdHybridHeatPump, zero_Interface.v_infoText.householdHybridHeatpump, i_householdHybridHeatPump.getX() + uI_Tabs.v_presentationXOffset, i_householdHybridHeatPump.getY() + uI_Tabs.v_presentationYOffset); 
         }
         break;
+      case _arrowLeftResidential:
+        if (true) {
+          ShapeImage self = this.arrowLeftResidential;
+          
+f_previousPage(); 
+        }
+        break;
+      case _arrowRightResidential1:
+        if (true) {
+          ShapeImage self = this.arrowRightResidential1;
+          
+f_nextPage(); 
+        }
+        break;
       default: return super.onShapeClick( _shape, index, clickx, clicky );
  	}
  	return false;
@@ -1763,34 +1527,34 @@ zero_Interface.f_setInfoText(i_householdHybridHeatPump, zero_Interface.v_infoTex
   @AnyLogicInternalCodegenAPI
   public void executeShapeControlAction( int _shape, int index, boolean value ) {
     switch( _shape ) {
-      case _cb_householdHTDistrictHeatingResidentialArea: {
-          ShapeCheckBox self = this.cb_householdHTDistrictHeatingResidentialArea;
-if ( cb_householdHTDistrictHeatingResidentialArea.isSelected() ){
-	sl_householdGasBurnerResidentialArea_pct.setValue(0, false);
-	sl_householdElectricHeatPumpResidentialArea_pct.setValue(0, false);
-	cb_householdLTDistrictHeatingResidentialArea.setSelected(false, false);
+      case _cb_householdHTDistrictHeating: {
+          ShapeCheckBox self = this.cb_householdHTDistrictHeating;
+if ( cb_householdHTDistrictHeating.isSelected() ){
+	sl_householdGasBurner_pct.setValue(0, false);
+	sl_householdElectricHeatPump_pct.setValue(0, false);
+	cb_householdLTDistrictHeating.setSelected(false, false);
 	f_addDistrictHeatingToAllHouses(uI_Tabs.f_getActiveSliderGridConnections_houses());
 }
 else{
-	sl_householdGasBurnerResidentialArea_pct.setValue(100, false);
-	sl_householdElectricHeatPumpResidentialArea_pct.setValue(0, false);
-	cb_householdLTDistrictHeatingResidentialArea.setSelected(false, false);
+	sl_householdGasBurner_pct.setValue(100, false);
+	sl_householdElectricHeatPump_pct.setValue(0, false);
+	cb_householdLTDistrictHeating.setSelected(false, false);
 	f_removeDistrictHeatingFromAllHouses(uI_Tabs.f_getActiveSliderGridConnections_houses());
 } 
 ;}
         break;
-      case _cb_householdLTDistrictHeatingResidentialArea: {
-          ShapeCheckBox self = this.cb_householdLTDistrictHeatingResidentialArea;
-if ( cb_householdLTDistrictHeatingResidentialArea.isSelected() ){
-	sl_householdElectricHeatPumpResidentialArea_pct.setValue(0, false);
-	sl_householdGasBurnerResidentialArea_pct.setValue(0, false);
-	cb_householdHTDistrictHeatingResidentialArea.setSelected(false, false);
+      case _cb_householdLTDistrictHeating: {
+          ShapeCheckBox self = this.cb_householdLTDistrictHeating;
+if ( cb_householdLTDistrictHeating.isSelected() ){
+	sl_householdElectricHeatPump_pct.setValue(0, false);
+	sl_householdGasBurner_pct.setValue(0, false);
+	cb_householdHTDistrictHeating.setSelected(false, false);
 	f_addLTDH(uI_Tabs.f_getActiveSliderGridConnections_houses());
 }
 else{
-	sl_householdElectricHeatPumpResidentialArea_pct.setValue(0, false);
-	sl_householdGasBurnerResidentialArea_pct.setValue(100, false);
-	cb_householdHTDistrictHeatingResidentialArea.setSelected(false, false);
+	sl_householdElectricHeatPump_pct.setValue(0, false);
+	sl_householdGasBurner_pct.setValue(100, false);
+	cb_householdHTDistrictHeating.setSelected(false, false);
 	f_removeLTDH(uI_Tabs.f_getActiveSliderGridConnections_houses());
 } 
 ;}
@@ -1805,161 +1569,102 @@ else{
   @AnyLogicInternalCodegenAPI
   public void executeShapeControlAction( int _shape, int index, double value ) {
     switch( _shape ) {
-      case _sl_districtHeatingHouseholds_pct: {
-          ShapeSlider self = this.sl_districtHeatingHouseholds_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.DISTRICTHEAT, sl_gasBurnerHouseholds_pct, sl_hybridHeatPumpHouseholds_pct, sl_electricHeatPumpHouseholds_pct, sl_districtHeatingHouseholds_pct, null, null );
+      case _sl_companiesHeatDemandReduction_pct: {
+          ShapeSlider self = this.sl_companiesHeatDemandReduction_pct;
+f_setDemandReductionHeating( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_companiesHeatDemandReduction_pct.getValue()); 
+;}
+        break;
+      case _sl_companiesDistrictHeating_pct: {
+          ShapeSlider self = this.sl_companiesDistrictHeating_pct;
+f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.DISTRICTHEAT, sl_companiesGasBurner_pct, sl_companiesHybridHeatPump_pct, sl_companiesElectricHeatPump_pct, sl_companiesDistrictHeating_pct, null, sl_companiesCustom_pct );
  
 ;}
         break;
-      case _sl_gasBurnerHouseholds_pct: {
-          ShapeSlider self = this.sl_gasBurnerHouseholds_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.GAS_BURNER, sl_gasBurnerHouseholds_pct, sl_hybridHeatPumpHouseholds_pct, sl_electricHeatPumpHouseholds_pct, sl_districtHeatingHouseholds_pct, null, null );
+      case _sl_companiesGasBurner_pct: {
+          ShapeSlider self = this.sl_companiesGasBurner_pct;
+f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.GAS_BURNER, sl_companiesGasBurner_pct, sl_companiesHybridHeatPump_pct, sl_companiesElectricHeatPump_pct, sl_companiesDistrictHeating_pct, null, sl_companiesCustom_pct );
  
 ;}
         break;
-      case _sl_hybridHeatPumpHouseholds_pct: {
-          ShapeSlider self = this.sl_hybridHeatPumpHouseholds_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.HYBRID_HEATPUMP, sl_gasBurnerHouseholds_pct, sl_hybridHeatPumpHouseholds_pct, sl_electricHeatPumpHouseholds_pct, sl_districtHeatingHouseholds_pct, null, null );
+      case _sl_companiesHybridHeatPump_pct: {
+          ShapeSlider self = this.sl_companiesHybridHeatPump_pct;
+f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.HYBRID_HEATPUMP, sl_companiesGasBurner_pct, sl_companiesHybridHeatPump_pct, sl_companiesElectricHeatPump_pct, sl_companiesDistrictHeating_pct, null, sl_companiesCustom_pct );
  
 ;}
         break;
-      case _sl_electricHeatPumpHouseholds_pct: {
-          ShapeSlider self = this.sl_electricHeatPumpHouseholds_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, sl_gasBurnerHouseholds_pct, sl_hybridHeatPumpHouseholds_pct, sl_electricHeatPumpHouseholds_pct, sl_districtHeatingHouseholds_pct, null, null );
- 
+      case _sl_companiesElectricHeatPump_pct: {
+          ShapeSlider self = this.sl_companiesElectricHeatPump_pct;
+f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, sl_companiesGasBurner_pct, sl_companiesHybridHeatPump_pct, sl_companiesElectricHeatPump_pct, sl_companiesDistrictHeating_pct, null, sl_companiesCustom_pct ); 
 ;}
         break;
-      case _sl_heatDemandReductionHouseholds_pct: {
-          ShapeSlider self = this.sl_heatDemandReductionHouseholds_pct;
-f_setDemandReductionHeating( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), sl_heatDemandReductionHouseholds_pct.getValue() ); 
-;}
-        break;
-      case _sl_heatDemandReductionCompanies_pct: {
-          ShapeSlider self = this.sl_heatDemandReductionCompanies_pct;
-f_setDemandReductionHeating( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_heatDemandReductionCompanies_pct.getValue() ); 
-;}
-        break;
-      case _sl_districtHeatingCompanies_pct: {
-          ShapeSlider self = this.sl_districtHeatingCompanies_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.DISTRICTHEAT, sl_gasBurnerCompanies_pct, sl_hybridHeatPumpCompanies_pct, sl_electricHeatPumpCompanies_pct, sl_districtHeatingCompanies_pct, null, null );
- 
-;}
-        break;
-      case _sl_gasBurnerCompanies_pct: {
-          ShapeSlider self = this.sl_gasBurnerCompanies_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.GAS_BURNER, sl_gasBurnerCompanies_pct, sl_hybridHeatPumpCompanies_pct, sl_electricHeatPumpCompanies_pct, sl_districtHeatingCompanies_pct, null, null );
- 
-;}
-        break;
-      case _sl_hybridHeatPumpCompanies_pct: {
-          ShapeSlider self = this.sl_hybridHeatPumpCompanies_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.HYBRID_HEATPUMP, sl_gasBurnerCompanies_pct, sl_hybridHeatPumpCompanies_pct, sl_electricHeatPumpCompanies_pct, sl_districtHeatingCompanies_pct, null, null );
- 
-;}
-        break;
-      case _sl_electricHeatPumpCompanies_pct: {
-          ShapeSlider self = this.sl_electricHeatPumpCompanies_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, sl_gasBurnerCompanies_pct, sl_hybridHeatPumpCompanies_pct, sl_electricHeatPumpCompanies_pct, sl_districtHeatingCompanies_pct, null, null );
- 
-;}
-        break;
-      case _sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct: {
-          ShapeSlider self = this.sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct;
-f_setDemandReductionHeating( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct.getValue()); 
-;}
-        break;
-      case _sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct: {
-          ShapeSlider self = this.sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.DISTRICTHEAT, sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct, sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct, sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct, sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct, null, sl_heatingTypeSlidersCompaniesCustom_pct );
- 
-;}
-        break;
-      case _sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct: {
-          ShapeSlider self = this.sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.GAS_BURNER, sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct, sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct, sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct, sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct, null, sl_heatingTypeSlidersCompaniesCustom_pct );
- 
-;}
-        break;
-      case _sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct: {
-          ShapeSlider self = this.sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.HYBRID_HEATPUMP, sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct, sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct, sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct, sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct, null, sl_heatingTypeSlidersCompaniesCustom_pct );
- 
-;}
-        break;
-      case _sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct: {
-          ShapeSlider self = this.sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct;
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_utilities()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsCompanies), OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct, sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct, sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct, sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct, null, sl_heatingTypeSlidersCompaniesCustom_pct );
- 
-;}
-        break;
-      case _sl_heatDemandSlidersCompaniesEBoiler_pct: {
-          ShapeSlider self = this.sl_heatDemandSlidersCompaniesEBoiler_pct;
+      case _sl_companiesEBoiler_pct: {
+          ShapeSlider self = this.sl_companiesEBoiler_pct;
 traceln("Slider doet nog niets!!");//f_setHeatingSlidersCompanies(3);
 //f_resetNeighborhoodHeatingSystems(4); 
 ;}
         break;
-      case _sl_heatingTypeSlidersCompaniesCustom_pct: {
-          ShapeSlider self = this.sl_heatingTypeSlidersCompaniesCustom_pct;
+      case _sl_companiesCustom_pct: {
+          ShapeSlider self = this.sl_companiesCustom_pct;
 new RuntimeException("This slider action should not be called, this slider is purely for visualisation of the amount of custom heating types for companies"); 
 ;}
         break;
-      case _sl_householdGasBurnerResidentialArea_pct: {
-          ShapeSlider self = this.sl_householdGasBurnerResidentialArea_pct;
-if (cb_householdHTDistrictHeatingResidentialArea.isSelected()) {
-	cb_householdHTDistrictHeatingResidentialArea.setSelected(false, false);
+      case _sl_householdGasBurner_pct: {
+          ShapeSlider self = this.sl_householdGasBurner_pct;
+if (cb_householdHTDistrictHeating.isSelected()) {
+	cb_householdHTDistrictHeating.setSelected(false, false);
 	f_removeDistrictHeatingFromAllHouses(uI_Tabs.f_getActiveSliderGridConnections_houses());
 }
-if (cb_householdLTDistrictHeatingResidentialArea.isSelected()) {
-	cb_householdLTDistrictHeatingResidentialArea.setSelected(false, false);
+if (cb_householdLTDistrictHeating.isSelected()) {
+	cb_householdLTDistrictHeating.setSelected(false, false);
 	f_removeLTDH(uI_Tabs.f_getActiveSliderGridConnections_houses());
 }
 
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.GAS_BURNER, sl_householdGasBurnerResidentialArea_pct, sl_householdHybridHeatpumpResidentialArea, sl_householdElectricHeatPumpResidentialArea_pct, null, null, null );
+f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.GAS_BURNER, sl_householdGasBurner_pct, sl_householdHybridHeatpump_pct, sl_householdElectricHeatPump_pct, null, null, null );
  
 ;}
         break;
-      case _sl_householdElectricHeatPumpResidentialArea_pct: {
-          ShapeSlider self = this.sl_householdElectricHeatPumpResidentialArea_pct;
-if (cb_householdHTDistrictHeatingResidentialArea.isSelected()) {
-	cb_householdHTDistrictHeatingResidentialArea.setSelected(false, false);
+      case _sl_householdElectricHeatPump_pct: {
+          ShapeSlider self = this.sl_householdElectricHeatPump_pct;
+if (cb_householdHTDistrictHeating.isSelected()) {
+	cb_householdHTDistrictHeating.setSelected(false, false);
 	f_removeDistrictHeatingFromAllHouses(uI_Tabs.f_getActiveSliderGridConnections_houses());
 }
-if (cb_householdLTDistrictHeatingResidentialArea.isSelected()) {
-	cb_householdLTDistrictHeatingResidentialArea.setSelected(false, false);
+if (cb_householdLTDistrictHeating.isSelected()) {
+	cb_householdLTDistrictHeating.setSelected(false, false);
 	f_removeLTDH(uI_Tabs.f_getActiveSliderGridConnections_houses());
 }
 
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, sl_householdGasBurnerResidentialArea_pct, sl_householdHybridHeatpumpResidentialArea, sl_householdElectricHeatPumpResidentialArea_pct, null, null, null );
+f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, sl_householdGasBurner_pct, sl_householdHybridHeatpump_pct, sl_householdElectricHeatPump_pct, null, null, null );
  
 ;}
         break;
-      case _sl_householdHeatDemandReductionResidentialArea_pct: {
-          ShapeSlider self = this.sl_householdHeatDemandReductionResidentialArea_pct;
-f_householdInsulation( uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdHeatDemandReductionResidentialArea_pct.getValue() ); 
+      case _sl_householdHeatDemandReduction_pct: {
+          ShapeSlider self = this.sl_householdHeatDemandReduction_pct;
+f_householdInsulation( uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdHeatDemandReduction_pct.getValue() ); 
 ;}
         break;
-      case _sl_householdAircoResidentialArea_pct: {
-          ShapeSlider self = this.sl_householdAircoResidentialArea_pct;
-f_setAircos(uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdAircoResidentialArea_pct.getValue() / 100.0); 
+      case _sl_householdAirco_pct: {
+          ShapeSlider self = this.sl_householdAirco_pct;
+f_setAircos(uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdAirco_pct.getValue() / 100.0); 
 ;}
         break;
-      case _sl_rooftopPTHouses_pct: {
-          ShapeSlider self = this.sl_rooftopPTHouses_pct;
-f_setPTSystemHouses( uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_rooftopPTHouses_pct.getValue() ); 
+      case _sl_householdRooftopPT_pct: {
+          ShapeSlider self = this.sl_householdRooftopPT_pct;
+f_setPTSystemHouses( uI_Tabs.f_getActiveSliderGridConnections_houses(), sl_householdRooftopPT_pct.getValue() ); 
 ;}
         break;
-      case _sl_householdHybridHeatpumpResidentialArea: {
-          ShapeSlider self = this.sl_householdHybridHeatpumpResidentialArea;
-if (cb_householdHTDistrictHeatingResidentialArea.isSelected()) {
-	cb_householdHTDistrictHeatingResidentialArea.setSelected(false, false);
+      case _sl_householdHybridHeatpump_pct: {
+          ShapeSlider self = this.sl_householdHybridHeatpump_pct;
+if (cb_householdHTDistrictHeating.isSelected()) {
+	cb_householdHTDistrictHeating.setSelected(false, false);
 	f_removeDistrictHeatingFromAllHouses(uI_Tabs.f_getActiveSliderGridConnections_houses());
 }
-if (cb_householdLTDistrictHeatingResidentialArea.isSelected()) {
-	cb_householdLTDistrictHeatingResidentialArea.setSelected(false, false);
+if (cb_householdLTDistrictHeating.isSelected()) {
+	cb_householdLTDistrictHeating.setSelected(false, false);
 	f_removeLTDH(uI_Tabs.f_getActiveSliderGridConnections_houses());
 }
 
-f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.HYBRID_HEATPUMP, sl_householdGasBurnerResidentialArea_pct, sl_householdHybridHeatpumpResidentialArea, sl_householdElectricHeatPumpResidentialArea_pct, null, null, null );
+f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGridConnections_houses()), new ArrayList<GridConnection>(zero_Interface.c_orderedHeatingSystemsHouses), OL_GridConnectionHeatingType.HYBRID_HEATPUMP, sl_householdGasBurner_pct, sl_householdHybridHeatpump_pct, sl_householdElectricHeatPump_pct, null, null, null );
  
 ;}
         break;
@@ -1973,73 +1678,43 @@ f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGrid
   @AnyLogicInternalCodegenAPI
   public double getShapeControlDefaultValueDouble( int _shape, int index ) {
     switch(_shape) {
-      case _sl_districtHeatingHouseholds_pct: return 
+      case _sl_companiesHeatDemandReduction_pct: return 
 0 
 ;
-      case _sl_gasBurnerHouseholds_pct: return 
+      case _sl_companiesDistrictHeating_pct: return 
 0 
 ;
-      case _sl_hybridHeatPumpHouseholds_pct: return 
+      case _sl_companiesGasBurner_pct: return 
 0 
 ;
-      case _sl_electricHeatPumpHouseholds_pct: return 
+      case _sl_companiesHybridHeatPump_pct: return 
 0 
 ;
-      case _sl_heatDemandReductionHouseholds_pct: return 
+      case _sl_companiesElectricHeatPump_pct: return 
 0 
 ;
-      case _sl_heatDemandReductionCompanies_pct: return 
+      case _sl_companiesEBoiler_pct: return 
 0 
 ;
-      case _sl_districtHeatingCompanies_pct: return 
+      case _sl_companiesCustom_pct: return 
 0 
 ;
-      case _sl_gasBurnerCompanies_pct: return 
-0 
-;
-      case _sl_hybridHeatPumpCompanies_pct: return 
-0 
-;
-      case _sl_electricHeatPumpCompanies_pct: return 
-0 
-;
-      case _sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct: return 
-0 
-;
-      case _sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct: return 
-0 
-;
-      case _sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct: return 
-0 
-;
-      case _sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct: return 
-0 
-;
-      case _sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct: return 
-0 
-;
-      case _sl_heatDemandSlidersCompaniesEBoiler_pct: return 
-0 
-;
-      case _sl_heatingTypeSlidersCompaniesCustom_pct: return 
-0 
-;
-      case _sl_householdGasBurnerResidentialArea_pct: return 
+      case _sl_householdGasBurner_pct: return 
 100 
 ;
-      case _sl_householdElectricHeatPumpResidentialArea_pct: return 
+      case _sl_householdElectricHeatPump_pct: return 
 0 
 ;
-      case _sl_householdHeatDemandReductionResidentialArea_pct: return 
+      case _sl_householdHeatDemandReduction_pct: return 
 0 
 ;
-      case _sl_householdAircoResidentialArea_pct: return 
+      case _sl_householdAirco_pct: return 
 0 
 ;
-      case _sl_rooftopPTHouses_pct: return 
+      case _sl_householdRooftopPT_pct: return 
 0 
 ;
-      case _sl_householdHybridHeatpumpResidentialArea: return 
+      case _sl_householdHybridHeatpump_pct: return 
 0 
 ;
       default: return super.getShapeControlDefaultValueDouble( _shape, index );
@@ -2051,91 +1726,7 @@ f_setHeatingSliders( new ArrayList<GridConnection>(uI_Tabs.f_getActiveSliderGrid
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_districtHeatingHouseholds_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    boolean _visible = 
-false 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
- 	}
-  }
-  
-  protected ShapeSlider sl_districtHeatingHouseholds_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_gasBurnerHouseholds_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_gasBurnerHouseholds_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_hybridHeatPumpHouseholds_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    boolean _visible = 
-false 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
- 	}
-  }
-  
-  protected ShapeSlider sl_hybridHeatPumpHouseholds_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_electricHeatPumpHouseholds_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_electricHeatPumpHouseholds_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_heatDemandReductionHouseholds_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesHeatDemandReduction_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2147,33 +1738,87 @@ false
     }
   }
   
-  protected ShapeSlider sl_heatDemandReductionHouseholds_pct;
+  protected ShapeSlider sl_companiesHeatDemandReduction_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_heatDemandReductionCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesDistrictHeating_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
--50 ;
+0 ;
       @AnyLogicInternalCodegenAPI
       double _max = 
-50 ;
+100 ;
       shape.setRange( _min, _max );
     }
   }
   
-  protected ShapeSlider sl_heatDemandReductionCompanies_pct;
+  protected ShapeSlider sl_companiesDistrictHeating_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_districtHeatingCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesGasBurner_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+    {
+      @AnyLogicInternalCodegenAPI
+      double _min = 
+0 ;
+      @AnyLogicInternalCodegenAPI
+      double _max = 
+100 ;
+      shape.setRange( _min, _max );
+    }
+  }
+  
+  protected ShapeSlider sl_companiesGasBurner_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _sl_companiesHybridHeatPump_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+    {
+      @AnyLogicInternalCodegenAPI
+      double _min = 
+0 ;
+      @AnyLogicInternalCodegenAPI
+      double _max = 
+100 ;
+      shape.setRange( _min, _max );
+    }
+  }
+  
+  protected ShapeSlider sl_companiesHybridHeatPump_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _sl_companiesElectricHeatPump_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+    {
+      @AnyLogicInternalCodegenAPI
+      double _min = 
+0 ;
+      @AnyLogicInternalCodegenAPI
+      double _max = 
+100 ;
+      shape.setRange( _min, _max );
+    }
+  }
+  
+  protected ShapeSlider sl_companiesElectricHeatPump_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _sl_companiesEBoiler_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     boolean _visible = 
-false 
+sl_companiesEBoiler_pct.isEnabled() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -2189,13 +1834,13 @@ false
  	}
   }
   
-  protected ShapeSlider sl_districtHeatingCompanies_pct;
+  protected ShapeSlider sl_companiesEBoiler_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_gasBurnerCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_companiesCustom_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2207,37 +1852,13 @@ false
     }
   }
   
-  protected ShapeSlider sl_gasBurnerCompanies_pct;
+  protected ShapeSlider sl_companiesCustom_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_hybridHeatPumpCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    boolean _visible = 
-false 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
- 	}
-  }
-  
-  protected ShapeSlider sl_hybridHeatPumpCompanies_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_electricHeatPumpCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdGasBurner_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2249,31 +1870,13 @@ false
     }
   }
   
-  protected ShapeSlider sl_electricHeatPumpCompanies_pct;
+  protected ShapeSlider sl_householdGasBurner_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
--50 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-50 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdElectricHeatPump_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2285,13 +1888,13 @@ false
     }
   }
   
-  protected ShapeSlider sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct;
+  protected ShapeSlider sl_householdElectricHeatPump_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdHeatDemandReduction_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2303,13 +1906,13 @@ false
     }
   }
   
-  protected ShapeSlider sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct;
+  protected ShapeSlider sl_householdHeatDemandReduction_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdAirco_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2321,13 +1924,15 @@ false
     }
   }
   
-  protected ShapeSlider sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct;
+  protected ShapeSlider sl_householdAirco_pct;
+  protected ShapeCheckBox cb_householdHTDistrictHeating;
+  protected ShapeCheckBox cb_householdLTDistrictHeating;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdRooftopPT_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2339,37 +1944,13 @@ false
     }
   }
   
-  protected ShapeSlider sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct;
+  protected ShapeSlider sl_householdRooftopPT_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _sl_heatDemandSlidersCompaniesEBoiler_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    boolean _visible = 
-sl_heatDemandSlidersCompaniesEBoiler_pct.isEnabled() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
- 	}
-  }
-  
-  protected ShapeSlider sl_heatDemandSlidersCompaniesEBoiler_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_heatingTypeSlidersCompaniesCustom_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
+  private void _sl_householdHybridHeatpump_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
     {
       @AnyLogicInternalCodegenAPI
       double _min = 
@@ -2381,511 +1962,359 @@ sl_heatDemandSlidersCompaniesEBoiler_pct.isEnabled()
     }
   }
   
-  protected ShapeSlider sl_heatingTypeSlidersCompaniesCustom_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_householdGasBurnerResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_householdGasBurnerResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_householdElectricHeatPumpResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_householdElectricHeatPumpResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_householdHeatDemandReductionResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_householdHeatDemandReductionResidentialArea_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_householdAircoResidentialArea_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_householdAircoResidentialArea_pct;
-  protected ShapeCheckBox cb_householdHTDistrictHeatingResidentialArea;
-  protected ShapeCheckBox cb_householdLTDistrictHeatingResidentialArea;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_rooftopPTHouses_pct_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_rooftopPTHouses_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _sl_householdHybridHeatpumpResidentialArea_SetDynamicParams_xjal( ShapeSlider shape ) {
-    {
-      @AnyLogicInternalCodegenAPI
-      double _min = 
-0 ;
-      @AnyLogicInternalCodegenAPI
-      double _max = 
-100 ;
-      shape.setRange( _min, _max );
-    }
-  }
-  
-  protected ShapeSlider sl_householdHybridHeatpumpResidentialArea;
+  protected ShapeSlider sl_householdHybridHeatpump_pct;
   protected ShapeRectangle rect_genericFunctions;
   protected ShapeText t_genericFunctions;
-  protected ShapeRectangle rect_heatDemandSliders;
-  protected ShapeText t_gasBurnerHouseholdsDescription;
-  protected ShapeText t_hybridHeatPumpHouseholdsDescription;
-  protected ShapeText t_electricHeatPumpHouseholdsDescription;
-  protected ShapeText t_districtHeatingHouseholdsDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_electricHeatPumpHouseholds_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_electricHeatPumpHouseholds_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_electricHeatPumpHouseholds_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_gasBurnerHouseholds_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_gasBurnerHouseholds_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_gasBurnerHouseholds_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_districtHeatingHouseholds_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_districtHeatingHouseholds_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_districtHeatingHouseholds_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_hybridHeatPumpHouseholds_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_hybridHeatPumpHouseholds_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_hybridHeatPumpHouseholds_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_heatDemandReductionHouseholds_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_heatDemandReductionHouseholds_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_heatDemandReductionHouseholds_pct;
-  protected ShapeText t_heatDemandReductionHouseholdsDescription;
-  protected ShapeText t_householdsDescription;
-  protected ShapeText t_heatDemandReductionCompaniesDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_heatDemandReductionCompanies_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_heatDemandReductionCompanies_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_heatDemandReductionCompanies_pct;
-  protected ShapeText t_gasBurnerCompaniesDescription;
-  protected ShapeText t_hybridHeatPumpCompaniesDescription;
-  protected ShapeText t_electricHeatPumpCompaniesDescription;
-  protected ShapeText t_districtHeatingCompaniesDescription;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_electricHeatPumpCompanies_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_electricHeatPumpCompanies_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_electricHeatPumpCompanies_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_gasBurnerCompanies_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_gasBurnerCompanies_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_gasBurnerCompanies_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_districtHeatingCompanies_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_districtHeatingCompanies_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_districtHeatingCompanies_pct;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_hybridHeatPumpCompanies_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_hybridHeatPumpCompanies_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_hybridHeatPumpCompanies_pct;
-  protected ShapeText t_companiesDescription;
-  protected ShapeImage i_companyReduction;
-  protected ShapeImage i_companyGasBoiler;
-  protected ShapeImage i_companyElectricHeatpump;
-  protected ShapeImage i_companyHybridHeatpump;
-  protected ShapeImage i_companyHeatGrid;
-  protected ShapeImage i_householdElectricHeatpump;
-  protected ShapeImage i_householdReduction;
-  protected ShapeImage i_householdGasBoiler;
-  protected ShapeImage i_householdHeatGrid;
-  protected ShapeImage i_householdHybridHeatpump;
-  protected ShapeGroup gr_heatingSliders_default;
   protected ShapeRectangle rect_heatDemandSliders1;
-  protected ShapeText t_heatDemandReductionCompaniesDescription1;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_heatDemandReductionCompanies_pct1_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_heatDemandReductionCompanies_pct1;
-  protected ShapeText t_gasBurnerCompaniesDescription1;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_hybridHeatPumpCompaniesDescription1_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesHeatDemandReductionDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct.isVisible() 
+sl_companiesHeatDemandReduction_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText t_hybridHeatPumpCompaniesDescription1;
-  protected ShapeText t_electricHeatPumpCompaniesDescription1;
+  protected ShapeText txt_companiesHeatDemandReductionDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_districtHeatingCompaniesDescription1_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesHeatDemandReduction_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeText t_districtHeatingCompaniesDescription1;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_electricHeatPumpCompanies_pct1_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_electricHeatPumpCompanies_pct1;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_gasBurnerCompanies_pct1_SetDynamicParams_xjal( ShapeText shape ) {
-    shape.setText(
-sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct.getIntValue() + "%" 
-);
-  }
-  
-  protected ShapeText t_gasBurnerCompanies_pct1;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_districtHeatingCompanies_pct1_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct.isVisible() 
+sl_companiesHeatDemandReduction_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct.getIntValue() + "%" 
+sl_companiesHeatDemandReduction_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_districtHeatingCompanies_pct1;
+  protected ShapeText txt_companiesHeatDemandReduction_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_hybridHeatPumpCompanies_pct1_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesGasBurnerDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct.isVisible() 
+sl_companiesGasBurner_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesGasBurnerDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesHybridHeatPumpDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesHybridHeatPump_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesHybridHeatPumpDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesElectricHeatPumpDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesElectricHeatPump_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesElectricHeatPumpDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesDistrictHeatingCompaniesDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesDistrictHeating_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesDistrictHeatingCompaniesDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesElectricHeatPump_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesElectricHeatPump_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct.getIntValue() + "%" 
+sl_companiesElectricHeatPump_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_hybridHeatPumpCompanies_pct1;
-  protected ShapeText t_companiesDescription1;
+  protected ShapeText txt_companiesElectricHeatPump_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_eBoilerCompanies_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesGasBurner_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_heatDemandSlidersCompaniesEBoiler_pct.isVisible() 
+sl_companiesGasBurner_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_heatDemandSlidersCompaniesEBoiler_pct.getIntValue() + "%" 
+sl_companiesGasBurner_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_eBoilerCompanies_pct;
+  protected ShapeText txt_companiesGasBurner_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_eBoilerCompaniesDescription_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesDistrictHeating_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_heatDemandSlidersCompaniesEBoiler_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeText t_eBoilerCompaniesDescription;
-  protected ShapeImage i_companyReduction_Company;
-  protected ShapeImage i_companyGasBoiler_Company;
-  protected ShapeImage i_companyElectricHeatpump_Company;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _i_companyHybridHeatpump_Company_SetDynamicParams_xjal( ShapeImage shape ) {
-    boolean _visible = 
-sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeImage i_companyHybridHeatpump_Company;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _i_companyHeatGrid_Company_SetDynamicParams_xjal( ShapeImage shape ) {
-    boolean _visible = 
-sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeImage i_companyHeatGrid_Company;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _i_companyEBoiler_Company_SetDynamicParams_xjal( ShapeImage shape ) {
-    boolean _visible = 
-sl_heatDemandSlidersCompaniesEBoiler_pct.isVisible() 
-;
-    shape.setVisible( _visible );
- 	if ( _visible ) {
- 	}
-  }
-  
-  protected ShapeImage i_companyEBoiler_Company;
-  
-  /**
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  private void _t_customHeatingTypeCompanies_pct_SetDynamicParams_xjal( ShapeText shape ) {
-    boolean _visible = 
-sl_heatingTypeSlidersCompaniesCustom_pct.isVisible() 
+sl_companiesDistrictHeating_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_heatingTypeSlidersCompaniesCustom_pct.getIntValue() + "%" 
+sl_companiesDistrictHeating_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_customHeatingTypeCompanies_pct;
+  protected ShapeText txt_companiesDistrictHeating_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _txt_customHeatingDemandCompaniesDescription_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_companiesHybridHeatPump_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_heatingTypeSlidersCompaniesCustom_pct.isVisible() 
+sl_companiesHybridHeatPump_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_companiesHybridHeatPump_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_companiesHybridHeatPump_pct;
+  protected ShapeText txt_heatingDemandSlidersCompaniesDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesEBoiler_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesEBoiler_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_companiesDistrictHeating_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_companiesEBoiler_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesEBoilerDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesEBoiler_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText txt_customHeatingDemandCompaniesDescription;
+  protected ShapeText txt_companiesEBoilerDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _i_companyCustomHeatingType_Company_SetDynamicParams_xjal( ShapeImage shape ) {
+  private void _i_companyReduction_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_heatingTypeSlidersCompaniesCustom_pct.isVisible() 
+sl_companiesHeatDemandReduction_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeImage i_companyCustomHeatingType_Company;
+  protected ShapeImage i_companyReduction;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _gr_heatingSliders_businesspark_SetDynamicParams_xjal( ShapeGroup shape ) {
+  private void _i_companyGasBoiler_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesGasBurner_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companyGasBoiler;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companyElectricHeatpump_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesElectricHeatPump_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companyElectricHeatpump;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companyHybridHeatpump_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesHybridHeatPump_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companyHybridHeatpump;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companyHeatGrid_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesDistrictHeating_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companyHeatGrid;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companyEBoiler_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesEBoiler_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companyEBoiler;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesCustom_pct_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesCustom_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+    shape.setText(
+sl_companiesCustom_pct.getIntValue() + "%" 
+);
+ 	}
+  }
+  
+  protected ShapeText txt_companiesCustom_pct;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _txt_companiesCustomDescription_SetDynamicParams_xjal( ShapeText shape ) {
+    boolean _visible = 
+sl_companiesCustom_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeText txt_companiesCustomDescription;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _i_companyCustom_SetDynamicParams_xjal( ShapeImage shape ) {
+    boolean _visible = 
+sl_companiesCustom_pct.isVisible() 
+;
+    shape.setVisible( _visible );
+ 	if ( _visible ) {
+ 	}
+  }
+  
+  protected ShapeImage i_companyCustom;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _gr_heatingSliders_companies_SetDynamicParams_xjal( ShapeGroup shape ) {
     shape.setX(
 0 
 );
   }
   
-  protected ShapeGroup gr_heatingSliders_businesspark;
+  protected ShapeGroup gr_heatingSliders_companies;
   protected ShapeRectangle rect_demandFunctions;
   protected ShapeText txt_demandFunctionsDescription;
   protected ShapeRectangle rect_heatingFunctions;
@@ -2896,134 +2325,134 @@ sl_heatingTypeSlidersCompaniesCustom_pct.isVisible()
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_householdGasBurnerDescriptionResidentialArea_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdGasBurnerDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdGasBurnerResidentialArea_pct.isVisible() 
+sl_householdGasBurner_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText t_householdGasBurnerDescriptionResidentialArea;
+  protected ShapeText txt_householdGasBurnerDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_householdElectricHeatPumpDescriptionResidentialArea_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdElectricHeatPumpDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdElectricHeatPumpResidentialArea_pct.isVisible() 
+sl_householdElectricHeatPump_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText t_householdElectricHeatPumpDescriptionResidentialArea;
+  protected ShapeText txt_householdElectricHeatPumpDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_householdElectricHeatPumpResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdElectricHeatPump_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdElectricHeatPumpResidentialArea_pct.isVisible() 
+sl_householdElectricHeatPump_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_householdElectricHeatPumpResidentialArea_pct.getIntValue() + "%" 
+sl_householdElectricHeatPump_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_householdElectricHeatPumpResidentialArea_pct;
+  protected ShapeText txt_householdElectricHeatPump_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_householdGasBurnerResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _t_householdGasBurner_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdGasBurnerResidentialArea_pct.isVisible() 
+sl_householdGasBurner_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_householdGasBurnerResidentialArea_pct.getIntValue() + "%" 
+sl_householdGasBurner_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_householdGasBurnerResidentialArea_pct;
+  protected ShapeText t_householdGasBurner_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_householdHeatDemandReductionResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdHeatDemandReduction_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdHeatDemandReductionResidentialArea_pct.isVisible() 
+sl_householdHeatDemandReduction_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_householdHeatDemandReductionResidentialArea_pct.getIntValue() + "%" 
+sl_householdHeatDemandReduction_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_householdHeatDemandReductionResidentialArea_pct;
+  protected ShapeText txt_householdHeatDemandReduction_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_householdHeatDemandReductionDescriptionResidentialArea_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdHeatDemandReductionDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdHeatDemandReductionResidentialArea_pct.isVisible() 
+sl_householdHeatDemandReduction_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText t_householdHeatDemandReductionDescriptionResidentialArea;
-  protected ShapeText t_householdHeatingTypeDescriptionResidentialArea;
+  protected ShapeText txt_householdHeatDemandReductionDescription;
+  protected ShapeText txt_heatingDemandSlidersHousesholdsDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_householdAircoDescriptionResidentialArea_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdAircoDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdAircoResidentialArea_pct.isVisible() 
+sl_householdAirco_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText t_householdAircoDescriptionResidentialArea;
+  protected ShapeText txt_householdAircoDescription;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_householdAircoResidentialArea_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdAirco_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdAircoResidentialArea_pct.isVisible() 
+sl_householdAirco_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_householdAircoResidentialArea_pct.getIntValue() + "%" 
+sl_householdAirco_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_householdAircoResidentialArea_pct;
+  protected ShapeText txt_householdAirco_pct;
   
   /**
    * <i>This method should not be called by user</i>
@@ -3031,7 +2460,7 @@ sl_householdAircoResidentialArea_pct.getIntValue() + "%"
   @AnyLogicInternalCodegenAPI
   private void _i_householdGasBurner_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_householdGasBurnerResidentialArea_pct.isVisible() 
+sl_householdGasBurner_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3046,7 +2475,7 @@ sl_householdGasBurnerResidentialArea_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdHeatPump_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_householdElectricHeatPumpResidentialArea_pct.isVisible() 
+sl_householdElectricHeatPump_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3061,7 +2490,7 @@ sl_householdElectricHeatPumpResidentialArea_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdHTDistrictHeating_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-cb_householdHTDistrictHeatingResidentialArea.isVisible() 
+cb_householdHTDistrictHeating.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3076,7 +2505,7 @@ cb_householdHTDistrictHeatingResidentialArea.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdLTDistrictHeating_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-cb_householdLTDistrictHeatingResidentialArea.isVisible() 
+cb_householdLTDistrictHeating.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3091,7 +2520,7 @@ cb_householdLTDistrictHeatingResidentialArea.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdAirconditioning_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_householdAircoResidentialArea_pct.isVisible() 
+sl_householdAirco_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3106,7 +2535,7 @@ sl_householdAircoResidentialArea_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdAdditionalInsulation_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_householdHeatDemandReductionResidentialArea_pct.isVisible() 
+sl_householdHeatDemandReduction_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3114,40 +2543,39 @@ sl_householdHeatDemandReductionResidentialArea_pct.isVisible()
   }
   
   protected ShapeImage i_householdAdditionalInsulation;
-  protected ShapeGroup gr_ptSlidersHouses;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_rooftopPTHouses_pct_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdRooftopPT_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_rooftopPTHouses_pct.isVisible() 
+sl_householdRooftopPT_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_rooftopPTHouses_pct.getIntValue() + "%" 
+sl_householdRooftopPT_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_rooftopPTHouses_pct;
+  protected ShapeText txt_householdRooftopPT_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _txt_rooftopPTHousesDescription_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdRooftopPTDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_rooftopPTHouses_pct.isVisible() 
+sl_householdRooftopPT_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText txt_rooftopPTHousesDescription;
+  protected ShapeText txt_householdRooftopPTDescription;
   
   /**
    * <i>This method should not be called by user</i>
@@ -3155,7 +2583,7 @@ sl_rooftopPTHouses_pct.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdPT_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_rooftopPTHouses_pct.isVisible() 
+sl_householdRooftopPT_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3168,16 +2596,16 @@ sl_rooftopPTHouses_pct.isVisible()
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _txt_householdHybridHeatpumpDescriptionResidentialArea_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _txt_householdHybridHeatpumpDescription_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdHybridHeatpumpResidentialArea.isVisible() 
+sl_householdHybridHeatpump_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
  	}
   }
   
-  protected ShapeText txt_householdHybridHeatpumpDescriptionResidentialArea;
+  protected ShapeText txt_householdHybridHeatpumpDescription;
   
   /**
    * <i>This method should not be called by user</i>
@@ -3185,7 +2613,7 @@ sl_householdHybridHeatpumpResidentialArea.isVisible()
   @AnyLogicInternalCodegenAPI
   private void _i_householdHybridHeatPump_SetDynamicParams_xjal( ShapeImage shape ) {
     boolean _visible = 
-sl_householdHybridHeatpumpResidentialArea.isVisible() 
+sl_householdHybridHeatpump_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
@@ -3198,35 +2626,50 @@ sl_householdHybridHeatpumpResidentialArea.isVisible()
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _t_householdElectricHeatPumpResidentialArea_pct1_SetDynamicParams_xjal( ShapeText shape ) {
+  private void _t_householdHybridHeatPump_pct_SetDynamicParams_xjal( ShapeText shape ) {
     boolean _visible = 
-sl_householdHybridHeatpumpResidentialArea.isVisible() 
+sl_householdHybridHeatpump_pct.isVisible() 
 ;
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setText(
-sl_householdHybridHeatpumpResidentialArea.getIntValue() + "%" 
+sl_householdHybridHeatpump_pct.getIntValue() + "%" 
 );
  	}
   }
   
-  protected ShapeText t_householdElectricHeatPumpResidentialArea_pct1;
+  protected ShapeText t_householdHybridHeatPump_pct;
   
   /**
    * <i>This method should not be called by user</i>
    */
   @AnyLogicInternalCodegenAPI
-  private void _gr_heatingSliders_residential_SetDynamicParams_xjal( ShapeGroup shape ) {
+  private void _gr_heatingSliders_households_SetDynamicParams_xjal( ShapeGroup shape ) {
     shape.setX(
 0 
 );
   }
   
-  protected ShapeGroup gr_heatingSliders_residential;
+  protected ShapeGroup gr_heatingSliders_households;
   protected ShapeRectangle rect_districtHeatingFunctions;
   protected ShapeText txt_districtheatingFunctionsDescription;
   protected ShapeRectangle rect_heatingProductionFunctions;
   protected ShapeText txt_heatingProductionFunctionsDescription;
+  protected ShapeImage arrowLeftResidential;
+  protected ShapeImage arrowRightResidential1;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _t_pageIndicator_SetDynamicParams_xjal( ShapeText shape ) {
+    shape.setText(
+"Pagina " + (v_currentPageIndex + 1) + "/" + c_loadedPageGroups.size() 
+);
+  }
+  
+  protected ShapeText t_pageIndicator;
+  protected ShapeGroup gr_pageIndicator;
   protected com.anylogic.engine.markup.Level level;
 
   private com.anylogic.engine.markup.Level[] _getLevels_xjal;
@@ -3238,128 +2681,8 @@ sl_householdHybridHeatpumpResidentialArea.getIntValue() + "%"
 
   @AnyLogicInternalCodegenAPI
   private void _createPersistentElementsBP0_xjal() {
-    sl_districtHeatingHouseholds_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 310.0,
-			100.0, 30.0,
-            false, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_districtHeatingHouseholds_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_districtHeatingHouseholds_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_districtHeatingHouseholds_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_gasBurnerHouseholds_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 235.0,
-			100.0, 30.0,
-            true, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_gasBurnerHouseholds_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_gasBurnerHouseholds_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_gasBurnerHouseholds_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_hybridHeatPumpHouseholds_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 260.0,
-			100.0, 30.0,
-            false, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_hybridHeatPumpHouseholds_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_hybridHeatPumpHouseholds_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_hybridHeatPumpHouseholds_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_electricHeatPumpHouseholds_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 285.0,
-			100.0, 30.0,
-            true, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_electricHeatPumpHouseholds_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_electricHeatPumpHouseholds_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_electricHeatPumpHouseholds_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_heatDemandReductionHouseholds_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 200.0,
+    sl_companiesHeatDemandReduction_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 55.0,
 			100.0, 30.0,
             true, false,
             -50
@@ -3371,7 +2694,7 @@ tabHeating.this, true, 265.0, 200.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_heatDemandReductionHouseholds_pct_SetDynamicParams_xjal( this );
+      _sl_companiesHeatDemandReduction_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3380,46 +2703,16 @@ tabHeating.this, true, 265.0, 200.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_heatDemandReductionHouseholds_pct, 0, value );
+        executeShapeControlAction( _sl_companiesHeatDemandReduction_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_heatDemandReductionHouseholds_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesHeatDemandReduction_pct, 0 ), getMax() ) );
       }
     };
-    sl_heatDemandReductionCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 35.0,
-			100.0, 30.0,
-            true, false,
-            -50
-            , 50
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_heatDemandReductionCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_heatDemandReductionCompanies_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_heatDemandReductionCompanies_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_districtHeatingCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 145.0,
+    sl_companiesDistrictHeating_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 175.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3431,7 +2724,7 @@ tabHeating.this, true, 265.0, 145.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_districtHeatingCompanies_pct_SetDynamicParams_xjal( this );
+      _sl_companiesDistrictHeating_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3440,16 +2733,16 @@ tabHeating.this, true, 265.0, 145.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_districtHeatingCompanies_pct, 0, value );
+        executeShapeControlAction( _sl_companiesDistrictHeating_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_districtHeatingCompanies_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesDistrictHeating_pct, 0 ), getMax() ) );
       }
     };
-    sl_gasBurnerCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 70.0,
+    sl_companiesGasBurner_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 85.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3461,7 +2754,7 @@ tabHeating.this, true, 265.0, 70.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_gasBurnerCompanies_pct_SetDynamicParams_xjal( this );
+      _sl_companiesGasBurner_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3470,16 +2763,16 @@ tabHeating.this, true, 265.0, 70.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_gasBurnerCompanies_pct, 0, value );
+        executeShapeControlAction( _sl_companiesGasBurner_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_gasBurnerCompanies_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesGasBurner_pct, 0 ), getMax() ) );
       }
     };
-    sl_hybridHeatPumpCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 95.0,
+    sl_companiesHybridHeatPump_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 115.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3491,7 +2784,7 @@ tabHeating.this, true, 265.0, 95.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_hybridHeatPumpCompanies_pct_SetDynamicParams_xjal( this );
+      _sl_companiesHybridHeatPump_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3500,16 +2793,16 @@ tabHeating.this, true, 265.0, 95.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_hybridHeatPumpCompanies_pct, 0, value );
+        executeShapeControlAction( _sl_companiesHybridHeatPump_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_hybridHeatPumpCompanies_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesHybridHeatPump_pct, 0 ), getMax() ) );
       }
     };
-    sl_electricHeatPumpCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 265.0, 120.0,
+    sl_companiesElectricHeatPump_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 145.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3521,7 +2814,7 @@ tabHeating.this, true, 265.0, 120.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_electricHeatPumpCompanies_pct_SetDynamicParams_xjal( this );
+      _sl_companiesElectricHeatPump_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3530,166 +2823,16 @@ tabHeating.this, true, 265.0, 120.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_electricHeatPumpCompanies_pct, 0, value );
+        executeShapeControlAction( _sl_companiesElectricHeatPump_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_electricHeatPumpCompanies_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesElectricHeatPump_pct, 0 ), getMax() ) );
       }
     };
-    sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 255.0, 50.0,
-			100.0, 30.0,
-            true, false,
-            -50
-            , 50
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 255.0, 160.0,
-			100.0, 30.0,
-            true, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 255.0, 85.0,
-			100.0, 30.0,
-            true, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 255.0, 110.0,
-			100.0, 30.0,
-            true, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct = new ShapeSlider(
-tabHeating.this, true, 255.0, 135.0,
-			100.0, 30.0,
-            true, false,
-            0
-            , 100
-            , 1
-            , ShapeControl.TYPE_DOUBLE ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public void action() {
-        executeShapeControlAction( _sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct, 0, value );
-      }
-
-      @Override
-      public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct, 0 ), getMax() ) );
-      }
-    };
-    sl_heatDemandSlidersCompaniesEBoiler_pct = new ShapeSlider(
-tabHeating.this, true, 255.0, 185.0,
+    sl_companiesEBoiler_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 205.0,
 			100.0, 30.0,
             false, false,
             0
@@ -3701,7 +2844,7 @@ tabHeating.this, true, 255.0, 185.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_heatDemandSlidersCompaniesEBoiler_pct_SetDynamicParams_xjal( this );
+      _sl_companiesEBoiler_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3710,16 +2853,16 @@ tabHeating.this, true, 255.0, 185.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_heatDemandSlidersCompaniesEBoiler_pct, 0, value );
+        executeShapeControlAction( _sl_companiesEBoiler_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_heatDemandSlidersCompaniesEBoiler_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesEBoiler_pct, 0 ), getMax() ) );
       }
     };
-    sl_heatingTypeSlidersCompaniesCustom_pct = new ShapeSlider(
-tabHeating.this, true, 255.0, 220.0,
+    sl_companiesCustom_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 235.0,
 			100.0, 30.0,
             false, false,
             0
@@ -3731,7 +2874,7 @@ tabHeating.this, true, 255.0, 220.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_heatingTypeSlidersCompaniesCustom_pct_SetDynamicParams_xjal( this );
+      _sl_companiesCustom_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3740,16 +2883,16 @@ tabHeating.this, true, 255.0, 220.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_heatingTypeSlidersCompaniesCustom_pct, 0, value );
+        executeShapeControlAction( _sl_companiesCustom_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_heatingTypeSlidersCompaniesCustom_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_companiesCustom_pct, 0 ), getMax() ) );
       }
     };
-    sl_householdGasBurnerResidentialArea_pct = new ShapeSlider(
-tabHeating.this, true, 260.0, 50.0,
+    sl_householdGasBurner_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 55.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3761,7 +2904,7 @@ tabHeating.this, true, 260.0, 50.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_householdGasBurnerResidentialArea_pct_SetDynamicParams_xjal( this );
+      _sl_householdGasBurner_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3770,16 +2913,16 @@ tabHeating.this, true, 260.0, 50.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_householdGasBurnerResidentialArea_pct, 0, value );
+        executeShapeControlAction( _sl_householdGasBurner_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdGasBurnerResidentialArea_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdGasBurner_pct, 0 ), getMax() ) );
       }
     };
-    sl_householdElectricHeatPumpResidentialArea_pct = new ShapeSlider(
-tabHeating.this, true, 260.0, 100.0,
+    sl_householdElectricHeatPump_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 115.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3791,7 +2934,7 @@ tabHeating.this, true, 260.0, 100.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_householdElectricHeatPumpResidentialArea_pct_SetDynamicParams_xjal( this );
+      _sl_householdElectricHeatPump_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3800,16 +2943,16 @@ tabHeating.this, true, 260.0, 100.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_householdElectricHeatPumpResidentialArea_pct, 0, value );
+        executeShapeControlAction( _sl_householdElectricHeatPump_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdElectricHeatPumpResidentialArea_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdElectricHeatPump_pct, 0 ), getMax() ) );
       }
     };
-    sl_householdHeatDemandReductionResidentialArea_pct = new ShapeSlider(
-tabHeating.this, true, 260.0, 245.0,
+    sl_householdHeatDemandReduction_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 235.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3821,7 +2964,7 @@ tabHeating.this, true, 260.0, 245.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_householdHeatDemandReductionResidentialArea_pct_SetDynamicParams_xjal( this );
+      _sl_householdHeatDemandReduction_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3830,16 +2973,16 @@ tabHeating.this, true, 260.0, 245.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_householdHeatDemandReductionResidentialArea_pct, 0, value );
+        executeShapeControlAction( _sl_householdHeatDemandReduction_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdHeatDemandReductionResidentialArea_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdHeatDemandReduction_pct, 0 ), getMax() ) );
       }
     };
-    sl_householdAircoResidentialArea_pct = new ShapeSlider(
-tabHeating.this, true, 260.0, 216.0,
+    sl_householdAirco_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 205.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3851,7 +2994,7 @@ tabHeating.this, true, 260.0, 216.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_householdAircoResidentialArea_pct_SetDynamicParams_xjal( this );
+      _sl_householdAirco_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3860,42 +3003,42 @@ tabHeating.this, true, 260.0, 216.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_householdAircoResidentialArea_pct, 0, value );
+        executeShapeControlAction( _sl_householdAirco_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdAircoResidentialArea_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdAirco_pct, 0 ), getMax() ) );
       }
     };
-    cb_householdHTDistrictHeatingResidentialArea = new ShapeCheckBox(
-tabHeating.this,true,20.0, 130.0,
+    cb_householdHTDistrictHeating = new ShapeCheckBox(
+tabHeating.this,true,20.0, 142.0,
 		135.0, 30.0,
             black, true,
-            _cb_householdHTDistrictHeatingResidentialArea_Font,
+            _cb_householdHTDistrictHeating_Font,
 			"HT-Warmtenet" ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _cb_householdHTDistrictHeatingResidentialArea, 0, value );
+        executeShapeControlAction( _cb_householdHTDistrictHeating, 0, value );
       }
     };
-    cb_householdLTDistrictHeatingResidentialArea = new ShapeCheckBox(
-tabHeating.this,true,20.0, 165.0,
+    cb_householdLTDistrictHeating = new ShapeCheckBox(
+tabHeating.this,true,20.0, 172.0,
 		185.0, 30.0,
             black, true,
-            _cb_householdLTDistrictHeatingResidentialArea_Font,
+            _cb_householdLTDistrictHeating_Font,
 			"LT-Warmtenet" ) {
 
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _cb_householdLTDistrictHeatingResidentialArea, 0, value );
+        executeShapeControlAction( _cb_householdLTDistrictHeating, 0, value );
       }
     };
-    sl_rooftopPTHouses_pct = new ShapeSlider(
-tabHeating.this, true, 260.0, 294.0,
+    sl_householdRooftopPT_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 265.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3907,7 +3050,7 @@ tabHeating.this, true, 260.0, 294.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_rooftopPTHouses_pct_SetDynamicParams_xjal( this );
+      _sl_householdRooftopPT_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3916,16 +3059,16 @@ tabHeating.this, true, 260.0, 294.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_rooftopPTHouses_pct, 0, value );
+        executeShapeControlAction( _sl_householdRooftopPT_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_rooftopPTHouses_pct, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdRooftopPT_pct, 0 ), getMax() ) );
       }
     };
-    sl_householdHybridHeatpumpResidentialArea = new ShapeSlider(
-tabHeating.this, true, 260.0, 75.0,
+    sl_householdHybridHeatpump_pct = new ShapeSlider(
+tabHeating.this, true, 260.0, 85.0,
 			100.0, 30.0,
             true, false,
             0
@@ -3937,7 +3080,7 @@ tabHeating.this, true, 260.0, 75.0,
 	
       public void updateDynamicProperties() {
 	
-      _sl_householdHybridHeatpumpResidentialArea_SetDynamicParams_xjal( this );
+      _sl_householdHybridHeatpump_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -3946,12 +3089,12 @@ tabHeating.this, true, 260.0, 75.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public void action() {
-        executeShapeControlAction( _sl_householdHybridHeatpumpResidentialArea, 0, value );
+        executeShapeControlAction( _sl_householdHybridHeatpump_pct, 0, value );
       }
 
       @Override
       public void setValueToDefault() {
-		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdHybridHeatpumpResidentialArea, 0 ), getMax() ) );
+		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_householdHybridHeatpump_pct, 0 ), getMax() ) );
       }
     };
     rect_genericFunctions = new ShapeRectangle(
@@ -3962,220 +3105,208 @@ tabHeating.this, true, 260.0, 75.0,
         SHAPE_DRAW_2D, false,140.0, 480.0, 0.0, 0.0,
         black,"Generic Functions",
         _t_genericFunctions_Font, ALIGNMENT_LEFT );
-    rect_heatDemandSliders = new ShapeRectangle(
+    rect_heatDemandSliders1 = new ShapeRectangle(
        SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
             null, mistyRose,
 			370.0, 350.0, 10.0, 3.0, LINE_STYLE_SOLID );
-    t_gasBurnerHouseholdsDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,30.0, 240.0, 0.0, 0.0,
-        black,"HR ketel aardgas",
-        _t_gasBurnerHouseholdsDescription_Font, ALIGNMENT_LEFT );
-    t_hybridHeatPumpHouseholdsDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,30.0, 265.0, 0.0, 0.0,
-        black,"Hybride warmtepomp",
-        _t_hybridHeatPumpHouseholdsDescription_Font, ALIGNMENT_LEFT );
-    t_hybridHeatPumpHouseholdsDescription.setVisible( false );
-    t_electricHeatPumpHouseholdsDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,30.0, 290.0, 0.0, 0.0,
-        black,"Elek. warmtepomp",
-        _t_electricHeatPumpHouseholdsDescription_Font, ALIGNMENT_LEFT );
-    t_districtHeatingHouseholdsDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,30.0, 315.0, 0.0, 0.0,
-        black,"Warmtenet",
-        _t_districtHeatingHouseholdsDescription_Font, ALIGNMENT_LEFT );
-    t_districtHeatingHouseholdsDescription.setVisible( false );
-    t_electricHeatPumpHouseholds_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 290.0, 0.0, 0.0,
-        black,"#",
-        _t_electricHeatPumpHouseholds_pct_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_electricHeatPumpHouseholds_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_gasBurnerHouseholds_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 240.0, 0.0, 0.0,
-        black,"#",
-        _t_gasBurnerHouseholds_pct_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_gasBurnerHouseholds_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_districtHeatingHouseholds_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 315.0, 0.0, 0.0,
-        black,"#",
-        _t_districtHeatingHouseholds_pct_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_districtHeatingHouseholds_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_districtHeatingHouseholds_pct.setVisible( false );
-    t_hybridHeatPumpHouseholds_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 265.0, 0.0, 0.0,
-        black,"#",
-        _t_hybridHeatPumpHouseholds_pct_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_hybridHeatPumpHouseholds_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_hybridHeatPumpHouseholds_pct.setVisible( false );
-    t_heatDemandReductionHouseholds_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 205.0, 0.0, 0.0,
-        black,"#",
-        _t_heatDemandReductionHouseholds_pct_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_heatDemandReductionHouseholds_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_heatDemandReductionHouseholdsDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,30.0, 205.0, 0.0, 0.0,
+    txt_companiesHeatDemandReductionDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 60.0, 0.0, 0.0,
         black,"Besparing warmte",
-        _t_heatDemandReductionHouseholdsDescription_Font, ALIGNMENT_LEFT );
-    t_householdsDescription = new ShapeText(
+        _txt_companiesHeatDemandReductionDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesHeatDemandReductionDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesHeatDemandReduction_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 60.0, 0.0, 0.0,
+        black,"#",
+        _txt_companiesHeatDemandReduction_pct_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesHeatDemandReduction_pct_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesGasBurnerDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 90.0, 0.0, 0.0,
+        black,"HR ketel aardgas",
+        _txt_companiesGasBurnerDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesGasBurnerDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesHybridHeatPumpDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 120.0, 0.0, 0.0,
+        black,"Hybride warmtepomp",
+        _txt_companiesHybridHeatPumpDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesHybridHeatPumpDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesElectricHeatPumpDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 150.0, 0.0, 0.0,
+        black,"Elektrische warmtepomp",
+        _txt_companiesElectricHeatPumpDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesElectricHeatPumpDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesDistrictHeatingCompaniesDescription = new ShapeText(
         SHAPE_DRAW_2D, true,20.0, 180.0, 0.0, 0.0,
-        black,"Huishoudens",
-        _t_householdsDescription_Font, ALIGNMENT_LEFT );
-    t_heatDemandReductionCompaniesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,25.0, 40.0, 0.0, 0.0,
-        black,"Besparing warmte",
-        _t_heatDemandReductionCompaniesDescription_Font, ALIGNMENT_LEFT );
-    t_heatDemandReductionCompanies_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 40.0, 0.0, 0.0,
-        black,"#",
-        _t_heatDemandReductionCompanies_pct_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_heatDemandReductionCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_gasBurnerCompaniesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,25.0, 75.0, 0.0, 0.0,
-        black,"HR ketel aardgas",
-        _t_gasBurnerCompaniesDescription_Font, ALIGNMENT_LEFT );
-    t_hybridHeatPumpCompaniesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,25.0, 100.0, 0.0, 0.0,
-        black,"Hybride warmtepomp",
-        _t_hybridHeatPumpCompaniesDescription_Font, ALIGNMENT_LEFT );
-    t_hybridHeatPumpCompaniesDescription.setVisible( false );
-    t_electricHeatPumpCompaniesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,25.0, 125.0, 0.0, 0.0,
-        black,"Elek. warmtepomp",
-        _t_electricHeatPumpCompaniesDescription_Font, ALIGNMENT_LEFT );
-    t_districtHeatingCompaniesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,25.0, 150.0, 0.0, 0.0,
         black,"Warmtenet",
-        _t_districtHeatingCompaniesDescription_Font, ALIGNMENT_LEFT );
-    t_districtHeatingCompaniesDescription.setVisible( false );
-    t_electricHeatPumpCompanies_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 125.0, 0.0, 0.0,
-        black,"#",
-        _t_electricHeatPumpCompanies_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesDistrictHeatingCompaniesDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_electricHeatPumpCompanies_pct_SetDynamicParams_xjal( this );
+      _txt_companiesDistrictHeatingCompaniesDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_gasBurnerCompanies_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 75.0, 0.0, 0.0,
+    txt_companiesElectricHeatPump_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 150.0, 0.0, 0.0,
         black,"#",
-        _t_gasBurnerCompanies_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesElectricHeatPump_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_gasBurnerCompanies_pct_SetDynamicParams_xjal( this );
+      _txt_companiesElectricHeatPump_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_districtHeatingCompanies_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 150.0, 0.0, 0.0,
+    txt_companiesGasBurner_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 90.0, 0.0, 0.0,
         black,"#",
-        _t_districtHeatingCompanies_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesGasBurner_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_districtHeatingCompanies_pct_SetDynamicParams_xjal( this );
+      _txt_companiesGasBurner_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_districtHeatingCompanies_pct.setVisible( false );
-    t_hybridHeatPumpCompanies_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,235.0, 100.0, 0.0, 0.0,
+    txt_companiesDistrictHeating_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 180.0, 0.0, 0.0,
         black,"#",
-        _t_hybridHeatPumpCompanies_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesDistrictHeating_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_hybridHeatPumpCompanies_pct_SetDynamicParams_xjal( this );
+      _txt_companiesDistrictHeating_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_hybridHeatPumpCompanies_pct.setVisible( false );
-    t_companiesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 15.0, 0.0, 0.0,
+    txt_companiesHybridHeatPump_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 120.0, 0.0, 0.0,
+        black,"#",
+        _txt_companiesHybridHeatPump_pct_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesHybridHeatPump_pct_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_heatingDemandSlidersCompaniesDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 20.0, 0.0, 0.0,
         black,"Bedrijven",
-        _t_companiesDescription_Font, ALIGNMENT_LEFT );
+        _txt_heatingDemandSlidersCompaniesDescription_Font, ALIGNMENT_LEFT );
+    txt_companiesEBoiler_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 210.0, 0.0, 0.0,
+        black,"#",
+        _txt_companiesEBoiler_pct_Font, ALIGNMENT_RIGHT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesEBoiler_pct_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    txt_companiesEBoilerDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 210.0, 0.0, 0.0,
+        black,"E-boiler",
+        _txt_companiesEBoilerDescription_Font, ALIGNMENT_LEFT ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _txt_companiesEBoilerDescription_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
     i_companyReduction = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 40.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 58.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companyReduction_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
@@ -4184,9 +3315,19 @@ tabHeating.this, true, 260.0, 75.0,
       }
     };
     i_companyGasBoiler = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 75.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 88.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companyGasBoiler_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
@@ -4195,9 +3336,19 @@ tabHeating.this, true, 260.0, 75.0,
       }
     };
     i_companyElectricHeatpump = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 125.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 148.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companyElectricHeatpump_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
@@ -4206,9 +3357,19 @@ tabHeating.this, true, 260.0, 75.0,
       }
     };
     i_companyHybridHeatpump = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 100.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 118.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companyHybridHeatpump_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
@@ -4217,9 +3378,19 @@ tabHeating.this, true, 260.0, 75.0,
       }
     };
     i_companyHeatGrid = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 150.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 178.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companyHeatGrid_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
@@ -4227,344 +3398,59 @@ tabHeating.this, true, 260.0, 75.0,
         return onShapeClick( _i_companyHeatGrid, 0, clickx, clicky );
       }
     };
-    i_householdElectricHeatpump = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 290.0, 0.0, 0.0,
+    i_companyEBoiler = new ShapeImage(
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 208.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _i_companyEBoiler_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
 
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_householdElectricHeatpump, 0, clickx, clicky );
+        return onShapeClick( _i_companyEBoiler, 0, clickx, clicky );
       }
     };
-    i_householdReduction = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 205.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_householdReduction, 0, clickx, clicky );
-      }
-    };
-    i_householdGasBoiler = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 240.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_householdGasBoiler, 0, clickx, clicky );
-      }
-    };
-    i_householdHeatGrid = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 315.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_householdHeatGrid, 0, clickx, clicky );
-      }
-    };
-    i_householdHybridHeatpump = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 170.0, 265.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_householdHybridHeatpump, 0, clickx, clicky );
-      }
-    };
-    rect_heatDemandSliders1 = new ShapeRectangle(
-       SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
-            null, mistyRose,
-			370.0, 350.0, 10.0, 3.0, LINE_STYLE_SOLID );
-    t_heatDemandReductionCompaniesDescription1 = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 55.0, 0.0, 0.0,
-        black,"Besparing warmte",
-        _t_heatDemandReductionCompaniesDescription1_Font, ALIGNMENT_LEFT );
-    t_heatDemandReductionCompanies_pct1 = new ShapeText(
-        SHAPE_DRAW_2D, true,225.0, 55.0, 0.0, 0.0,
+    txt_companiesCustom_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 240.0, 0.0, 0.0,
         black,"#",
-        _t_heatDemandReductionCompanies_pct1_Font, ALIGNMENT_CENTER ) {
+        _txt_companiesCustom_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_heatDemandReductionCompanies_pct1_SetDynamicParams_xjal( this );
+      _txt_companiesCustom_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_gasBurnerCompaniesDescription1 = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 90.0, 0.0, 0.0,
-        black,"HR ketel aardgas",
-        _t_gasBurnerCompaniesDescription1_Font, ALIGNMENT_LEFT );
-    t_hybridHeatPumpCompaniesDescription1 = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 115.0, 0.0, 0.0,
-        black,"Hybride warmtepomp",
-        _t_hybridHeatPumpCompaniesDescription1_Font, ALIGNMENT_LEFT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_hybridHeatPumpCompaniesDescription1_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_electricHeatPumpCompaniesDescription1 = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 140.0, 0.0, 0.0,
-        black,"Elek. warmtepomp",
-        _t_electricHeatPumpCompaniesDescription1_Font, ALIGNMENT_LEFT );
-    t_districtHeatingCompaniesDescription1 = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 165.0, 0.0, 0.0,
-        black,"Warmtenet",
-        _t_districtHeatingCompaniesDescription1_Font, ALIGNMENT_LEFT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_districtHeatingCompaniesDescription1_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_electricHeatPumpCompanies_pct1 = new ShapeText(
-        SHAPE_DRAW_2D, true,225.0, 140.0, 0.0, 0.0,
-        black,"#",
-        _t_electricHeatPumpCompanies_pct1_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_electricHeatPumpCompanies_pct1_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_gasBurnerCompanies_pct1 = new ShapeText(
-        SHAPE_DRAW_2D, true,225.0, 90.0, 0.0, 0.0,
-        black,"#",
-        _t_gasBurnerCompanies_pct1_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_gasBurnerCompanies_pct1_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_districtHeatingCompanies_pct1 = new ShapeText(
-        SHAPE_DRAW_2D, true,225.0, 165.0, 0.0, 0.0,
-        black,"#",
-        _t_districtHeatingCompanies_pct1_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_districtHeatingCompanies_pct1_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_hybridHeatPumpCompanies_pct1 = new ShapeText(
-        SHAPE_DRAW_2D, true,225.0, 115.0, 0.0, 0.0,
-        black,"#",
-        _t_hybridHeatPumpCompanies_pct1_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_hybridHeatPumpCompanies_pct1_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_companiesDescription1 = new ShapeText(
-        SHAPE_DRAW_2D, true,10.0, 20.0, 0.0, 0.0,
-        black,"Bedrijven",
-        _t_companiesDescription1_Font, ALIGNMENT_LEFT );
-    t_eBoilerCompanies_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,225.0, 190.0, 0.0, 0.0,
-        black,"#",
-        _t_eBoilerCompanies_pct_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_eBoilerCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    t_eBoilerCompaniesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 190.0, 0.0, 0.0,
-        black,"E-boiler",
-        _t_eBoilerCompaniesDescription_Font, ALIGNMENT_LEFT ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_eBoilerCompaniesDescription_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    i_companyReduction_Company = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 160.0, 55.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_companyReduction_Company, 0, clickx, clicky );
-      }
-    };
-    i_companyGasBoiler_Company = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 160.0, 90.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_companyGasBoiler_Company, 0, clickx, clicky );
-      }
-    };
-    i_companyElectricHeatpump_Company = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 160.0, 140.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_companyElectricHeatpump_Company, 0, clickx, clicky );
-      }
-    };
-    i_companyHybridHeatpump_Company = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 160.0, 115.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _i_companyHybridHeatpump_Company_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_companyHybridHeatpump_Company, 0, clickx, clicky );
-      }
-    };
-    i_companyHeatGrid_Company = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 160.0, 165.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _i_companyHeatGrid_Company_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_companyHeatGrid_Company, 0, clickx, clicky );
-      }
-    };
-    i_companyEBoiler_Company = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 160.0, 190.0, 0.0, 0.0,
-20.0, 20.0, "/zerointerfaceloader/",
-			new String[]{"icon_i.png",} ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _i_companyEBoiler_Company_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-
-      @Override
-      @AnyLogicInternalCodegenAPI
-      public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_companyEBoiler_Company, 0, clickx, clicky );
-      }
-    };
-    t_customHeatingTypeCompanies_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,225.0, 225.0, 0.0, 0.0,
-        black,"#",
-        _t_customHeatingTypeCompanies_pct_Font, ALIGNMENT_CENTER ) {
-	
-      @Override
-	
-      public void updateDynamicProperties() {
-	
-      _t_customHeatingTypeCompanies_pct_SetDynamicParams_xjal( this );
-	
-      super.updateDynamicProperties();
-	
-      }
-    };
-    txt_customHeatingDemandCompaniesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,15.0, 225.0, 0.0, 0.0,
+    txt_companiesCustomDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 240.0, 0.0, 0.0,
         black,"Custom systeem",
-        _txt_customHeatingDemandCompaniesDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_companiesCustomDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _txt_customHeatingDemandCompaniesDescription_SetDynamicParams_xjal( this );
+      _txt_companiesCustomDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    i_companyCustomHeatingType_Company = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 160.0, 225.0, 0.0, 0.0,
+    i_companyCustom = new ShapeImage(
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 238.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4572,7 +3458,7 @@ tabHeating.this, true, 260.0, 75.0,
 	
       public void updateDynamicProperties() {
 	
-      _i_companyCustomHeatingType_Company_SetDynamicParams_xjal( this );
+      _i_companyCustom_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -4581,7 +3467,7 @@ tabHeating.this, true, 260.0, 75.0,
       @Override
       @AnyLogicInternalCodegenAPI
       public boolean onClick( double clickx, double clicky ) {
-        return onShapeClick( _i_companyCustomHeatingType_Company, 0, clickx, clicky );
+        return onShapeClick( _i_companyCustom, 0, clickx, clicky );
       }
     };
     rect_demandFunctions = new ShapeRectangle(
@@ -4604,132 +3490,132 @@ tabHeating.this, true, 260.0, 75.0,
        SHAPE_DRAW_2D3D, true,0.0, 0.0, 0.0, 0.0,
             null, mistyRose,
 			370.0, 350.0, 10.0, 3.0, LINE_STYLE_SOLID );
-    t_householdGasBurnerDescriptionResidentialArea = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 55.0, 0.0, 0.0,
+    txt_householdGasBurnerDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 60.0, 0.0, 0.0,
         black,"Gas brander",
-        _t_householdGasBurnerDescriptionResidentialArea_Font, ALIGNMENT_LEFT ) {
+        _txt_householdGasBurnerDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdGasBurnerDescriptionResidentialArea_SetDynamicParams_xjal( this );
+      _txt_householdGasBurnerDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdElectricHeatPumpDescriptionResidentialArea = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 105.0, 0.0, 0.0,
-        black,"Elec. warmtepomp",
-        _t_householdElectricHeatPumpDescriptionResidentialArea_Font, ALIGNMENT_LEFT ) {
+    txt_householdElectricHeatPumpDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 120.0, 0.0, 0.0,
+        black,"Elektrische warmtepomp",
+        _txt_householdElectricHeatPumpDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdElectricHeatPumpDescriptionResidentialArea_SetDynamicParams_xjal( this );
+      _txt_householdElectricHeatPumpDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdElectricHeatPumpResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 105.0, 0.0, 0.0,
+    txt_householdElectricHeatPump_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 120.0, 0.0, 0.0,
         black,"#",
-        _t_householdElectricHeatPumpResidentialArea_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_householdElectricHeatPump_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdElectricHeatPumpResidentialArea_pct_SetDynamicParams_xjal( this );
+      _txt_householdElectricHeatPump_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdGasBurnerResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 55.0, 0.0, 0.0,
+    t_householdGasBurner_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 60.0, 0.0, 0.0,
         black,"#",
-        _t_householdGasBurnerResidentialArea_pct_Font, ALIGNMENT_CENTER ) {
+        _t_householdGasBurner_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdGasBurnerResidentialArea_pct_SetDynamicParams_xjal( this );
+      _t_householdGasBurner_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdHeatDemandReductionResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 250.0, 0.0, 0.0,
+    txt_householdHeatDemandReduction_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 240.0, 0.0, 0.0,
         black,"#",
-        _t_householdHeatDemandReductionResidentialArea_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_householdHeatDemandReduction_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdHeatDemandReductionResidentialArea_pct_SetDynamicParams_xjal( this );
+      _txt_householdHeatDemandReduction_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdHeatDemandReductionDescriptionResidentialArea = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 250.0, 0.0, 0.0,
+    txt_householdHeatDemandReductionDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 240.0, 0.0, 0.0,
         black,"Huizen met betere isolatie",
-        _t_householdHeatDemandReductionDescriptionResidentialArea_Font, ALIGNMENT_LEFT ) {
+        _txt_householdHeatDemandReductionDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdHeatDemandReductionDescriptionResidentialArea_SetDynamicParams_xjal( this );
+      _txt_householdHeatDemandReductionDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdHeatingTypeDescriptionResidentialArea = new ShapeText(
+    txt_heatingDemandSlidersHousesholdsDescription = new ShapeText(
         SHAPE_DRAW_2D, true,20.0, 20.0, 0.0, 0.0,
-        black,"Verwarming en koeling",
-        _t_householdHeatingTypeDescriptionResidentialArea_Font, ALIGNMENT_LEFT );
-    t_householdAircoDescriptionResidentialArea = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 220.0, 0.0, 0.0,
+        black,"Huizen",
+        _txt_heatingDemandSlidersHousesholdsDescription_Font, ALIGNMENT_LEFT );
+    txt_householdAircoDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 210.0, 0.0, 0.0,
         black,"Huizen met Airco",
-        _t_householdAircoDescriptionResidentialArea_Font, ALIGNMENT_LEFT ) {
+        _txt_householdAircoDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdAircoDescriptionResidentialArea_SetDynamicParams_xjal( this );
+      _txt_householdAircoDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    t_householdAircoResidentialArea_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 220.0, 0.0, 0.0,
+    txt_householdAirco_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 210.0, 0.0, 0.0,
         black,"#",
-        _t_householdAircoResidentialArea_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_householdAirco_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdAircoResidentialArea_pct_SetDynamicParams_xjal( this );
+      _txt_householdAirco_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     i_householdGasBurner = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 55.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 58.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4750,7 +3636,7 @@ tabHeating.this, true, 260.0, 75.0,
       }
     };
     i_householdHeatPump = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 105.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 118.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4770,12 +3656,8 @@ tabHeating.this, true, 260.0, 75.0,
         return onShapeClick( _i_householdHeatPump, 0, clickx, clicky );
       }
     };
-  }
-  
-  @AnyLogicInternalCodegenAPI
-  private void _createPersistentElementsBP1_xjal() {
     i_householdHTDistrictHeating = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 220.0, 135.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 148.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4796,7 +3678,7 @@ tabHeating.this, true, 260.0, 75.0,
       }
     };
     i_householdLTDistrictHeating = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 220.0, 170.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 178.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4817,7 +3699,7 @@ tabHeating.this, true, 260.0, 75.0,
       }
     };
     i_householdAirconditioning = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 220.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 208.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4838,7 +3720,7 @@ tabHeating.this, true, 260.0, 75.0,
       }
     };
     i_householdAdditionalInsulation = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 250.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 238.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4858,38 +3740,38 @@ tabHeating.this, true, 260.0, 75.0,
         return onShapeClick( _i_householdAdditionalInsulation, 0, clickx, clicky );
       }
     };
-    t_rooftopPTHouses_pct = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 299.0, 0.0, 0.0,
+    txt_householdRooftopPT_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 270.0, 0.0, 0.0,
         black,"#",
-        _t_rooftopPTHouses_pct_Font, ALIGNMENT_CENTER ) {
+        _txt_householdRooftopPT_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_rooftopPTHouses_pct_SetDynamicParams_xjal( this );
+      _txt_householdRooftopPT_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
-    txt_rooftopPTHousesDescription = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 300.0, 0.0, 0.0,
+    txt_householdRooftopPTDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 270.0, 0.0, 0.0,
         black,"Huizen met PT",
-        _txt_rooftopPTHousesDescription_Font, ALIGNMENT_LEFT ) {
+        _txt_householdRooftopPTDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _txt_rooftopPTHousesDescription_SetDynamicParams_xjal( this );
+      _txt_householdRooftopPTDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     i_householdPT = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 298.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 268.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4909,23 +3791,23 @@ tabHeating.this, true, 260.0, 75.0,
         return onShapeClick( _i_householdPT, 0, clickx, clicky );
       }
     };
-    txt_householdHybridHeatpumpDescriptionResidentialArea = new ShapeText(
-        SHAPE_DRAW_2D, true,20.0, 80.0, 0.0, 0.0,
+    txt_householdHybridHeatpumpDescription = new ShapeText(
+        SHAPE_DRAW_2D, true,20.0, 90.0, 0.0, 0.0,
         black,"Hybride warmtepomp",
-        _txt_householdHybridHeatpumpDescriptionResidentialArea_Font, ALIGNMENT_LEFT ) {
+        _txt_householdHybridHeatpumpDescription_Font, ALIGNMENT_LEFT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _txt_householdHybridHeatpumpDescriptionResidentialArea_SetDynamicParams_xjal( this );
+      _txt_householdHybridHeatpumpDescription_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     i_householdHybridHeatPump = new ShapeImage(
-		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 80.0, 0.0, 0.0,
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 180.0, 88.0, 0.0, 0.0,
 20.0, 20.0, "/zerointerfaceloader/",
 			new String[]{"icon_i.png",} ) {
 	
@@ -4945,16 +3827,16 @@ tabHeating.this, true, 260.0, 75.0,
         return onShapeClick( _i_householdHybridHeatPump, 0, clickx, clicky );
       }
     };
-    t_householdElectricHeatPumpResidentialArea_pct1 = new ShapeText(
-        SHAPE_DRAW_2D, true,230.0, 80.0, 0.0, 0.0,
+    t_householdHybridHeatPump_pct = new ShapeText(
+        SHAPE_DRAW_2D, true,245.0, 90.0, 0.0, 0.0,
         black,"#",
-        _t_householdElectricHeatPumpResidentialArea_pct1_Font, ALIGNMENT_CENTER ) {
+        _t_householdHybridHeatPump_pct_Font, ALIGNMENT_RIGHT ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _t_householdElectricHeatPumpResidentialArea_pct1_SetDynamicParams_xjal( this );
+      _t_householdHybridHeatPump_pct_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
@@ -4976,155 +3858,147 @@ tabHeating.this, true, 260.0, 75.0,
         SHAPE_DRAW_2D, false,160.0, 970.0, 0.0, 0.0,
         black,"District Heating Functions",
         _txt_heatingProductionFunctionsDescription_Font, ALIGNMENT_CENTER );
-  }
+    arrowLeftResidential = new ShapeImage(
+		tabHeating.this, SHAPE_DRAW_2D3D, true, -35.0, -12.0, 0.0, 1.5707963267948966,
+12.0, 12.0, "/zerointerfaceloader/",
+			new String[]{"icon_arrow.png",} ) {
 
-  @AnyLogicInternalCodegenAPI
-  private void _createPersistentElementsAP0_xjal() {
-    {
-    gr_heatingSliders_default = new ShapeGroup( tabHeating.this, SHAPE_DRAW_2D3D, true, 0.0, 0.0, 0.0, 0.0
-	
-	     , rect_heatDemandSliders
-	     , t_gasBurnerHouseholdsDescription
-	     , t_hybridHeatPumpHouseholdsDescription
-	     , t_electricHeatPumpHouseholdsDescription
-	     , t_districtHeatingHouseholdsDescription
-	     , t_electricHeatPumpHouseholds_pct
-	     , t_gasBurnerHouseholds_pct
-	     , t_districtHeatingHouseholds_pct
-	     , t_hybridHeatPumpHouseholds_pct
-	     , sl_districtHeatingHouseholds_pct
-	     , sl_gasBurnerHouseholds_pct
-	     , sl_hybridHeatPumpHouseholds_pct
-	     , sl_electricHeatPumpHouseholds_pct
-	     , sl_heatDemandReductionHouseholds_pct
-	     , t_heatDemandReductionHouseholds_pct
-	     , t_heatDemandReductionHouseholdsDescription
-	     , t_householdsDescription
-	     , sl_heatDemandReductionCompanies_pct
-	     , t_heatDemandReductionCompaniesDescription
-	     , t_heatDemandReductionCompanies_pct
-	     , t_gasBurnerCompaniesDescription
-	     , t_hybridHeatPumpCompaniesDescription
-	     , t_electricHeatPumpCompaniesDescription
-	     , t_districtHeatingCompaniesDescription
-	     , t_electricHeatPumpCompanies_pct
-	     , t_gasBurnerCompanies_pct
-	     , t_districtHeatingCompanies_pct
-	     , t_hybridHeatPumpCompanies_pct
-	     , sl_districtHeatingCompanies_pct
-	     , sl_gasBurnerCompanies_pct
-	     , sl_hybridHeatPumpCompanies_pct
-	     , sl_electricHeatPumpCompanies_pct
-	     , t_companiesDescription
-	     , i_companyReduction
-	     , i_companyGasBoiler
-	     , i_companyElectricHeatpump
-	     , i_companyHybridHeatpump
-	     , i_companyHeatGrid
-	     , i_householdElectricHeatpump
-	     , i_householdReduction
-	     , i_householdGasBoiler
-	     , i_householdHeatGrid
-	     , i_householdHybridHeatpump );
-    }
-    gr_heatingSliders_default.setVisible( false );
-    {
-    gr_heatingSliders_businesspark = new ShapeGroup( tabHeating.this, SHAPE_DRAW_2D3D, true, 800.0, 0.0, 0.0, 0.0
-	
-	     , rect_heatDemandSliders1
-	     , sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct
-	     , t_heatDemandReductionCompaniesDescription1
-	     , t_heatDemandReductionCompanies_pct1
-	     , t_gasBurnerCompaniesDescription1
-	     , t_hybridHeatPumpCompaniesDescription1
-	     , t_electricHeatPumpCompaniesDescription1
-	     , t_districtHeatingCompaniesDescription1
-	     , t_electricHeatPumpCompanies_pct1
-	     , t_gasBurnerCompanies_pct1
-	     , t_districtHeatingCompanies_pct1
-	     , t_hybridHeatPumpCompanies_pct1
-	     , sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct
-	     , sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct
-	     , sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct
-	     , sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct
-	     , t_companiesDescription1
-	     , t_eBoilerCompanies_pct
-	     , sl_heatDemandSlidersCompaniesEBoiler_pct
-	     , t_eBoilerCompaniesDescription
-	     , i_companyReduction_Company
-	     , i_companyGasBoiler_Company
-	     , i_companyElectricHeatpump_Company
-	     , i_companyHybridHeatpump_Company
-	     , i_companyHeatGrid_Company
-	     , i_companyEBoiler_Company
-	     , t_customHeatingTypeCompanies_pct
-	     , sl_heatingTypeSlidersCompaniesCustom_pct
-	     , txt_customHeatingDemandCompaniesDescription
-	     , i_companyCustomHeatingType_Company ) {
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _arrowLeftResidential, 0, clickx, clicky );
+      }
+    };
+    arrowRightResidential1 = new ShapeImage(
+		tabHeating.this, SHAPE_DRAW_2D3D, true, 35.0, 0.0, 0.0, 4.71238898038469,
+12.0, 12.0, "/zerointerfaceloader/",
+			new String[]{"icon_arrow.png",} ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _arrowRightResidential1, 0, clickx, clicky );
+      }
+    };
+    t_pageIndicator = new ShapeText(
+        SHAPE_DRAW_2D, true,0.0, -12.0, 0.0, 0.0,
+        black,"Pagina 1/2",
+        _t_pageIndicator_Font, ALIGNMENT_CENTER ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _gr_heatingSliders_businesspark_SetDynamicParams_xjal( this );
+      _t_pageIndicator_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+  }
+
+  @AnyLogicInternalCodegenAPI
+  private void _createPersistentElementsAP0_xjal() {
+    {
+    gr_heatingSliders_companies = new ShapeGroup( tabHeating.this, SHAPE_DRAW_2D3D, true, 400.0, 0.0, 0.0, 0.0
+	
+	     , rect_heatDemandSliders1
+	     , sl_companiesHeatDemandReduction_pct
+	     , txt_companiesHeatDemandReductionDescription
+	     , txt_companiesHeatDemandReduction_pct
+	     , txt_companiesGasBurnerDescription
+	     , txt_companiesHybridHeatPumpDescription
+	     , txt_companiesElectricHeatPumpDescription
+	     , txt_companiesDistrictHeatingCompaniesDescription
+	     , txt_companiesElectricHeatPump_pct
+	     , txt_companiesGasBurner_pct
+	     , txt_companiesDistrictHeating_pct
+	     , txt_companiesHybridHeatPump_pct
+	     , sl_companiesDistrictHeating_pct
+	     , sl_companiesGasBurner_pct
+	     , sl_companiesHybridHeatPump_pct
+	     , sl_companiesElectricHeatPump_pct
+	     , txt_heatingDemandSlidersCompaniesDescription
+	     , txt_companiesEBoiler_pct
+	     , sl_companiesEBoiler_pct
+	     , txt_companiesEBoilerDescription
+	     , i_companyReduction
+	     , i_companyGasBoiler
+	     , i_companyElectricHeatpump
+	     , i_companyHybridHeatpump
+	     , i_companyHeatGrid
+	     , i_companyEBoiler
+	     , txt_companiesCustom_pct
+	     , sl_companiesCustom_pct
+	     , txt_companiesCustomDescription
+	     , i_companyCustom ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _gr_heatingSliders_companies_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     }
-    gr_heatingSliders_businesspark.setVisible( false );
+    gr_heatingSliders_companies.setVisible( false );
     {
-    gr_ptSlidersHouses = new ShapeGroup( tabHeating.this, SHAPE_DRAW_2D3D, true, 200.0, 320.0, 0.0, 0.0
-	 );
-    }
-    {
-    gr_heatingSliders_residential = new ShapeGroup( tabHeating.this, SHAPE_DRAW_2D3D, true, 400.0, 0.0, 0.0, 0.0
+    gr_heatingSliders_households = new ShapeGroup( tabHeating.this, SHAPE_DRAW_2D3D, true, 0.0, 0.0, 0.0, 0.0
 	
 	     , rect_heatDeandSlidersResidentialArea
-	     , t_householdGasBurnerDescriptionResidentialArea
-	     , t_householdElectricHeatPumpDescriptionResidentialArea
-	     , t_householdElectricHeatPumpResidentialArea_pct
-	     , t_householdGasBurnerResidentialArea_pct
-	     , sl_householdGasBurnerResidentialArea_pct
-	     , sl_householdElectricHeatPumpResidentialArea_pct
-	     , sl_householdHeatDemandReductionResidentialArea_pct
-	     , t_householdHeatDemandReductionResidentialArea_pct
-	     , t_householdHeatDemandReductionDescriptionResidentialArea
-	     , t_householdHeatingTypeDescriptionResidentialArea
-	     , sl_householdAircoResidentialArea_pct
-	     , t_householdAircoDescriptionResidentialArea
-	     , t_householdAircoResidentialArea_pct
-	     , cb_householdHTDistrictHeatingResidentialArea
-	     , cb_householdLTDistrictHeatingResidentialArea
+	     , txt_householdGasBurnerDescription
+	     , txt_householdElectricHeatPumpDescription
+	     , txt_householdElectricHeatPump_pct
+	     , t_householdGasBurner_pct
+	     , sl_householdGasBurner_pct
+	     , sl_householdElectricHeatPump_pct
+	     , sl_householdHeatDemandReduction_pct
+	     , txt_householdHeatDemandReduction_pct
+	     , txt_householdHeatDemandReductionDescription
+	     , txt_heatingDemandSlidersHousesholdsDescription
+	     , sl_householdAirco_pct
+	     , txt_householdAircoDescription
+	     , txt_householdAirco_pct
+	     , cb_householdHTDistrictHeating
+	     , cb_householdLTDistrictHeating
 	     , i_householdGasBurner
 	     , i_householdHeatPump
 	     , i_householdHTDistrictHeating
 	     , i_householdLTDistrictHeating
 	     , i_householdAirconditioning
 	     , i_householdAdditionalInsulation
-	     , gr_ptSlidersHouses
-	     , t_rooftopPTHouses_pct
-	     , sl_rooftopPTHouses_pct
-	     , txt_rooftopPTHousesDescription
+	     , txt_householdRooftopPT_pct
+	     , sl_householdRooftopPT_pct
+	     , txt_householdRooftopPTDescription
 	     , i_householdPT
-	     , txt_householdHybridHeatpumpDescriptionResidentialArea
-	     , sl_householdHybridHeatpumpResidentialArea
+	     , txt_householdHybridHeatpumpDescription
+	     , sl_householdHybridHeatpump_pct
 	     , i_householdHybridHeatPump
-	     , t_householdElectricHeatPumpResidentialArea_pct1 ) {
+	     , t_householdHybridHeatPump_pct ) {
 	
       @Override
 	
       public void updateDynamicProperties() {
 	
-      _gr_heatingSliders_residential_SetDynamicParams_xjal( this );
+      _gr_heatingSliders_households_SetDynamicParams_xjal( this );
 	
       super.updateDynamicProperties();
 	
       }
     };
     }
-    gr_heatingSliders_residential.setVisible( false );
+    gr_heatingSliders_households.setVisible( false );
+    {
+    gr_pageIndicator = new ShapeGroup( tabHeating.this, SHAPE_DRAW_2D3D, true, 185.0, 20.0, 0.0, 0.0
+	
+	     , arrowLeftResidential
+	     , arrowRightResidential1
+	     , t_pageIndicator );
+    }
+    gr_pageIndicator.setVisible( false );
   }
 
   @AnyLogicInternalCodegenAPI
@@ -5139,7 +4013,6 @@ tabHeating.this, true, 260.0, 75.0,
 	_getLevels_xjal = concatenateArrays( super.getLevels(), 
       level );
     _createPersistentElementsBP0_xjal();
-    _createPersistentElementsBP1_xjal();
   }
 
   @Override
@@ -5219,29 +4092,19 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     setupInitialConditions_xjal( tabHeating.class );
     // Dynamic initialization of persistent elements
     _createPersistentElementsBS0_xjal();
-    sl_districtHeatingHouseholds_pct.setValueToDefault();
-    sl_gasBurnerHouseholds_pct.setValueToDefault();
-    sl_hybridHeatPumpHouseholds_pct.setValueToDefault();
-    sl_electricHeatPumpHouseholds_pct.setValueToDefault();
-    sl_heatDemandReductionHouseholds_pct.setValueToDefault();
-    sl_heatDemandReductionCompanies_pct.setValueToDefault();
-    sl_districtHeatingCompanies_pct.setValueToDefault();
-    sl_gasBurnerCompanies_pct.setValueToDefault();
-    sl_hybridHeatPumpCompanies_pct.setValueToDefault();
-    sl_electricHeatPumpCompanies_pct.setValueToDefault();
-    sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct.setValueToDefault();
-    sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct.setValueToDefault();
-    sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct.setValueToDefault();
-    sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct.setValueToDefault();
-    sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct.setValueToDefault();
-    sl_heatDemandSlidersCompaniesEBoiler_pct.setValueToDefault();
-    sl_heatingTypeSlidersCompaniesCustom_pct.setValueToDefault();
-    sl_householdGasBurnerResidentialArea_pct.setValueToDefault();
-    sl_householdElectricHeatPumpResidentialArea_pct.setValueToDefault();
-    sl_householdHeatDemandReductionResidentialArea_pct.setValueToDefault();
-    sl_householdAircoResidentialArea_pct.setValueToDefault();
-    sl_rooftopPTHouses_pct.setValueToDefault();
-    sl_householdHybridHeatpumpResidentialArea.setValueToDefault();
+    sl_companiesHeatDemandReduction_pct.setValueToDefault();
+    sl_companiesDistrictHeating_pct.setValueToDefault();
+    sl_companiesGasBurner_pct.setValueToDefault();
+    sl_companiesHybridHeatPump_pct.setValueToDefault();
+    sl_companiesElectricHeatPump_pct.setValueToDefault();
+    sl_companiesEBoiler_pct.setValueToDefault();
+    sl_companiesCustom_pct.setValueToDefault();
+    sl_householdGasBurner_pct.setValueToDefault();
+    sl_householdElectricHeatPump_pct.setValueToDefault();
+    sl_householdHeatDemandReduction_pct.setValueToDefault();
+    sl_householdAirco_pct.setValueToDefault();
+    sl_householdRooftopPT_pct.setValueToDefault();
+    sl_householdHybridHeatpump_pct.setValueToDefault();
   }
 
   @Override
@@ -5267,6 +4130,9 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
    */
   @AnyLogicInternalCodegenAPI
   private void setupPlainVariables_tabHeating_xjal() {
+    v_currentPageIndex = 
+0 
+;
   }
 
   // User API -----------------------------------------------------
@@ -5328,79 +4194,83 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 
   // Additional class code
 
-// Default Sliders
-public ShapeGroup getGroupHeatDemandSliders() {
-	return this.gr_heatingSliders_default;
+// Page navigation
+public ShapeGroup getGroupPageIndicator() {
+	return this.gr_pageIndicator;
 }
 
-public ShapeSlider getSliderHeatDemandReductionCompanies_pct() { 
-	return this.sl_heatDemandReductionCompanies_pct;
+public List<ShapeGroup> getLoadedPages() {
+	return this.c_loadedPageGroups;
 }
 
-public ShapeSlider getSliderGasBurnerCompanies_pct() { 
-	return this.sl_gasBurnerCompanies_pct;
+public int getCurrentPageIndex() {
+	return this.v_currentPageIndex;
 }
 
-public ShapeSlider getSliderElectricHeatPumpCompanies_pct() { 
-	return this.sl_electricHeatPumpCompanies_pct;
+// Slider groups
+public ShapeGroup getGroupHeatDemandSliders_Households() {
+	return this.gr_heatingSliders_households;
 }
 
-public ShapeSlider getSliderHeatDemandReductionHouseholds_pct() { 
-	return this.sl_heatDemandReductionHouseholds_pct;
-}
-
-public ShapeSlider getSliderGasBurnerHouseholds_pct() { 
-	return this.sl_gasBurnerHouseholds_pct;
-}
-
-public ShapeSlider getSliderElectricHeatPumpHouseholds_pct() { 
-	return this.sl_electricHeatPumpHouseholds_pct;
+public ShapeGroup getGroupHeatDemandSliders_Companies() {
+	return this.gr_heatingSliders_companies;
 }
 
 // Residential Tab Sliders
-public ShapeGroup getGroupHeatDemandSlidersResidentialArea() {
-	return this.gr_heatingSliders_residential;
+public ShapeSlider getSliderHouseholdGasBurner_pct() { 
+	return this.sl_householdGasBurner_pct;
 }
 
-public ShapeSlider getSliderHeatDemandSlidersResidentialAreaHouseholdsGasBurner_pct() { 
-	return this.sl_householdGasBurnerResidentialArea_pct;
-}
-public ShapeSlider getSl_householdHybridHeatpumpResidentialArea() { 
-	return this.sl_householdHybridHeatpumpResidentialArea;
+public ShapeSlider getSliderHouseholdHybridHeatpump_pct() { 
+	return this.sl_householdHybridHeatpump_pct;
 }
 
-public ShapeSlider getSliderHeatDemandSlidersResidentialAreaHouseholdsElectricHeatPump_pct() { 
-	return this.sl_householdElectricHeatPumpResidentialArea_pct;
+public ShapeSlider getSliderHouseholdElectricHeatPump_pct() { 
+	return this.sl_householdElectricHeatPump_pct;
+}
+
+public ShapeSlider getSliderHouseholdAirco_pct() { 
+	return this.sl_householdAirco_pct;
+}
+
+public ShapeSlider getSliderHouseholdHeatDemandReduction_pct() { 
+	return this.sl_householdHeatDemandReduction_pct;
+}
+
+public ShapeSlider getSliderHouseholdRooftopPT_pct() { 
+	return this.sl_householdRooftopPT_pct;
 }
 
 // Company Tab Sliders
-public ShapeGroup getGroupHeatDemandSlidersCompanies() {
-	return this.gr_heatingSliders_businesspark;
+public ShapeSlider getSliderCompaniesHeatDemandReduction_pct() { 
+	return this.sl_companiesHeatDemandReduction_pct;
 }
 
-public ShapeSlider getSliderHeatDemandSlidersCompaniesHeatDemandReductionCompanies_pct() { 
-	return this.sl_heatDemandSlidersCompaniesHeatDemandReductionCompanies_pct;
+public ShapeSlider getSliderCompaniesGasBurner_pct() { 
+	return this.sl_companiesGasBurner_pct;
 }
 
-public ShapeSlider getSliderHeatDemandSlidersCompaniesGasBurnerCompanies_pct() { 
-	return this.sl_heatDemandSlidersCompaniesGasBurnerCompanies_pct;
+public ShapeSlider getSliderCompaniesHybridHeatPump_pct() { 
+	return this.sl_companiesHybridHeatPump_pct;
 }
 
-public ShapeSlider getSliderHeatDemandSlidersCompaniesElectricHeatPumpCompanies_pct() { 
-	return this.sl_heatDemandSlidersCompaniesElectricHeatPumpCompanies_pct;
+public ShapeSlider getSliderCompaniesElectricHeatPump_pct() { 
+	return this.sl_companiesElectricHeatPump_pct;
 }
 
-public ShapeSlider getSl_heatingTypeSlidersCompaniesCustom_pct(){
-	return this.sl_heatingTypeSlidersCompaniesCustom_pct;
+public ShapeSlider getSliderCompaniesDistrictHeating_pct(){
+	return this.sl_companiesDistrictHeating_pct;
 }
 
-public ShapeSlider getSl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct(){
-	return this.sl_heatDemandSlidersCompaniesHybridHeatPumpCompanies_pct;
+public ShapeSlider getSliderCompaniesEBoiler_pct(){
+	return this.sl_companiesEBoiler_pct;
 }
 
-public ShapeSlider getSl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct(){
-	return this.sl_heatDemandSlidersCompaniesDistrictHeatingCompanies_pct;
-} 
+public ShapeSlider getSliderCompaniesCustomHeating_pct(){
+	return this.sl_companiesCustom_pct;
+}
+
+ 
   // End of additional class code
 
 }

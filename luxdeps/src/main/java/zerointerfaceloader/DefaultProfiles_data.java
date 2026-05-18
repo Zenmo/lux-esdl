@@ -98,17 +98,7 @@ public class DefaultProfiles_data {
 	
 	//CO2 emission factor data
 	List<Double> CO2EmissionFactorElectricityImport_kgpkWh;
-	 //t_h,
-	 // wind_e_prod_normalized,
-	// solar_e_prod_normalized,
-	// ambientTemperature_degC,
-	// Day-ahead Price [EUR/MWh],
-	// house_e_demand_other,
-	// house_h_demand_hot_water,
-	// building_e_demand_other,
-	// building_h_demand,
-	// industry_steel_e_demand,industry_steel_h_demand,industry_other_e_demand,industry_other_h_demand,logistics_fleet_e_hgv
-
+	
 	// Various demand profiles
 	List<Double> defaultHouseElectricityDemandProfile_fr;
 	List<Double> defaultHouseHotWaterDemandProfile_fr;

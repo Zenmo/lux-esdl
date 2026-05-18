@@ -1936,10 +1936,10 @@ for (var survey : surveys) {
         for (var gridConnection: address.getGridConnections()) {
 
 		 	//Check if it has (or will have) a direct connection with the grid (either gas or electric), if not: skip this gc.
-		 	boolean hasNaturalGasConnection = (gridConnection.getNaturalGas().getHasConnection() != null)? gridConnection.getNaturalGas().getHasConnection() : false;	 	
+		 	boolean hasNaturalGasConnection = gridConnection.getNaturalGas().checkHasConnection();	 	
 		 	boolean hasExpansionRequest = (gridConnection.getElectricity().getGridExpansion().getHasRequestAtGridOperator() != null ) ? gridConnection.getElectricity().getGridExpansion().getHasRequestAtGridOperator() : false;
 		 	
-		 	if (!gridConnection.getElectricity().getHasConnection() && !hasExpansionRequest && !hasNaturalGasConnection){
+		 	if (!gridConnection.getElectricity().checkHasConnection() && !hasExpansionRequest && !hasNaturalGasConnection){
 				traceln("surveyGC with sequence: " + gridConnection.getSequence() + " is not created, as it has no connection to the grid, future grid connection or current gas connection.");	
 			 	continue;
 		 	}
@@ -3054,7 +3054,7 @@ Double pvPower_kW = (gridConnection.getSupply().getPvInstalledKwp() != null) ? n
 
 ////Electricity (connection and consumption)
 //Check for electricity connection and data
-if (gridConnection.getElectricity().getHasConnection()){
+if (gridConnection.getElectricity().checkHasConnection()){
 	
 	//Connection capacities
 	//TEMPORARY CONVERSION NEEDED UNTIL NO LONGER INTEGER FROM SURVEY
@@ -3703,7 +3703,7 @@ for(GridConnection connectedGC : existingBuilding.c_containedGridConnections){
 existingBuilding.p_floorSurfaceArea_m2 += connectingBuildingData.address_floor_surface_m2(); 
   }
 
-  protected void f_addHeatAsset( GridConnection parentGC, OL_GridConnectionHeatingType heatAssetType, double maxHeatOutputPower_kW ) { 
+  public void f_addHeatAsset( GridConnection parentGC, OL_GridConnectionHeatingType heatAssetType, double maxHeatOutputPower_kW ) { 
 
 //Initialize parameters
 double heatOutputCapacityGasBurner_kW;
@@ -3730,7 +3730,7 @@ switch (heatAssetType){ // There is always only one heatingType, If there are ma
 		//Add primary heating asset (heatpump) (if its not part of the basic profile already
 		inputCapacityElectric_kW = max(avgc_data.p_minHeatpumpElectricCapacity_kW, maxHeatOutputPower_kW / 3); //-- /3, kan nog kleiner want is hybride zodat gasbrander ook bij springt, dus kleiner MOETEN aanname voor hoe klein onderzoeken
 		efficiency = avgc_data.p_avgEfficiencyHeatpump_fr;
-		baseTemperature_degC = zero_Interface.energyModel.pp_ambientTemperature_degC.getCurrentValue();
+		baseTemperature_degC = energyModel.pp_ambientTemperature_degC.getCurrentValue();
 		outputTemperature_degC = avgc_data.p_avgOutputTemperatureHybridHeatpump_degC;
 		ambientTempType = OL_AmbientTempType.AMBIENT_AIR;
 		sourceAssetHeatPower_kW = 0;
@@ -3738,7 +3738,7 @@ switch (heatAssetType){ // There is always only one heatingType, If there are ma
 		
 		J_EAConversionHeatPump heatPumpHybrid = new J_EAConversionHeatPump(parentGC, inputCapacityElectric_kW, efficiency, energyModel.p_timeParameters, outputTemperature_degC, baseTemperature_degC, sourceAssetHeatPower_kW, belowZeroHeatpumpEtaReductionFactor, ambientTempType);
 
-		zero_Interface.energyModel.c_ambientDependentAssets.add(heatPumpHybrid);
+		energyModel.c_ambientDependentAssets.add(heatPumpHybrid);
 		
 		//Add secondary heating asset (gasburner)
 		heatOutputCapacityGasBurner_kW = max(avgc_data.p_minGasBurnerOutputCapacity_kW, maxHeatOutputPower_kW);
@@ -3752,7 +3752,7 @@ switch (heatAssetType){ // There is always only one heatingType, If there are ma
 		//Add primary heating asset (heatpump)
 		inputCapacityElectric_kW = max(avgc_data.p_minHeatpumpElectricCapacity_kW, maxHeatOutputPower_kW); // Could be a lot smaller due to high cop
 		efficiency = avgc_data.p_avgEfficiencyHeatpump_fr;
-		baseTemperature_degC = zero_Interface.energyModel.pp_ambientTemperature_degC.getCurrentValue();
+		baseTemperature_degC = energyModel.pp_ambientTemperature_degC.getCurrentValue();
 		outputTemperature_degC = avgc_data.p_avgOutputTemperatureElectricHeatpump_degC;
 		ambientTempType = OL_AmbientTempType.AMBIENT_AIR;
 		sourceAssetHeatPower_kW = 0;
@@ -3936,7 +3936,7 @@ if ( topGridNode == null ) {
 String topGridNodeID = topGridNode.gridnode_id();
 
 //Create data package for e-hub dashboard slider gcs
-if(project_data.project_type() == OL_ProjectType.BUSINESSPARK){
+if(c_companyBuilding_data.size() > 1){
 	f_addSliderSolarfarm(zero_Interface.p_defaultEnergyHubSliderGCName_solarfarm, topGridNodeID);
 	f_addSliderWindfarm(zero_Interface.p_defaultEnergyHubSliderGCName_windfarm, topGridNodeID);
 	f_addSliderBattery(zero_Interface.p_defaultEnergyHubSliderGCName_battery, topGridNodeID);
@@ -4836,7 +4836,7 @@ Double
  f_createSurveyHeatProfiles( GridConnection engineGC, com.zenmo.zummon.companysurvey.GridConnection surveyGC, OL_GridConnectionHeatingType heatingType ) { 
 
 ////Gas and Heating
-if (surveyGC.getNaturalGas().getHasConnection() != null && surveyGC.getNaturalGas().getHasConnection() ) {
+if (surveyGC.getNaturalGas().checkHasConnection()) {
 	switch (heatingType) {
 		case HYBRID_HEATPUMP:
 			// Exception for hybrid heatpumps, when it will be a ghost asset make gas profile
@@ -5283,7 +5283,7 @@ zero_Interface.user = user;
   public void f_setSimulationTimeParameters(  ) { 
 
 //Sim start year
-int simStartYear = getExperiment().getEngine().getStartDate().getYear() + 1900;  // 1900 years offset because of Java/AnyLogic convention
+int simStartYear = getEngine().getStartDate().getYear() + 1900;  // 1900 years offset because of Java/AnyLogic convention
 
 // Create date at start of simulation year to use to calculate v_simStartHour_h
 Date d = new Date();
@@ -5295,7 +5295,7 @@ d.setMinutes(0);
 d.setDate(1);
 
 //Calculate sim start hour
-double simStartTime_h = roundToInt((getExperiment().getEngine().getStartDate().getTime() - d.getTime())/1000.0/60/60); //Get time is in ms -> converted into hours
+double simStartTime_h = roundToInt((getEngine().getStartDate().getTime() - d.getTime())/1000.0/60/60); //Get time is in ms -> converted into hours
 
 //Fix for if start is within summer time, the v_simStartHour_h is not correct anymore
 double summerTimeStart_h = avgc_data.map_yearlySummerWinterTimeStartHour.get(simStartYear).getFirst();
@@ -5306,8 +5306,8 @@ if(simStartTime_h > summerTimeStart_h && simStartTime_h < winterTimeStart_h){
 
 //Set sim duration if it is set
 double simDuration_h; //Sim duration in hours
-if(getExperiment().getEngine().getStopDate() != null){ //If experiment has set time, it gets bias
-	simDuration_h = roundToInt(((double)getExperiment().getEngine().getStopDate().getTime() - getExperiment().getEngine().getStartDate().getTime())/1000.0/60/60); //Get time is in ms -> converted into hours
+if(getEngine().getStopDate() != null){ //If experiment has set time, it gets bias
+	simDuration_h = roundToInt(((double)getEngine().getStopDate().getTime() - getEngine().getStartDate().getTime())/1000.0/60/60); //Get time is in ms -> converted into hours
 	if(simStartTime_h > summerTimeStart_h && simStartTime_h + simDuration_h > winterTimeStart_h){//Compensate if start time is in summer time, and end time is in winter time -> simulation would otherwise have 1 hour too much
 		simDuration_h -= 1;
 	}

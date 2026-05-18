@@ -1175,8 +1175,8 @@ else {
 
   void f_setPVSystem( GridConnection GC, double v_rooftopPV_kWp ) { 
 
-if (GC.v_liveAssetsMetaData.activeAssetFlows.contains(OL_AssetFlowCategories.pvProductionElectric_kW)){
-	J_EAProduction pvAsset = findFirst(GC.c_productionAssets, p -> p.getEAType() == OL_EnergyAssetType.PHOTOVOLTAIC );
+J_EAProduction pvAsset = findFirst(GC.c_productionAssets, p -> p.getEAType() == OL_EnergyAssetType.PHOTOVOLTAIC );
+if (pvAsset != null){
 	if (v_rooftopPV_kWp == 0) {
 		pvAsset.removeEnergyAsset();
 	}
