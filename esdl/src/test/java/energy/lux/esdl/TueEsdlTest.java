@@ -44,7 +44,8 @@ public class TueEsdlTest {
         var hourOffset = (double) milliOffset / Duration.ofHours(1).toMillis();
 
         var degC = luxEngine.pp_ambientTemperature_degC.getValue(hourOffset);
-        // The ESDL file seems to have kelvin but the ESDL spec says it should be Celsius
+        // The ESDL file seems to have kelvin,
+        // but the ESDL spec says it should be Celsius
         assertEquals(295.85, degC, 0.01);
 
         var eurpMWh = luxEngine.pp_dayAheadElectricityPricing_eurpMWh.getValue(hourOffset);
@@ -66,16 +67,14 @@ public class TueEsdlTest {
     }
 
     private GridNode findGridNodeById(EnergyModel energyModel, String gridNodeId) {
-        for (int i = 0; i < energyModel.pop_gridNodes.size(); i++) {
-            GridNode gridNode = energyModel.pop_gridNodes.get(i);
+        for (GridNode gridNode : energyModel.pop_gridNodes) {
             if (gridNodeId.equals(gridNode.p_gridNodeID)) return gridNode;
         }
         return null;
     }
 
     private GridConnection findGridConnectionById(EnergyModel energyModel, String gridConnectionId) {
-        for (int i = 0; i < energyModel.pop_gridConnections.size(); i++) {
-            GridConnection gridConnection = energyModel.pop_gridConnections.get(i);
+        for (GridConnection gridConnection : energyModel.pop_gridConnections) {
             if (gridConnectionId.equals(gridConnection.p_gridConnectionID)) return gridConnection;
         }
         return null;
