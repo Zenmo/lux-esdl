@@ -52,7 +52,7 @@ public class AreaLoader {
             var childGridNode = createGridNodeForTransformer(transformer, luxLoader);
             traverseNetworkFromAsset(asset, luxLoader, childGridNode, visitedPortIds);
         } else if (asset instanceof EConnection eConnection) {
-            var gridConnection = createGridConnectionForEConnection(eConnection, luxLoader, currentGridNode);
+            var gridConnection = createGridconnection(eConnection, luxLoader, currentGridNode);
             var gcSwitch = new GridConnectionAssetLoader(gridConnection, luxLoader, eConnection);
             for (var port: eConnection.getPort()) {
                 // skip InPort because that leaves the grid connection
@@ -76,7 +76,7 @@ public class AreaLoader {
         return gridNode;
     }
 
-    private static GridConnection createGridConnectionForEConnection(
+    private static GridConnection createGridconnection(
             EConnection eConnection, Zero_Loader luxLoader, GridNode parentGridNode
     ) {
         EnergyModel energyModel = luxLoader.energyModel;
@@ -87,12 +87,11 @@ public class AreaLoader {
     }
 
     private static Import findImportAsset(Area area) {
-        var imports = area.getAsset().stream().filter(asset -> asset instanceof Import).toList();
-        Import importAsset = switch (imports.size()) {
-            case 0 -> throw new NoSuchElementException("No import asset found");
-            case 1 -> (Import) imports.get(0);
-            default -> throw new NoSuchElementException("Multiple import assets found");
-        };
+        var importAsset = (Import) Util.findSingle(
+                area.getAsset(),
+                asset -> asset instanceof Import,
+                "import asset"
+        );
 
         assertImportAssetHasNoInPorts(importAsset);
 
