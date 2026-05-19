@@ -52,7 +52,13 @@ public class AreaLoader {
             traverseNetworkFromAsset(asset, luxLoader, childGridNode, visitedPortIds);
         } else if (asset instanceof EConnection eConnection) {
             var gridConnection = createGridConnectionForEConnection(eConnection, luxLoader, currentGridNode);
-            traverseInsideGridConnection(eConnection, luxLoader, gridConnection, new HashSet<>(), new HashSet<>());
+            var gcSwitch = new GridConnectionAssetLoader(gridConnection, luxLoader, eConnection);
+            for (var port: eConnection.getPort()) {
+                // skip InPort because that leaves the grid connection
+                if (port instanceof OutPort outPort) {
+                    gcSwitch.doSwitch(outPort);
+                }
+            }
         } else {
             throw new NotImplemented(
                     "Unexpected asset type in network traversal: "
@@ -78,115 +84,6 @@ public class AreaLoader {
         gridConnection.p_gridConnectionID = eConnection.getId();
         gridConnection.p_parentNodeElectricID = parentGridNode.p_gridNodeID;
         return gridConnection;
-    }
-
-    private static void traverseInsideGridConnection(
-            EnergyAsset asset,
-            Zero_Loader luxLoader,
-            GridConnection gridConnection,
-            Set<String> visitedPortIds,
-            Set<String> processedAssetIds
-    ) {
-        for (Port port : asset.getPort()) {
-            if (!(port instanceof OutPort outPort)) continue;
-            if (!visitedPortIds.add(outPort.getId())) continue;
-            for (InPort connectedInPort : outPort.getConnectedTo()) {
-                EnergyAsset nextAsset = connectedInPort.getEnergyasset();
-                processGridConnectionAsset(nextAsset, luxLoader, gridConnection, visitedPortIds, processedAssetIds);
-            }
-        }
-    }
-
-    private static void processGridConnectionAsset(
-            EnergyAsset asset,
-            Zero_Loader luxLoader,
-            GridConnection gridConnection,
-            Set<String> visitedPortIds,
-            Set<String> processedAssetIds
-    ) {
-        if (asset instanceof ElectricityNetwork network) {
-            loadGeneratorsConnectedToElectricityNetwork(network, luxLoader, gridConnection, visitedPortIds, processedAssetIds);
-            traverseInsideGridConnection(network, luxLoader, gridConnection, visitedPortIds, processedAssetIds);
-        } else if (asset instanceof ElectricityDemand demand) {
-            if (processedAssetIds.add(demand.getId())) {
-                loadElectricityDemand(demand, luxLoader, gridConnection);
-            }
-        } else if (asset instanceof EVChargingStation evStation) {
-            if (processedAssetIds.add(evStation.getId())) {
-                GridConnectionAssetLoader.loadEVChargingStation(evStation, luxLoader, gridConnection);
-            }
-        } else if (asset instanceof HybridHeatPump heatPump) {
-            if (processedAssetIds.add(heatPump.getId())) {
-                GridConnectionAssetLoader.loadHybridHeatPump(heatPump, luxLoader, gridConnection);
-            }
-        } else {
-            throw new NotImplemented(
-                    "Unexpected asset type in grid connection traversal: "
-                            + asset.getClass().getSimpleName() + " id=" + asset.getId()
-            );
-        }
-    }
-
-    private static void loadGeneratorsConnectedToElectricityNetwork(
-            ElectricityNetwork network,
-            Zero_Loader luxLoader,
-            GridConnection gridConnection,
-            Set<String> visitedPortIds,
-            Set<String> processedAssetIds
-    ) {
-        for (Port port : network.getPort()) {
-            if (!(port instanceof InPort inPort)) continue;
-            for (OutPort connectedOutPort : inPort.getConnectedTo()) {
-                EnergyAsset sourceAsset = connectedOutPort.getEnergyasset();
-                if (sourceAsset instanceof EConnection) continue;
-                if (!visitedPortIds.add(connectedOutPort.getId())) continue;
-                if (sourceAsset instanceof PVInstallation pv) {
-                    if (processedAssetIds.add(pv.getId())) {
-                        GridConnectionAssetLoader.loadPVInstallation(pv, luxLoader, gridConnection);
-                    }
-                } else {
-                    throw new NotImplemented(
-                            "Unexpected generator connected to ElectricityNetwork: "
-                                    + sourceAsset.getClass().getSimpleName() + " id=" + sourceAsset.getId()
-                    );
-                }
-            }
-        }
-    }
-
-    private static void loadElectricityDemand(
-            ElectricityDemand demand, Zero_Loader luxLoader, GridConnection gridConnection
-    ) {
-        var dateTimeProfile = findFirstDateTimeProfile(demand);
-        if (dateTimeProfile == null) {
-            logger.warn("No DateTimeProfile found for ElectricityDemand id={}, skipping", demand.getId());
-            return;
-        }
-        var profilePointer = DateTimeProfileLoader.createProfilePointer(
-                luxLoader,
-                dateTimeProfile,
-                demand.getId() + "_demand",
-                OL_ProfileUnits.KWHPQUARTERHOUR
-        );
-        var demandAsset = new J_EAProfile(
-                gridConnection,
-                OL_EnergyCarriers.ELECTRICITY,
-                profilePointer,
-                OL_AssetFlowCategories.fixedConsumptionElectric_kW,
-                luxLoader.energyModel.p_timeParameters
-        );
-        demandAsset.setEnergyAssetName(demand.getName());
-    }
-
-    private static DateTimeProfile findFirstDateTimeProfile(EnergyAsset asset) {
-        for (Port port : asset.getPort()) {
-            for (GenericProfile profile : port.getProfile()) {
-                if (profile instanceof DateTimeProfile dateTimeProfile) {
-                    return dateTimeProfile;
-                }
-            }
-        }
-        return null;
     }
 
     private static Import findImportAsset(Area area) {

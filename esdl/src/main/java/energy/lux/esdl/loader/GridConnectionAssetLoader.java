@@ -1,38 +1,151 @@
 package energy.lux.esdl.loader;
 
 import energy.lux.esdl.NotImplemented;
-import esdl.EVChargingStation;
-import esdl.HybridHeatPump;
-import esdl.PVInstallation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import zero_engine.GridConnection;
-import zero_engine.OL_EnergyAssetType;
-import zero_engine.OL_GridConnectionHeatingType;
-import zero_engine.OL_PVOrientation;
+import esdl.*;
+import esdl.util.EsdlSwitch;
+import org.eclipse.emf.ecore.EObject;
+import zero_engine.*;
 import zerointerfaceloader.Zero_Loader;
 
-public class GridConnectionAssetLoader {
-    private static final Logger logger = LoggerFactory.getLogger(GridConnectionAssetLoader.class);
+import java.util.HashSet;
+import java.util.Set;
 
-    static void loadPVInstallation(
-            PVInstallation esdlPvInstallation, Zero_Loader luxLoader, GridConnection gridConnection
-    ) {
-        double installedPowerKilowatts = esdlPvInstallation.getSurfaceArea() * esdlPvInstallation.getPanelEfficiency();
-        luxLoader.f_addPVProductionAsset(gridConnection, esdlPvInstallation.getName(), installedPowerKilowatts, OL_PVOrientation.SOUTH);
+import static energy.lux.esdl.loader.SwitchStatus.DONE;
+
+public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
+    private final GridConnection luxGridConnection;
+
+    private final Zero_Loader luxLoader;
+
+    private final EConnection entryPoint;
+
+    private final Set<Port> visitedPorts = new HashSet<>();
+    private final Set<EnergyAsset> processedAssets = new HashSet<>();
+
+    public GridConnectionAssetLoader(GridConnection luxGridConnection, Zero_Loader luxLoader, EConnection entryPoint) {
+        this.luxGridConnection = luxGridConnection;
+        this.luxLoader = luxLoader;
+        // prevent exiting the grid connection while searching through the cables
+        this.entryPoint = entryPoint;
     }
 
-    static void loadEVChargingStation(
-            EVChargingStation evStation, Zero_Loader luxLoader, GridConnection gridConnection
-    ) {
-        var maxChargingPowerKw = evStation.getPower() * 0.001;
-        luxLoader.f_addElectricVehicle(gridConnection, OL_EnergyAssetType.ELECTRIC_VEHICLE, true, 8_000, maxChargingPowerKw);
+    @Override
+    public SwitchStatus defaultCase(EObject object) {
+        throw new RuntimeException("Unexpected asset type " + object.toString());
     }
 
-    static void loadHybridHeatPump(
-            HybridHeatPump heatPump, Zero_Loader luxLoader, GridConnection gridConnection
-    ) {
-        var maxThermalPowerKw = heatPump.getGasHeaterThermalPower() * 0.001;
-        luxLoader.f_addHeatAsset(gridConnection, OL_GridConnectionHeatingType.HYBRID_HEATPUMP, maxThermalPowerKw);
+    @Override
+    public SwitchStatus caseEnergyAsset(EnergyAsset energyAsset) {
+        throw new NotImplemented("Not implemented loading Energy Asset " + printItem(energyAsset));
+    }
+
+    @Override
+    public SwitchStatus caseEConnection(EConnection eConnection) {
+        if (eConnection != entryPoint) {
+            throw new RuntimeException("Found a grid connection within a grid connection: " + printItem(eConnection));
+        }
+        return DONE;
+    }
+
+    @Override
+    public SwitchStatus caseInPort(InPort inPort) {
+        if (this.visitedPorts.add(inPort)) {
+            doSwitch(inPort.getEnergyasset());
+            for (var outPort: inPort.getConnectedTo()) {
+                doSwitch(outPort);
+            }
+        }
+        return DONE;
+    }
+
+    @Override
+    public SwitchStatus caseOutPort(OutPort outPort) {
+        if (this.visitedPorts.add(outPort)) {
+            doSwitch(outPort.getEnergyasset());
+            for (var inPort: outPort.getConnectedTo()) {
+                doSwitch(inPort);
+            }
+        }
+        return DONE;
+    }
+
+    @Override
+    public SwitchStatus caseElectricityNetwork(ElectricityNetwork electricityNetwork) {
+        for (Port port : electricityNetwork.getPort()) {
+            this.doSwitch(port);
+        }
+        return DONE;
+    }
+
+    @Override
+    public SwitchStatus casePVInstallation(PVInstallation pvInstallation) {
+        if (this.processedAssets.add(pvInstallation)) {
+            var baseIrradianceWPerM2 = 1000.0;
+            var efficiency = pvInstallation.getPanelEfficiency() * pvInstallation.getInverterEfficiency();
+            var installedPowerKw = pvInstallation.getSurfaceArea() * efficiency * baseIrradianceWPerM2 * 0.001;
+            luxLoader.f_addPVProductionAsset(luxGridConnection, pvInstallation.getName(), installedPowerKw, OL_PVOrientation.SOUTH);
+        }
+        return DONE;
+    }
+
+    @Override
+    public SwitchStatus caseHybridHeatPump(HybridHeatPump hybridHeatPump) {
+        if (this.processedAssets.add(hybridHeatPump)) {
+            var maxThermalPowerKw = hybridHeatPump.getGasHeaterThermalPower() * 0.001;
+            luxLoader.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.HYBRID_HEATPUMP, maxThermalPowerKw);
+        }
+        return DONE;
+    }
+
+    @Override
+    public SwitchStatus caseEVChargingStation(EVChargingStation evChargingStation) {
+        if (this.processedAssets.add(evChargingStation)) {
+            var maxChargingPowerKw = evChargingStation.getPower() * 0.001;
+            luxLoader.f_addElectricVehicle(luxGridConnection, OL_EnergyAssetType.ELECTRIC_VEHICLE, true, 8_000, maxChargingPowerKw);
+        }
+        return DONE;
+    }
+
+    @Override
+    public SwitchStatus caseElectricityDemand(ElectricityDemand demand) {
+        if (!this.processedAssets.add(demand)) {
+            return DONE;
+        }
+
+        var dateTimeProfile = findFirstDateTimeProfile(demand);
+        if (dateTimeProfile == null) {
+            throw new NotImplemented("No DateTimeProfile found for " + printItem(demand));
+        }
+
+        var profilePointer = DateTimeProfileLoader.createProfilePointer(
+                luxLoader,
+                dateTimeProfile,
+                demand.getId() + "_demand",
+                OL_ProfileUnits.KWHPQUARTERHOUR
+        );
+        var demandAsset = new J_EAProfile(
+                luxGridConnection,
+                OL_EnergyCarriers.ELECTRICITY,
+                profilePointer,
+                OL_AssetFlowCategories.fixedConsumptionElectric_kW,
+                luxLoader.energyModel.p_timeParameters
+        );
+        demandAsset.setEnergyAssetName(demand.getName());
+        return DONE;
+    }
+
+    private static DateTimeProfile findFirstDateTimeProfile(EnergyAsset asset) {
+        for (Port port : asset.getPort()) {
+            for (GenericProfile profile : port.getProfile()) {
+                if (profile instanceof DateTimeProfile dateTimeProfile) {
+                    return dateTimeProfile;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String printItem(Item esdlItem) {
+        return esdlItem.getClass().getName() + "[id=" + esdlItem.getId() + "]";
     }
 }
