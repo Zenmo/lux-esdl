@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import zero_engine.EnergyModel;
 import zero_engine.GridConnection;
 import zero_engine.GridNode;
+import zero_engine.OL_EnergyCarriers;
 
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -12,8 +13,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test tue.esdl supplied by partners.
@@ -81,6 +82,16 @@ public class TueEsdlTest {
         }
 
         assertEquals(i, luxEngine.v_timeStepsElapsed);
+
+        // Sanity checks
+        var demandDataSet = luxEngine.v_liveData.dsm_liveDemand_kW.get(OL_EnergyCarriers.ELECTRICITY);
+        assertThat(demandDataSet.getYMean()).isBetween(0.1, 10.0);
+        assertThat(demandDataSet.getYMax()).isBetween(1.0, 40.0);
+
+        var supplyDataSet = luxEngine.v_liveData.dsm_liveSupply_kW.get(OL_EnergyCarriers.ELECTRICITY);
+        // 32 m2 of solar = 6 kWp
+        assertThat(supplyDataSet.getYMean()).isBetween(0.001, 1.0);
+        assertThat(supplyDataSet.getYMax()).isBetween(0.01, 3.0);
     }
 
     private GridNode findGridNodeById(EnergyModel energyModel, String gridNodeId) {

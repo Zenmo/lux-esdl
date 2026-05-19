@@ -12,6 +12,10 @@ import java.util.Set;
 
 import static energy.lux.esdl.loader.SwitchStatus.DONE;
 
+/**
+ * Iterate through the network behind EConnection
+ * and add the assets to the LUX grid connection
+ */
 public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
     private final GridConnection luxGridConnection;
 
@@ -80,10 +84,7 @@ public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
     @Override
     public SwitchStatus casePVInstallation(PVInstallation pvInstallation) {
         if (this.processedAssets.add(pvInstallation)) {
-            var baseIrradianceWPerM2 = 1000.0;
-            var efficiency = pvInstallation.getPanelEfficiency() * pvInstallation.getInverterEfficiency();
-            var installedPowerKw = pvInstallation.getSurfaceArea() * efficiency * baseIrradianceWPerM2 * 0.001;
-            luxLoader.f_addPVProductionAsset(luxGridConnection, pvInstallation.getName(), installedPowerKw, OL_PVOrientation.SOUTH);
+            PVLoader.loadPVInstallation(pvInstallation, luxGridConnection, luxLoader);
         }
         return DONE;
     }
@@ -121,7 +122,8 @@ public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
                 luxLoader,
                 dateTimeProfile,
                 demand.getId() + "_demand",
-                OL_ProfileUnits.KWHPQUARTERHOUR
+                OL_ProfileUnits.KWHPQUARTERHOUR,
+                v -> v * 0.001
         );
         var demandAsset = new J_EAProfile(
                 luxGridConnection,
