@@ -1,6 +1,7 @@
 package energy.lux.esdl.loader;
 
 import energy.lux.esdl.NotImplemented;
+import energy.lux.esdl.Util;
 import esdl.*;
 import esdl.util.EsdlSwitch;
 import org.eclipse.emf.ecore.EObject;
@@ -40,13 +41,13 @@ public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
 
     @Override
     public SwitchStatus caseEnergyAsset(EnergyAsset energyAsset) {
-        throw new NotImplemented("Not implemented loading Energy Asset " + printItem(energyAsset));
+        throw new NotImplemented("Not implemented loading Energy Asset " + Util.printItem(energyAsset));
     }
 
     @Override
     public SwitchStatus caseEConnection(EConnection eConnection) {
         if (eConnection != entryPoint) {
-            throw new RuntimeException("Found a grid connection within a grid connection: " + printItem(eConnection));
+            throw new RuntimeException("Found a grid connection within a grid connection: " + Util.printItem(eConnection));
         }
         return DONE;
     }
@@ -90,9 +91,18 @@ public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
     }
 
     @Override
+    public SwitchStatus caseHeatPump(HeatPump heatPump) {
+        if (this.processedAssets.add(heatPump)) {
+            var maxThermalPowerKw = heatPump.getPower() * 0.001;
+            luxLoader.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, maxThermalPowerKw);
+        }
+        return DONE;
+    }
+
+    @Override
     public SwitchStatus caseHybridHeatPump(HybridHeatPump hybridHeatPump) {
         if (this.processedAssets.add(hybridHeatPump)) {
-            var maxThermalPowerKw = hybridHeatPump.getGasHeaterThermalPower() * 0.001;
+            var maxThermalPowerKw = hybridHeatPump.getHeatPumpThermalPower() * 0.001;
             luxLoader.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.HYBRID_HEATPUMP, maxThermalPowerKw);
         }
         return DONE;
@@ -115,7 +125,7 @@ public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
 
         var dateTimeProfile = findFirstDateTimeProfile(demand);
         if (dateTimeProfile == null) {
-            throw new NotImplemented("No DateTimeProfile found for " + printItem(demand));
+            throw new NotImplemented("No DateTimeProfile found for " + Util.printItem(demand));
         }
 
         var profilePointer = DateTimeProfileLoader.createProfilePointer(
@@ -145,9 +155,5 @@ public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
             }
         }
         return null;
-    }
-
-    private static String printItem(Item esdlItem) {
-        return esdlItem.getClass().getName() + "[id=" + esdlItem.getId() + "]";
     }
 }

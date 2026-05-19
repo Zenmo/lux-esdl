@@ -1,6 +1,7 @@
 package energy.lux.esdl.loader;
 
 import energy.lux.esdl.NotImplemented;
+import energy.lux.esdl.Util;
 import esdl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +62,7 @@ public class AreaLoader {
             }
         } else {
             throw new NotImplemented(
-                    "Unexpected asset type in network traversal: "
-                            + asset.getClass().getSimpleName() + " id=" + asset.getId()
+                    "Unexpected asset type in network traversal: " + Util.printItem(asset)
             );
         }
     }
