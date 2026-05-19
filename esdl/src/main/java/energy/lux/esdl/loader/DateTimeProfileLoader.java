@@ -1,5 +1,6 @@
 package energy.lux.esdl.loader;
 
+import energy.lux.esdl.DateTimeUtil;
 import energy.lux.esdl.NotImplemented;
 import esdl.DateTimeProfile;
 import esdl.EnergyMarket;
@@ -12,17 +13,17 @@ import zero_engine.J_ProfilePointer;
 import zero_engine.OL_ProfileUnits;
 import zerointerfaceloader.Zero_Loader;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 public class DateTimeProfileLoader {
     private static final Logger logger = LoggerFactory.getLogger(RootLoader.class);
 
+    /**
+     * This interprets the source data as Kelvin.
+     * The ESDL specification says it should be Celsius.
+     */
     static void loadOutsideTemperature(
             EnvironmentalProfiles environmentalProfiles,
             Zero_Loader luxLoader
@@ -34,7 +35,8 @@ public class DateTimeProfileLoader {
                     luxLoader,
                     outsideTemperatureProfile,
                     "esdl_outside_temperature_deg_c",
-                    OL_ProfileUnits.TEMPERATURE_DEGC
+                    OL_ProfileUnits.TEMPERATURE_DEGC,
+                    v -> v - 273.15
             );
         } else {
             throw new NotImplemented("Outside temperature profile is only implemented for DateTimeProfile");
@@ -65,7 +67,7 @@ public class DateTimeProfileLoader {
                     marketPriceProfile,
                     "esdl_day_ahead_electricity_pricing_eur_per_mwh",
                     OL_ProfileUnits.PRICE_EURPMWH,
-                    1000.0
+                    v -> v * 1000.0
             );
         }
     }
@@ -83,7 +85,7 @@ public class DateTimeProfileLoader {
             String profileId,
             OL_ProfileUnits unit
     ) {
-        return createProfilePointer(luxLoader, esdlProfile, profileId, unit, 1.0);
+        return createProfilePointer(luxLoader, esdlProfile, profileId, unit, v -> v);
     }
 
     static J_ProfilePointer createProfilePointer(
@@ -91,12 +93,12 @@ public class DateTimeProfileLoader {
             DateTimeProfile esdlProfile,
             String profileId,
             OL_ProfileUnits unit,
-            double valueMultiplier
+            Function<Double, Double> valueTransformer
     ) {
         var elements = sorted(esdlProfile.getElement());
         // TODO: give a warning if the time series is outside of the simulation year
 
-        var hoursValues = toHoursValues(elements, luxLoader.getYear(), valueMultiplier);
+        var hoursValues = toHoursValues(elements, luxLoader.getYear(), valueTransformer);
 
         return luxLoader.f_createEngineProfile(
             profileId,
@@ -109,17 +111,17 @@ public class DateTimeProfileLoader {
     static private HoursValues toHoursValues(
             List<ProfileElement> profileElements,
             int startYear,
-            double valueMultiplier
+            Function<Double, Double> valueTransformer
     ) {
-        var luxStart = luxJan1stInstant(startYear);
+        var luxStart = DateTimeUtil.luxJan1stInstant(startYear);
 
         var hours = new double[profileElements.size()];
         var values = new double[profileElements.size()];
 
         var i = 0;
         for (var element : profileElements) {
-            hours[i] = hoursBetween(luxStart, element.getFrom());
-            values[i] = element.getValue() * valueMultiplier;
+            hours[i] = DateTimeUtil.hoursBetween(luxStart, element.getFrom());
+            values[i] = valueTransformer.apply(element.getValue());
             i++;
         }
 
@@ -131,18 +133,6 @@ public class DateTimeProfileLoader {
                 .stream()
                 .sorted(Comparator.comparing(ProfileElement::getFrom))
                 .toList();
-    }
-
-    static private Instant luxJan1stInstant(int year) {
-        // LUX usually runs in the timezone Europe/Amsterdam
-        var timeZone = ZoneId.of("Europe/Amsterdam");
-        return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, timeZone)
-                .toInstant();
-    }
-
-    static private double hoursBetween(Instant from, Date to) {
-         var milliseconds = to.getTime() - from.toEpochMilli();
-         return (double) milliseconds / Duration.ofHours(1).toMillis();
     }
 
     /**

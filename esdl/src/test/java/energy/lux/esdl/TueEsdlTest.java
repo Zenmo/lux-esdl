@@ -39,14 +39,12 @@ public class TueEsdlTest {
 
         var timeZone = ZoneId.of("Europe/Amsterdam");
         var timestampToCheck = LocalDateTime.parse("2020-08-11T01:30:00.000000").atZone(timeZone);
-        var simulationYearStart = ZonedDateTime.of(2025, 1, 1, 0, 0, 0, 0, timeZone);
-        var milliOffset = timestampToCheck.toInstant().toEpochMilli() - simulationYearStart.toInstant().toEpochMilli();
-        var hourOffset = (double) milliOffset / Duration.ofHours(1).toMillis();
+        var hourOffset = DateTimeUtil.getHourOffset(2025, timestampToCheck);
 
         var degC = luxEngine.pp_ambientTemperature_degC.getValue(hourOffset);
         // The ESDL file seems to have kelvin,
         // but the ESDL spec says it should be Celsius
-        assertEquals(295.85, degC, 0.01);
+        assertEquals(295.85 - 273.15, degC, 0.01);
 
         var eurpMWh = luxEngine.pp_dayAheadElectricityPricing_eurpMWh.getValue(hourOffset);
         assertEquals(98.2, eurpMWh, 0.01);
@@ -69,6 +67,20 @@ public class TueEsdlTest {
         assertEquals(5, connectionHome1.c_energyAssets.size());
         // fixed consumption
         assertEquals(1, connectionHome2.c_energyAssets.size());
+
+        luxEngine.f_initializeEngine();
+        // run for 24 hours
+        var i = 0;
+        for (
+                double hours = 0.0;
+                hours < 24;
+                hours += luxEngine.p_timeParameters.getTimeStep_h()
+        ) {
+            i++;
+            luxEngine.f_runTimestep();
+        }
+
+        assertEquals(i, luxEngine.v_timeStepsElapsed);
     }
 
     private GridNode findGridNodeById(EnergyModel energyModel, String gridNodeId) {
