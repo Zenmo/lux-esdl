@@ -2,6 +2,7 @@ package energy.lux.esdl.loader;
 
 import energy.lux.esdl.DateTimeUtil;
 import energy.lux.esdl.NotImplemented;
+import energy.lux.esdl.iterator.RootIterator;
 import esdl.DateTimeProfile;
 import esdl.EnergyMarket;
 import esdl.EnvironmentalProfiles;
@@ -18,13 +19,13 @@ import java.util.List;
 import java.util.function.Function;
 
 public class DateTimeProfileLoader {
-    private static final Logger logger = LoggerFactory.getLogger(RootLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(RootIterator.class);
 
     /**
      * This interprets the source data as Kelvin.
      * The ESDL specification says it should be Celsius.
      */
-    static void loadOutsideTemperature(
+    public static void loadOutsideTemperature(
             EnvironmentalProfiles environmentalProfiles,
             Zero_Loader luxLoader
     ) {
@@ -46,7 +47,7 @@ public class DateTimeProfileLoader {
     /**
      * TODO: This assumes that only electricity prices are given.
      */
-    static void loadDayAheadElectricityPricing(
+    public static void loadDayAheadElectricityPricing(
             EnergyMarket energyMarket,
             Zero_Loader luxLoader
     ) {
@@ -72,7 +73,7 @@ public class DateTimeProfileLoader {
         }
     }
 
-    static void loadSolarIrradiance(
+    public static void loadSolarIrradiance(
             EnvironmentalProfiles environmentalProfiles,
             Zero_Loader luxLoader
     ) {

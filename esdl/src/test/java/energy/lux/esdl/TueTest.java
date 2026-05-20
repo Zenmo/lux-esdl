@@ -1,13 +1,9 @@
 package energy.lux.esdl;
 
-import energy.lux.esdl.loader.RootLoader;
+import energy.lux.esdl.iterator.RootIterator;
 import org.junit.jupiter.api.Test;
-import zero_engine.EnergyModel;
-import zero_engine.GridConnection;
-import zero_engine.GridNode;
 import zero_engine.OL_EnergyCarriers;
 
-import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
@@ -32,7 +28,7 @@ public class TueTest {
         assertNotNull(esdl);
 
         var luxLoader = LuxModelFactory.createEnergyModel();
-        RootLoader.loadEsdlIntoLux(esdl, luxLoader);
+        RootIterator.loadEsdlIntoLux(esdl, luxLoader);
 
         var luxEngine = luxLoader.energyModel;
 
@@ -49,16 +45,16 @@ public class TueTest {
         assertEquals(98.2, eurpMWh, 0.01);
 
         assertEquals(2, luxEngine.pop_gridNodes.size());
-        var importGridNode = findGridNodeById(luxEngine, "35c99886-75dc-482e-9747-7a84d9d739ad");
+        var importGridNode = TestUtil.findGridNodeById(luxEngine, "35c99886-75dc-482e-9747-7a84d9d739ad");
         assertNotNull(importGridNode, "Import grid node not loaded");
-        var transformerGridNode = findGridNodeById(luxEngine, "d2411d31-08fd-4965-bc85-78a1fb4b3b8d");
+        var transformerGridNode = TestUtil.findGridNodeById(luxEngine, "d2411d31-08fd-4965-bc85-78a1fb4b3b8d");
         assertNotNull(transformerGridNode, "Transformer grid node not loaded");
 
         assertEquals(2, luxEngine.pop_gridConnections.size());
-        var connectionHome1 = findGridConnectionById(luxEngine, "5c19dcff-b004-4644-99b9-f42d15a34f3a");
+        var connectionHome1 = TestUtil.findGridConnectionById(luxEngine, "5c19dcff-b004-4644-99b9-f42d15a34f3a");
         assertNotNull(connectionHome1, "ConnectionHome1 not found");
         assertEquals(transformerGridNode.p_gridNodeID, connectionHome1.p_parentNodeElectricID);
-        var connectionHome2 = findGridConnectionById(luxEngine, "1412f71f-a9d2-4c66-a834-385cf91c3767");
+        var connectionHome2 = TestUtil.findGridConnectionById(luxEngine, "1412f71f-a9d2-4c66-a834-385cf91c3767");
         assertNotNull(connectionHome2, "ConnectionHome2 not found");
         assertEquals(transformerGridNode.p_gridNodeID, connectionHome2.p_parentNodeElectricID);
 
@@ -98,19 +94,5 @@ public class TueTest {
         // 32 m2 of solar = 6 kWp
         assertThat(supplyDataSet.getYMean()).isBetween(0.001, 1.0);
         assertThat(supplyDataSet.getYMax()).isBetween(0.01, 3.0);
-    }
-
-    private GridNode findGridNodeById(EnergyModel energyModel, String gridNodeId) {
-        for (GridNode gridNode : energyModel.pop_gridNodes) {
-            if (gridNodeId.equals(gridNode.p_gridNodeID)) return gridNode;
-        }
-        return null;
-    }
-
-    private GridConnection findGridConnectionById(EnergyModel energyModel, String gridConnectionId) {
-        for (GridConnection gridConnection : energyModel.pop_gridConnections) {
-            if (gridConnectionId.equals(gridConnection.p_gridConnectionID)) return gridConnection;
-        }
-        return null;
     }
 }

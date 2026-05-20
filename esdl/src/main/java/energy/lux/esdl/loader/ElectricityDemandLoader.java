@@ -6,15 +6,33 @@ import esdl.*;
 import zero_engine.*;
 import zerointerfaceloader.Zero_Loader;
 
-import static energy.lux.esdl.loader.SwitchStatus.DONE;
-
 public class ElectricityDemandLoader {
-    public static void loadElectricityDemand(ElectricityDemand demand, GridConnection luxGridConnection, Zero_Loader luxLoader) {
+    public static void loadElectricityDemand(
+            ElectricityDemand demand,
+            GridConnection luxGridConnection,
+            Zero_Loader luxLoader
+    ) {
         var dateTimeProfile = findFirstDateTimeProfile(demand);
-        if (dateTimeProfile == null) {
-            throw new NotImplemented("No DateTimeProfile found for " + Util.printItem(demand));
+        if (dateTimeProfile != null) {
+            loadProfile(dateTimeProfile, demand, luxGridConnection, luxLoader);
+            return;
         }
 
+        double annualDemandKwh = demand.getFullLoadHours() * demand.getPower() * 0.001;
+        if (annualDemandKwh != 0.0) {
+            luxLoader.f_addElectricityDemandProfile(luxGridConnection, annualDemandKwh, 0.0, false, "default_house_electricity_demand_fr");
+            return;
+        }
+
+        throw new NotImplemented("This type of ElectricityDemand is not implemented: " + Util.printItem(demand));
+    }
+
+    private static J_EAProfile loadProfile(
+            DateTimeProfile dateTimeProfile,
+            ElectricityDemand demand,
+            GridConnection luxGridConnection,
+            Zero_Loader luxLoader
+    ) {
         var profilePointer = DateTimeProfileLoader.createProfilePointer(
                 luxLoader,
                 dateTimeProfile,
@@ -30,6 +48,7 @@ public class ElectricityDemandLoader {
                 luxLoader.energyModel.p_timeParameters
         );
         demandAsset.setEnergyAssetName(demand.getName());
+        return  demandAsset;
     }
 
     private static DateTimeProfile findFirstDateTimeProfile(EnergyAsset asset) {

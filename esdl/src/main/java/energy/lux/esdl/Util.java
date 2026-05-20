@@ -11,6 +11,10 @@ public class Util {
         return esdlItem.eClass().getInstanceClassName() + "[id=" + esdlItem.getId() + "]";
     }
 
+    public static <E> E findSingle(Iterable<E> collection, Function<? super E, Boolean> matchFn) {
+        return findSingle(collection, matchFn, "item");
+    }
+
     public static <E> E findSingle(Iterable<E> collection, Function<? super E, Boolean> matchFn, String itemDescription) {
         var matches = new ArrayList<E>();
 
