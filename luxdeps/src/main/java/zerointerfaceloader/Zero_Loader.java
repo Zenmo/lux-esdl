@@ -4239,7 +4239,7 @@ if(pp == null){
  
   }
 
-  protected void f_addBuildingHeatModel( GridConnection parentGC, double floorArea_m2, Double heatDemand_kwhpa, J_HeatingPreferences heatingPreferences ) { 
+  public void f_addBuildingHeatModel( GridConnection parentGC, double floorArea_m2, Double heatDemand_kwhpa, J_HeatingPreferences heatingPreferences ) { 
 
 double maxPowerHeat_kW = 1000; 				//Dit is hoeveel vermogen het huis kan afgeven/opnemen, moet voldoende hoog zijn zodat het niet beperkend is voor warmteoverdracht tussen heatingAsset en J_EABuilding. Wordt alleen gebruikt in rekenstap van ratio of capacity
 double lossFactor_WpK; 						//Dit is wat bepaalt hoeveel warmte het huis verliest/opneemt per tijdstap per delta_T

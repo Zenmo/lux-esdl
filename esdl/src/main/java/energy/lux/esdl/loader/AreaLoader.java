@@ -9,7 +9,6 @@ import zero_engine.*;
 import zerointerfaceloader.Zero_Loader;
 
 import java.util.HashSet;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class AreaLoader {
@@ -22,7 +21,7 @@ public class AreaLoader {
         traverseNetworkFromAsset(importAsset, luxLoader, rootGridNode, new HashSet<>());
 
         for (Area ignored : area.getArea()) {
-            throw new NoSuchElementException("Nested areas are not supported yet");
+            throw new NotImplemented("Nested areas are not supported yet");
         }
     }
 
@@ -52,14 +51,7 @@ public class AreaLoader {
             var childGridNode = createGridNodeForTransformer(transformer, luxLoader);
             traverseNetworkFromAsset(asset, luxLoader, childGridNode, visitedPortIds);
         } else if (asset instanceof EConnection eConnection) {
-            var gridConnection = createGridconnection(eConnection, luxLoader, currentGridNode);
-            var gcSwitch = new GridConnectionAssetLoader(gridConnection, luxLoader, eConnection);
-            for (var port: eConnection.getPort()) {
-                // skip InPort because that leaves the grid connection
-                if (port instanceof OutPort outPort) {
-                    gcSwitch.doSwitch(outPort);
-                }
-            }
+            GridConnectionLoader.loadGridConnection(eConnection, luxLoader, currentGridNode);
         } else {
             throw new NotImplemented(
                     "Unexpected asset type in network traversal: " + Util.printItem(asset)
@@ -74,16 +66,6 @@ public class AreaLoader {
         gridNode.p_description = transformer.getName();
         gridNode.p_energyCarrier = OL_EnergyCarriers.ELECTRICITY;
         return gridNode;
-    }
-
-    private static GridConnection createGridconnection(
-            EConnection eConnection, Zero_Loader luxLoader, GridNode parentGridNode
-    ) {
-        EnergyModel energyModel = luxLoader.energyModel;
-        var gridConnection = energyModel.add_pop_gridConnections();
-        gridConnection.p_gridConnectionID = eConnection.getId();
-        gridConnection.p_parentNodeElectricID = parentGridNode.p_gridNodeID;
-        return gridConnection;
     }
 
     private static Import findImportAsset(Area area) {

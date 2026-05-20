@@ -1,5 +1,6 @@
 package energy.lux.esdl.loader;
 
+import energy.lux.esdl.Util;
 import esdl.PVInstallation;
 import zero_engine.GridConnection;
 import zero_engine.OL_PVOrientation;
@@ -23,17 +24,9 @@ public class PVLoader {
     }
 
     private static double calculateEfficiency(PVInstallation pvInstallation) {
-        var panelEfficiency = defaultIfZero(pvInstallation.getPanelEfficiency(), defaultPanelEfficiency);
-        var inverterEfficiency = defaultIfZero(pvInstallation.getInverterEfficiency(), defaultInverterEfficiency);
+        var panelEfficiency = Util.defaultIfZero(pvInstallation.getPanelEfficiency(), defaultPanelEfficiency);
+        var inverterEfficiency = Util.defaultIfZero(pvInstallation.getInverterEfficiency(), defaultInverterEfficiency);
 
         return panelEfficiency * inverterEfficiency;
-    }
-
-    private static double defaultIfZero(double value, double defaultValue) {
-        if (value == 0.0) {
-            return defaultValue;
-        } else {
-            return value;
-        }
     }
 }

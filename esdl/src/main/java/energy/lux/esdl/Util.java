@@ -27,4 +27,12 @@ public class Util {
             default -> throw new NoSuchElementException(String.format("Multiple %s found, expected exactly one", itemDescription));
         };
     }
+
+    public static double defaultIfZero(double value, double defaultValue) {
+        if (value == 0.0) {
+            return defaultValue;
+        } else {
+            return value;
+        }
+    }
 }

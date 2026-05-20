@@ -64,10 +64,18 @@ public class TueEsdlTest {
         assertNotNull(connectionHome2, "ConnectionHome2 not found");
         assertEquals(transformerGridNode.p_gridNodeID, connectionHome2.p_parentNodeElectricID);
 
-        // PV + EV + fixed consumption + heat pump + gas burner (hybrid configuration)
-        assertEquals(5, connectionHome1.c_energyAssets.size());
-        // fixed consumption
-        assertEquals(1, connectionHome2.c_energyAssets.size());
+        // 1. PV
+        // 2. EV
+        // 3. fixed consumption
+        // 4. heat pump
+        // 5. gas burner (hybrid configuration)
+        // 6. building thermals
+        assertEquals(6, connectionHome1.c_energyAssets.size());
+        // fixed consumption + building thermals
+        assertEquals(2, connectionHome2.c_energyAssets.size());
+
+        assertThat(connectionHome1.p_BuildingThermalAsset.getHeatCapacity_JpK())
+                .isGreaterThan(1.0);
 
         luxEngine.f_initializeEngine();
         // run for 24 hours
