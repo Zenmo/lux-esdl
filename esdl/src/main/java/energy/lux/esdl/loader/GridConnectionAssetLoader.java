@@ -52,6 +52,11 @@ public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
         return DONE;
     }
 
+    public SwitchStatus caseBattery(Battery battery) {
+        HomeBatteryLoader.loadBattery(battery, luxGridConnection, luxLoader);
+        return DONE;
+    }
+
     @Override
     public SwitchStatus caseInPort(InPort inPort) {
         if (this.visitedPorts.add(inPort)) {

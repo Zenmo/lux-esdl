@@ -1,6 +1,5 @@
 package energy.lux.esdl;
 
-import esdl.Import;
 import esdl.Item;
 
 import java.util.ArrayList;
@@ -34,5 +33,17 @@ public class Util {
         } else {
             return value;
         }
+    }
+
+    public static void throwIfZero(double value, Item esdlItem, String property) {
+        if (value == 0.0) {
+            throw new RuntimeException(
+                    String.format("%s of %s is zero", uppercaseFirst(property), printItem(esdlItem))
+            );
+        }
+    }
+
+    private static String uppercaseFirst(String input) {
+        return input.substring(0, 1).toUpperCase() + input.substring(1);
     }
 }
