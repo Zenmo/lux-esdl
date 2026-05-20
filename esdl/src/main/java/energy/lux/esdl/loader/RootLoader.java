@@ -1,5 +1,6 @@
 package energy.lux.esdl.loader;
 
+import energy.lux.esdl.iterator.AreaIterator;
 import esdl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class RootLoader {
         for (Instance instance : esdlEnergySystem.getInstance()) {
             Area area = instance.getArea();
             if (area != null) {
-                AreaLoader.loadArea(area, luxLoader);
+                AreaIterator.loadArea(area, luxLoader);
             }
         }
     }

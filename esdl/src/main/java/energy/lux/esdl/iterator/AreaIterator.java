@@ -1,7 +1,9 @@
-package energy.lux.esdl.loader;
+package energy.lux.esdl.iterator;
 
 import energy.lux.esdl.NotImplemented;
 import energy.lux.esdl.Util;
+import energy.lux.esdl.loader.GridConnectionLoader;
+import energy.lux.esdl.loader.GridNodeLoader;
 import esdl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +13,10 @@ import zerointerfaceloader.Zero_Loader;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AreaLoader {
-    private static final Logger logger = LoggerFactory.getLogger(AreaLoader.class);
+public class AreaIterator {
+    private static final Logger logger = LoggerFactory.getLogger(AreaIterator.class);
 
-    static void loadArea(Area area, Zero_Loader luxLoader) {
+    public static void loadArea(Area area, Zero_Loader luxLoader) {
         // assumption: import asset is the root of the area network
         var importAsset = findImportAsset(area);
         var rootGridNode = GridNodeLoader.loadImportAsset(importAsset, luxLoader.energyModel);

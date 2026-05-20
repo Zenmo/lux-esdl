@@ -1,7 +1,11 @@
-package energy.lux.esdl.loader;
+package energy.lux.esdl.iterator;
 
 import energy.lux.esdl.NotImplemented;
 import energy.lux.esdl.Util;
+import energy.lux.esdl.loader.ElectricityDemandLoader;
+import energy.lux.esdl.loader.HomeBatteryLoader;
+import energy.lux.esdl.loader.PVLoader;
+import energy.lux.esdl.loader.SwitchStatus;
 import esdl.*;
 import esdl.util.EsdlSwitch;
 import org.eclipse.emf.ecore.EObject;
@@ -17,7 +21,7 @@ import static energy.lux.esdl.loader.SwitchStatus.DONE;
  * Iterate through the network behind EConnection
  * and add the assets to the LUX grid connection
  */
-public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
+public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     private final GridConnection luxGridConnection;
 
     private final Zero_Loader luxLoader;
@@ -27,7 +31,7 @@ public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
     private final Set<Port> visitedPorts = new HashSet<>();
     private final Set<EnergyAsset> processedAssets = new HashSet<>();
 
-    public GridConnectionAssetLoader(GridConnection luxGridConnection, Zero_Loader luxLoader, EConnection entryPoint) {
+    public GridConnectionAssetIterator(GridConnection luxGridConnection, Zero_Loader luxLoader, EConnection entryPoint) {
         this.luxGridConnection = luxGridConnection;
         this.luxLoader = luxLoader;
         // prevent exiting the grid connection while searching through the cables
@@ -128,37 +132,7 @@ public class GridConnectionAssetLoader extends EsdlSwitch<SwitchStatus> {
             return DONE;
         }
 
-        var dateTimeProfile = findFirstDateTimeProfile(demand);
-        if (dateTimeProfile == null) {
-            throw new NotImplemented("No DateTimeProfile found for " + Util.printItem(demand));
-        }
-
-        var profilePointer = DateTimeProfileLoader.createProfilePointer(
-                luxLoader,
-                dateTimeProfile,
-                demand.getId() + "_demand",
-                OL_ProfileUnits.KWHPQUARTERHOUR,
-                v -> v * 0.001
-        );
-        var demandAsset = new J_EAProfile(
-                luxGridConnection,
-                OL_EnergyCarriers.ELECTRICITY,
-                profilePointer,
-                OL_AssetFlowCategories.fixedConsumptionElectric_kW,
-                luxLoader.energyModel.p_timeParameters
-        );
-        demandAsset.setEnergyAssetName(demand.getName());
+        ElectricityDemandLoader.loadElectricityDemand(demand, luxGridConnection, luxLoader);
         return DONE;
-    }
-
-    private static DateTimeProfile findFirstDateTimeProfile(EnergyAsset asset) {
-        for (Port port : asset.getPort()) {
-            for (GenericProfile profile : port.getProfile()) {
-                if (profile instanceof DateTimeProfile dateTimeProfile) {
-                    return dateTimeProfile;
-                }
-            }
-        }
-        return null;
     }
 }

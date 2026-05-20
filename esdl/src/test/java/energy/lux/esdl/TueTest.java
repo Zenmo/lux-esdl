@@ -8,10 +8,8 @@ import zero_engine.GridNode;
 import zero_engine.OL_EnergyCarriers;
 
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test tue.esdl supplied by partners.
  */
-public class TueEsdlTest {
+public class TueTest {
     @Test
-    public void testReadTueESDL() throws URISyntaxException {
+    public void testReadTueESDL() {
         var javaUrl = getClass().getResource("/tue.esdl");
         var energySystem = ESDLReader.readResource(javaUrl);
         assertNotNull(energySystem);

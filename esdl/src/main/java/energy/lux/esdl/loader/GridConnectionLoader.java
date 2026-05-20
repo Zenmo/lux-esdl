@@ -1,9 +1,7 @@
 package energy.lux.esdl.loader;
 
-import energy.lux.esdl.NotImplemented;
-import energy.lux.esdl.Util;
+import energy.lux.esdl.iterator.GridConnectionAssetIterator;
 import esdl.EConnection;
-import esdl.GenericBuilding;
 import esdl.OutPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +19,7 @@ public class GridConnectionLoader {
         var gridConnection = instantiateGridConnection(eConnection, luxLoader, parentGridNode);
         loadBuilding(eConnection, luxLoader, gridConnection);
 
-        var gcSwitch = new GridConnectionAssetLoader(gridConnection, luxLoader, eConnection);
+        var gcSwitch = new GridConnectionAssetIterator(gridConnection, luxLoader, eConnection);
         for (var port: eConnection.getPort()) {
             // skip InPort because that leaves the grid connection
             if (port instanceof OutPort outPort) {
