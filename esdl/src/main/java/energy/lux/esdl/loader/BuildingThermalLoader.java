@@ -1,7 +1,7 @@
 package energy.lux.esdl.loader;
 
 import energy.lux.esdl.NotImplemented;
-import energy.lux.esdl.Util;
+import energy.lux.esdl.util.Util;
 import esdl.AbstractBuilding;
 import esdl.EnergyLabelEnum;
 import esdl.GenericBuilding;

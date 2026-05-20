@@ -1,4 +1,4 @@
-package energy.lux.esdl;
+package energy.lux.esdl.util;
 
 import java.time.*;
 import java.time.temporal.Temporal;

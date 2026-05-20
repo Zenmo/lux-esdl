@@ -1,7 +1,7 @@
 package energy.lux.esdl.iterator;
 
 import energy.lux.esdl.NotImplemented;
-import energy.lux.esdl.Util;
+import energy.lux.esdl.util.Util;
 import energy.lux.esdl.loader.ElectricityDemandLoader;
 import energy.lux.esdl.loader.HomeBatteryLoader;
 import energy.lux.esdl.loader.PVLoader;

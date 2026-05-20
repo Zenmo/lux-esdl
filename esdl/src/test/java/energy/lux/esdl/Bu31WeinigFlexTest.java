@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import zero_engine.*;
 
 import static energy.lux.esdl.TestUtil.findGridConnectionById;
+import static energy.lux.esdl.TestUtil.runLux;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Bu31WeinigFlexTest {
     @Test
@@ -18,6 +20,7 @@ public class Bu31WeinigFlexTest {
         RootIterator.loadEsdlIntoLux(esdl, luxLoader);
 
         var luxEngine = luxLoader.energyModel;
+
         // random grid connection
         var gridConnection = findGridConnectionById(luxEngine, "1aae283c-bd71-4b74-9a6d-5f31ffd3bf61");
 
@@ -42,8 +45,17 @@ public class Bu31WeinigFlexTest {
 
         assertThat(gridConnection.c_consumptionAssets).hasSize(1);
         var consumptionAsset = gridConnection.c_consumptionAssets.get(0);
-        assertThat(consumptionAsset.getBaseConsumption_kWh()).isEqualTo(2494.153162899, Offset.offset(0.001));
+        assertThat(consumptionAsset.getBaseConsumption_kWh())
+                .isEqualTo(2494.153162899, Offset.offset(0.001));
 
-        assertThat(gridConnection.p_batteryAsset).isNotNull();
+        var battery = gridConnection.p_batteryAsset;
+        assertThat(battery).isNotNull();
+        assertEquals(
+                battery.getStorageCapacity_kWh(),
+                45700308.94104158 / 3_600_000
+        );
+
+        luxEngine.f_initializeEngine();
+        runLux(luxEngine, 24.0);
     }
 }

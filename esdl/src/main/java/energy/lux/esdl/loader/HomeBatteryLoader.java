@@ -5,10 +5,9 @@ import zero_engine.GridConnection;
 import zero_engine.OL_EnergyAssetType;
 import zerointerfaceloader.Zero_Loader;
 
-import java.util.Arrays;
 import java.util.stream.DoubleStream;
 
-import static energy.lux.esdl.Util.throwIfZero;
+import static energy.lux.esdl.util.Util.throwIfZero;
 
 public class HomeBatteryLoader {
     /**

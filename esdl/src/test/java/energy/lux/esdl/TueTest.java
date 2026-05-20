@@ -1,12 +1,14 @@
 package energy.lux.esdl;
 
 import energy.lux.esdl.iterator.RootIterator;
+import energy.lux.esdl.util.DateTimeUtil;
 import org.junit.jupiter.api.Test;
 import zero_engine.OL_EnergyCarriers;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import static energy.lux.esdl.TestUtil.runLux;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -73,17 +75,8 @@ public class TueTest {
 
         luxEngine.f_initializeEngine();
         // run for 24 hours
-        var i = 0;
-        for (
-                double hours = 0.0;
-                hours < 24;
-                hours += luxEngine.p_timeParameters.getTimeStep_h()
-        ) {
-            i++;
-            luxEngine.f_runTimestep();
-        }
-
-        assertEquals(i, luxEngine.v_timeStepsElapsed);
+        runLux(luxEngine, 24.0);
+        assertEquals(96, luxEngine.v_timeStepsElapsed);
 
         // Sanity checks
         var demandDataSet = luxEngine.v_liveData.dsm_liveDemand_kW.get(OL_EnergyCarriers.ELECTRICITY);

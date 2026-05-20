@@ -1,7 +1,8 @@
 package energy.lux.esdl.iterator;
 
 import energy.lux.esdl.NotImplemented;
-import energy.lux.esdl.Util;
+import energy.lux.esdl.util.CollectionUtil;
+import energy.lux.esdl.util.Util;
 import energy.lux.esdl.loader.GridConnectionLoader;
 import energy.lux.esdl.loader.GridNodeLoader;
 import esdl.*;
@@ -62,7 +63,7 @@ public class AreaIterator {
     }
 
     private static Import findImportAsset(Area area) {
-        var importAsset = (Import) Util.findSingle(
+        var importAsset = (Import) CollectionUtil.findSingle(
                 area.getAsset(),
                 asset -> asset instanceof Import,
                 "import asset"

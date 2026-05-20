@@ -1,11 +1,21 @@
 package energy.lux.esdl.iterator;
 
+import energy.lux.esdl.EsdlException;
 import energy.lux.esdl.loader.DateTimeProfileLoader;
 import esdl.*;
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zero_engine.EnergyModel;
 import zerointerfaceloader.Zero_Loader;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+import static energy.lux.esdl.util.CollectionUtil.single;
 
 /**
  * Transform ESDL EnergySystem to a LUX EnergyModel.
@@ -26,12 +36,68 @@ public class RootIterator {
         loadMeasures(esdlEnergySystem.getMeasures(), luxLoader);
         loadServices(esdlEnergySystem.getServices(), luxLoader);
 
-        for (Instance instance : esdlEnergySystem.getInstance()) {
-            Area area = instance.getArea();
-            if (area != null) {
-                AreaIterator.loadArea(area, luxLoader);
+        var instance = single(esdlEnergySystem.getInstance(), Instance.class.getName());
+
+        Area area = instance.getArea();
+        if (area == null) {
+            throw new EsdlException("No area in energy system");
+        }
+
+        AreaIterator.loadArea(area, luxLoader);
+
+        verifyNumberOfGridConnections(area, luxLoader.energyModel);
+    }
+
+    private static void verifyNumberOfGridConnections(
+            Area area,
+            EnergyModel luxEngine
+    ) {
+        var esdlGridConnectionIds = allEsdlGridConnectionIds(area);
+        var luxGridConnectionIds = allLuxGridConnectionIds(luxEngine);
+
+        var uniqueEsdlIds = new HashSet<>(esdlGridConnectionIds);
+        if (uniqueEsdlIds.size() != esdlGridConnectionIds.size()) {
+            throw new EsdlException("Duplicate grid connection IDs found in ESDL model");
+        }
+
+        var uniqueLuxIds = new HashSet<>(luxGridConnectionIds);
+        if (uniqueLuxIds.size() != luxGridConnectionIds.size()) {
+            throw new EsdlException("Duplicate grid connection IDs found in LUX model");
+        }
+
+        var missingGcIds = new HashSet<>(uniqueEsdlIds);
+        missingGcIds.removeAll(uniqueLuxIds);
+        if (!missingGcIds.isEmpty()) {
+            throw new EsdlException(
+                    String.format(
+                            "%d grid connections were in the ESDL but not created in LUX. ID's: %s",
+                            missingGcIds.size(),
+                            String.join(", ", missingGcIds)
+                    )
+            );
+        }
+    }
+
+    private static List<String> allEsdlGridConnectionIds(Area area) {
+        var connectionIds = new ArrayList<String>();
+        TreeIterator<EObject> iterator = area.eAllContents();
+
+        while (iterator.hasNext()) {
+            EObject eObject = iterator.next();
+            if (eObject instanceof EConnection connection) {
+                String id = connection.getId();
+                if (id != null) {
+                    connectionIds.add(id);
+                }
             }
         }
+        return connectionIds;
+    }
+
+    private static List<String> allLuxGridConnectionIds(EnergyModel luxEngine) {
+        return luxEngine.c_gridConnections.stream()
+                .map(gc -> gc.p_gridConnectionID)
+                .toList();
     }
 
     private static void loadEnvironmentalProfiles(

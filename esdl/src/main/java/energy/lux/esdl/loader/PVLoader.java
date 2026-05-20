@@ -1,11 +1,14 @@
 package energy.lux.esdl.loader;
 
-import energy.lux.esdl.Util;
+import energy.lux.esdl.util.Util;
 import esdl.PVInstallation;
 import zero_engine.GridConnection;
 import zero_engine.OL_PVOrientation;
 import zerointerfaceloader.Zero_Loader;
 
+/**
+ * TODO: us AVGC values
+ */
 public class PVLoader {
     private static double baseIrradianceWPerM2 = 1000.0;
 

@@ -1,6 +1,6 @@
 package energy.lux.esdl.loader;
 
-import energy.lux.esdl.DateTimeUtil;
+import energy.lux.esdl.util.DateTimeUtil;
 import energy.lux.esdl.NotImplemented;
 import energy.lux.esdl.iterator.RootIterator;
 import esdl.DateTimeProfile;
