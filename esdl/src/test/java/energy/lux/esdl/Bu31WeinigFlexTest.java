@@ -3,6 +3,7 @@ package energy.lux.esdl;
 import energy.lux.esdl.iterator.RootIterator;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import zero_engine.*;
 
 import static energy.lux.esdl.TestUtil.findGridConnectionById;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,11 +18,32 @@ public class Bu31WeinigFlexTest {
         RootIterator.loadEsdlIntoLux(esdl, luxLoader);
 
         var luxEngine = luxLoader.energyModel;
+        // random grid connection
         var gridConnection = findGridConnectionById(luxEngine, "1aae283c-bd71-4b74-9a6d-5f31ffd3bf61");
-        // TODO: why 2 batteries?
-        assertThat(gridConnection.c_energyAssets).hasSize(7);
 
+        var luxAssets = gridConnection.c_energyAssets;
+        assertThat(luxAssets)
+                .filteredOn(asset -> asset instanceof J_EAStorageElectric)
+                .hasSize(1);
+        assertThat(luxAssets)
+                .filteredOn(asset -> asset instanceof J_EABuilding)
+                .hasSize(1);
+        assertThat(luxAssets)
+                .filteredOn(asset -> asset instanceof J_EAProduction)
+                .hasSize(1);
+        assertThat(luxAssets)
+                .filteredOn(asset -> asset instanceof J_EAConversionHeatPump)
+                .hasSize(1);
+        assertThat(luxAssets)
+                .filteredOn(asset -> asset instanceof J_EAConsumption)
+                .hasSize(1);
+
+        assertThat(luxAssets).hasSize(5);
+
+        assertThat(gridConnection.c_consumptionAssets).hasSize(1);
         var consumptionAsset = gridConnection.c_consumptionAssets.get(0);
         assertThat(consumptionAsset.getBaseConsumption_kWh()).isEqualTo(2494.153162899, Offset.offset(0.001));
+
+        assertThat(gridConnection.p_batteryAsset).isNotNull();
     }
 }

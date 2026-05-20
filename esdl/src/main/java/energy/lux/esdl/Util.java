@@ -1,8 +1,10 @@
 package energy.lux.esdl;
 
+import esdl.EnergyAsset;
 import esdl.Item;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 

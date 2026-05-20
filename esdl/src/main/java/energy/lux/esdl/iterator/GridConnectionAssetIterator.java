@@ -57,7 +57,9 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     }
 
     public SwitchStatus caseBattery(Battery battery) {
-        HomeBatteryLoader.loadBattery(battery, luxGridConnection, luxLoader);
+        if (this.processedAssets.add(battery)) {
+            HomeBatteryLoader.loadBattery(battery, luxGridConnection, luxLoader);
+        }
         return DONE;
     }
 
