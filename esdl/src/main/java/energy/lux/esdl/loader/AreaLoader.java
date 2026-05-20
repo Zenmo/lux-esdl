@@ -17,7 +17,7 @@ public class AreaLoader {
     static void loadArea(Area area, Zero_Loader luxLoader) {
         // assumption: import asset is the root of the area network
         var importAsset = findImportAsset(area);
-        var rootGridNode = loadImportAsset(importAsset, luxLoader);
+        var rootGridNode = GridNodeLoader.loadImportAsset(importAsset, luxLoader.energyModel);
         traverseNetworkFromAsset(importAsset, luxLoader, rootGridNode, new HashSet<>());
 
         for (Area ignored : area.getArea()) {
@@ -48,7 +48,7 @@ public class AreaLoader {
         } else if (asset instanceof Joint) {
             traverseNetworkFromAsset(asset, luxLoader, currentGridNode, visitedPortIds);
         } else if (asset instanceof Transformer transformer) {
-            var childGridNode = createGridNodeForTransformer(transformer, luxLoader);
+            var childGridNode = GridNodeLoader.loadTransformer(transformer, luxLoader.energyModel);
             traverseNetworkFromAsset(asset, luxLoader, childGridNode, visitedPortIds);
         } else if (asset instanceof EConnection eConnection) {
             GridConnectionLoader.loadGridConnection(eConnection, luxLoader, currentGridNode);
@@ -57,15 +57,6 @@ public class AreaLoader {
                     "Unexpected asset type in network traversal: " + Util.printItem(asset)
             );
         }
-    }
-
-    private static GridNode createGridNodeForTransformer(Transformer transformer, Zero_Loader luxLoader) {
-        EnergyModel energyModel = luxLoader.energyModel;
-        var gridNode = energyModel.add_pop_gridNodes();
-        gridNode.p_gridNodeID = transformer.getId();
-        gridNode.p_description = transformer.getName();
-        gridNode.p_energyCarrier = OL_EnergyCarriers.ELECTRICITY;
-        return gridNode;
     }
 
     private static Import findImportAsset(Area area) {
@@ -89,16 +80,5 @@ public class AreaLoader {
                 );
             }
         }
-    }
-
-    private static GridNode loadImportAsset(Import importAsset, Zero_Loader luxLoader) {
-        EnergyModel energyModel = luxLoader.energyModel;
-
-        var gridNode = energyModel.add_pop_gridNodes();
-        gridNode.p_gridNodeID = importAsset.getId();
-        gridNode.p_description = importAsset.getName() + ", " + importAsset.getDescription();
-        gridNode.p_energyCarrier = OL_EnergyCarriers.ELECTRICITY;
-
-        return gridNode;
     }
 }

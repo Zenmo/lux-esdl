@@ -13,8 +13,11 @@ import java.net.URL;
  * Read ESDL XML to an object.
  */
 public class ESDLReader {
-    public static EnergySystem readResource(URL javaUrl) {
+    static {
         EsdlPackage.eINSTANCE.eClass();
+    }
+
+    public static EnergySystem readResource(URL javaUrl) {
         var eclipseUri = URI.createURI(javaUrl.toString());
 
         XMIResource resource = new XMIResourceImpl(eclipseUri);
