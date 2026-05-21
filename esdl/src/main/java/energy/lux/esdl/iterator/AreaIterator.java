@@ -32,11 +32,20 @@ public class AreaIterator {
             EnergyAsset asset, Zero_Loader luxLoader, GridNode currentGridNode, Set<String> visitedPortIds
     ) {
         for (Port port : asset.getPort()) {
-            if (!(port instanceof OutPort outPort)) continue;
-            if (!visitedPortIds.add(outPort.getId())) continue;
-            for (InPort connectedInPort : outPort.getConnectedTo()) {
-                EnergyAsset nextAsset = connectedInPort.getEnergyasset();
-                processNetworkAsset(nextAsset, luxLoader, currentGridNode, visitedPortIds);
+            if (!visitedPortIds.add(port.getId())) continue;
+
+            if (port instanceof OutPort outPort) {
+                for (InPort connectedInPort : outPort.getConnectedTo()) {
+                    EnergyAsset nextAsset = connectedInPort.getEnergyasset();
+                    processNetworkAsset(nextAsset, luxLoader, currentGridNode, visitedPortIds);
+                }
+            }
+
+            if (port instanceof InPort inPort) {
+                for (OutPort connectedInPort : inPort.getConnectedTo()) {
+                    EnergyAsset nextAsset = connectedInPort.getEnergyasset();
+                    processNetworkAsset(nextAsset, luxLoader, currentGridNode, visitedPortIds);
+                }
             }
         }
     }
