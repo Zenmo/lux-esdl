@@ -6,6 +6,8 @@ import energy.lux.esdl.util.Util;
 import energy.lux.esdl.loader.GridConnectionLoader;
 import energy.lux.esdl.loader.GridNodeLoader;
 import esdl.*;
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.jdt.internal.compiler.env.IModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zero_engine.*;
@@ -21,49 +23,72 @@ public class AreaIterator {
         // assumption: import asset is the root of the area network
         var importAsset = findImportAsset(area);
         var rootGridNode = GridNodeLoader.loadImportAsset(importAsset, luxLoader.energyModel);
-        traverseNetworkFromAsset(importAsset, luxLoader, rootGridNode, new HashSet<>());
+        processNetworkAsset(importAsset, luxLoader, rootGridNode, new HashSet<>());
 
         for (Area ignored : area.getArea()) {
             throw new NotImplemented("Nested areas are not supported yet");
         }
     }
 
-    private static void traverseNetworkFromAsset(
-            EnergyAsset asset, Zero_Loader luxLoader, GridNode currentGridNode, Set<String> visitedPortIds
+    /**
+     * When entering a port for the first time from another port
+     */
+    private static void processEntryPort(
+            Port entryPort,
+            Zero_Loader luxLoader,
+            GridNode gridNode,
+            Set<EnergyAsset> visitedAssets
     ) {
-        for (Port port : asset.getPort()) {
-            if (!visitedPortIds.add(port.getId())) continue;
+        processNetworkAsset(entryPort.getEnergyasset(), luxLoader, gridNode, visitedAssets);
+    }
 
+    /**
+     * When leaving an asset via the ports
+     */
+    private static void processExitPorts(
+            EList<Port> exitPorts,
+            Zero_Loader luxLoader,
+            GridNode gridNode,
+            Set<EnergyAsset> visitedAssets
+    ) {
+        for (Port port : exitPorts) {
             if (port instanceof OutPort outPort) {
                 for (InPort connectedInPort : outPort.getConnectedTo()) {
-                    EnergyAsset nextAsset = connectedInPort.getEnergyasset();
-                    processNetworkAsset(nextAsset, luxLoader, currentGridNode, visitedPortIds);
+                    processEntryPort(connectedInPort, luxLoader, gridNode, visitedAssets);
                 }
             }
 
             if (port instanceof InPort inPort) {
-                for (OutPort connectedInPort : inPort.getConnectedTo()) {
-                    EnergyAsset nextAsset = connectedInPort.getEnergyasset();
-                    processNetworkAsset(nextAsset, luxLoader, currentGridNode, visitedPortIds);
+                for (OutPort connectedOutPort : inPort.getConnectedTo()) {
+                    processEntryPort(connectedOutPort, luxLoader, gridNode, visitedAssets);
                 }
             }
         }
     }
 
     private static void processNetworkAsset(
-            EnergyAsset asset, Zero_Loader luxLoader, GridNode currentGridNode, Set<String> visitedPortIds
+            EnergyAsset asset,
+            Zero_Loader luxLoader,
+            GridNode currentGridNode,
+            Set<EnergyAsset> visitedAssets
     ) {
+        if (visitedAssets.contains(asset)) {
+            return;
+        }
+        visitedAssets.add(asset);
+
         if (asset instanceof Import) {
-            // Do not traverse backwards to Import
+            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets);
         } else if (asset instanceof ElectricityCable) {
-            traverseNetworkFromAsset(asset, luxLoader, currentGridNode, visitedPortIds);
+            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets);
         } else if (asset instanceof Joint) {
-            traverseNetworkFromAsset(asset, luxLoader, currentGridNode, visitedPortIds);
+            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets);
         } else if (asset instanceof Transformer transformer) {
             var childGridNode = GridNodeLoader.loadTransformer(transformer, luxLoader.energyModel);
-            traverseNetworkFromAsset(asset, luxLoader, childGridNode, visitedPortIds);
+            processExitPorts(asset.getPort(), luxLoader, childGridNode, visitedAssets);
         } else if (asset instanceof EConnection eConnection) {
             GridConnectionLoader.loadGridConnection(eConnection, luxLoader, currentGridNode);
+            // Do not traverse further
         } else {
             throw new NotImplemented(
                     "Unexpected asset type in network traversal: " + Util.printItem(asset)

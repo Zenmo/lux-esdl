@@ -48,6 +48,9 @@ public class RootIterator {
         verifyNumberOfGridConnections(area, luxLoader.energyModel);
     }
 
+    /**
+     * Check that all the grid connections in the ESDL were added.
+     */
     private static void verifyNumberOfGridConnections(
             Area area,
             EnergyModel luxEngine
@@ -96,7 +99,69 @@ public class RootIterator {
 
     private static List<String> allLuxGridConnectionIds(EnergyModel luxEngine) {
         return luxEngine.c_gridConnections.stream()
-                .map(gc -> gc.p_gridConnectionID)
+                .map(gn -> gn.p_gridConnectionID)
+                .toList();
+    }
+
+    /**
+     * Check that all the grid nodes in the ESDL were added.
+     */
+    private static void verifyNumberOfGridNodes(
+            Area area,
+            EnergyModel luxEngine
+    ) {
+        var esdlGridNodeIds = allEsdlGridNodeIds(area);
+        var allLuxGridNodeIds = allLuxGridNodeIds(luxEngine);
+
+        var uniqueEsdlIds = new HashSet<>(esdlGridNodeIds);
+        if (uniqueEsdlIds.size() != esdlGridNodeIds.size()) {
+            throw new EsdlException("Duplicate grid node IDs found in ESDL model");
+        }
+
+        var uniqueLuxIds = new HashSet<>(allLuxGridNodeIds);
+        if (uniqueLuxIds.size() != allLuxGridNodeIds.size()) {
+            throw new EsdlException("Duplicate grid node IDs found in LUX model");
+        }
+
+        var missingGcIds = new HashSet<>(uniqueEsdlIds);
+        missingGcIds.removeAll(uniqueLuxIds);
+        if (!missingGcIds.isEmpty()) {
+            throw new EsdlException(
+                    String.format(
+                            "%d grid node were in the ESDL but not created in LUX. ID's: %s",
+                            missingGcIds.size(),
+                            String.join(", ", missingGcIds)
+                    )
+            );
+        }
+    }
+
+    private static List<String> allEsdlGridNodeIds(Area area) {
+        var nodeIds = new ArrayList<String>();
+        TreeIterator<EObject> iterator = area.eAllContents();
+
+        while (iterator.hasNext()) {
+            EObject eObject = iterator.next();
+            if (eObject instanceof Import importAsset) {
+                String id = importAsset.getId();
+                if (id != null) {
+                    nodeIds.add(id);
+                }
+            }
+
+            if (eObject instanceof Transformer transformer) {
+                String id = transformer.getId();
+                if (id != null) {
+                    nodeIds.add(id);
+                }
+            }
+        }
+        return nodeIds;
+    }
+
+    private static List<String> allLuxGridNodeIds(EnergyModel luxEngine) {
+        return luxEngine.pop_gridNodes.stream()
+                .map(gc -> gc.p_gridNodeID)
                 .toList();
     }
 
