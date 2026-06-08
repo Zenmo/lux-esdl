@@ -50,18 +50,18 @@ public class LuxModelFactory {
                  *
                  * This seems the correct way to initialize an Agent
                  *
-                 * The 3-parameter constructor overload calls instantiateBaseStructure_xjal()
-                 * to create child agents and then recursively does the same for child agents
-                 * (top-to-bottom)
+                 * The 3-parameter constructor overload
+                 *   - sets default values of parameters
+                 *   - creates child agents recursively (top-to-bottom)
+                 *   - sets agent links.
                  *
-                 * Agent::create() executes:
-                 * - onBeforeCreate() hook of top agent
-                 * - doCreate()
-                 *   - sets up plain variables
-                 *   - recursively calls onBeforeCreate() and doCreate() of child agents
-                 *     (generated code, top-to-bottom)
-                 * - Recursively calls onCreate() hook of child agents (bottom-to-top)
-                 * - onCreate() hook of top agent
+                 * Agent::create()
+                 *   - top-to-bottom for all agents:
+                 *       - calls onBeforeCreate() user hook
+                 *       - sets default values of variables
+                 *   - calls onCreate() user hook for all agents bottom-to-top
+                 *
+                 * (Agent::start() calls onStartup() of all agents bottom-to-top)
                  */
                 var loader = new Zero_Loader(engine, null, null);
                 loader.create();
