@@ -33,40 +33,50 @@ public class LuxModelFactory {
     public static Zero_Loader createEnergyModelImpl() throws IOException, InvalidFormatException {
         // I suspect it's possible to create an EnergyModel without an experiment
         // if we do some small changes to the EnergyModel and Loader.
-        var experiment = new ExperimentSimulation<EnergyModel>() {
+        var experiment = new ExperimentSimulation<Zero_Loader>() {
             @Override
-            public EnergyModel createRoot(Engine engine) {
-                var energyModel = new EnergyModel();
-                // We can't call this here because this is the root agent.
-                // It will try to make itself its own owner and fail.
-                // Maybe the root agent should be a simpler agent.
-//                energyModel.setEngine(engine);
-//                energyModel.instantiateBaseStructure_xjal();
-                return energyModel;
+            public void setupEngine(Engine engine) {
+                super.setupEngine(engine);
+
+                // needs to start at midnight
+                var start = ZonedDateTime.of(2025, 1, 1, 0, 0, 0, 0, ZoneId.of("Europe/Amsterdam"));
+                engine.setStartDate(Date.from(start.toInstant()));
             }
 
             @Override
-            public void setupRootParameters(EnergyModel e, boolean b) {
+            public Zero_Loader createRoot(Engine engine) {
+                /*
+                 * !! IMPORTANT !!
+                 *
+                 * This seems the correct way to initialize an Agent
+                 *
+                 * The 3-parameter constructor overload calls instantiateBaseStructure_xjal()
+                 * to create child agents and then recursively does the same for child agents
+                 * (top-to-bottom)
+                 *
+                 * Agent::create() executes:
+                 * - onBeforeCreate() hook of top agent
+                 * - doCreate()
+                 *   - sets up plain variables
+                 *   - recursively calls onBeforeCreate() and doCreate() of child agents
+                 *     (generated code, top-to-bottom)
+                 * - Recursively calls onCreate() hook of child agents (bottom-to-top)
+                 * - onCreate() hook of top agent
+                 */
+                var loader = new Zero_Loader(engine, null, null);
+                loader.create();
+                return loader;
+            }
+
+            @Override
+            public void setupRootParameters(Zero_Loader e, boolean b) {
                 // AnyLogic usually generates this method body
             }
         };
 
-        // needs to start at midnight
-        var start = ZonedDateTime.of(2025, 1, 1, 0, 0, 0, 0, ZoneId.of("Europe/Amsterdam"));
-        var engine = experiment.getEngine();
-        engine.setStartDate(Date.from(start.toInstant()));
+        var loader = experiment.createRoot(experiment.getEngine());
+        var energyModel = loader.energyModel;
 
-        var energyModel = experiment.createRoot(engine);
-
-        var loader = new Zero_Loader();
-        loader.setEngine(engine);
-        loader.instantiateBaseStructure_xjal();
-        // intializes child agents
-        // calls setupPlainVariables_xjal
-        loader.doCreate();
-        energyModel.createAndStart(loader);
-
-        loader.energyModel = energyModel;
         loader.settings = Settings.builder().build();
         loader.f_setSimulationTimeParameters();
 
