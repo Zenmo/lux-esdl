@@ -1710,6 +1710,12 @@ Color
   public 
 ViewArea 
  v_currentViewArea;
+  public 
+Color 
+ v_dieselGeneratorColor;
+  public 
+Color 
+ v_dieselGeneratorLineColor;
 
   // Collection Variables
   public 
@@ -2634,12 +2640,7 @@ uI_Results.getCheckbox_KPISummary().setEnabled(false);
 
 
 // Set info text
-if ( GN.p_realCapacityAvailable ) {
-	v_clickedObjectText = GN.p_nodeType + "-station, " + Integer.toString( ((int)GN.p_capacity_kW) ) + " kW, ID: " + GN.p_gridNodeID + ", aansluitingen: " + GN.f_getConnectedGridConnections().size() + ", Type station: " + GN.p_description;
-}
-else {
-	v_clickedObjectText =  GN.p_nodeType + "-station, " + Integer.toString( ((int)GN.p_capacity_kW) ) + " kW (ingeschat), ID: " + GN.p_gridNodeID + ", aansluitingen: " + GN.f_getConnectedGridConnections().size() + ", Type station: " + GN.p_description;
-}
+f_setSelectedGNText();
 
 // Color the GridNode
 GN.gisRegion.setFillColor( v_selectionColor );
@@ -2726,9 +2727,6 @@ f_updateUIResultsData();
 
 //Set the button for going to the company UI (needs to be at the end of this function!)
 f_setUIButton();
-
-//alle panden met meerdere adressen hebben op dit moment (16-7-24) dezelfde functie(s) voor ieder adres, dus dit is op dit moment zinloos
-//f_listFunctions();
  
   }
 
@@ -4109,14 +4107,22 @@ for(OL_GISObjectType activeSpecialGISObjectType : c_modelActiveSpecialGISObjects
 } 
   }
 
-  public void f_setTrafoText(  ) { 
+  public void f_setSelectedGNText(  ) { 
 
-if ( v_clickedGridNode.p_realCapacityAvailable ) {
-	v_clickedObjectText = v_clickedGridNode.p_nodeType + "-station, " + Integer.toString( ((int)v_clickedGridNode.p_capacity_kW) ) + " kW, ID: " + v_clickedGridNode.p_gridNodeID + ", aansluitingen: " + v_clickedGridNode.f_getConnectedGridConnections().size() + ", Type station: " + v_clickedGridNode.p_description;
+String GNCapacityUnitString = " kW"; 
+if ( !v_clickedGridNode.p_realCapacityAvailable ) {
+	GNCapacityUnitString += " (ingeschat)";
 }
-else {
-	v_clickedObjectText =  v_clickedGridNode.p_nodeType + "-station, " + Integer.toString( ((int)v_clickedGridNode.p_capacity_kW) ) + " kW (ingeschat), ID: " + v_clickedGridNode.p_gridNodeID + ", aansluitingen: " + v_clickedGridNode.f_getConnectedGridConnections().size() + ", Type station: " + v_clickedGridNode.p_description;
-} 
+
+//Get total connected gcs
+int totalConnectedGCs = findAll(v_clickedGridNode.f_getAllLowerLVLConnectedGridConnections(), gc -> gc.f_isActive()).size();
+
+v_clickedObjectText =  v_clickedGridNode.p_nodeType + "-station, " + 
+					   roundToInt(v_clickedGridNode.p_capacity_kW) + GNCapacityUnitString +
+					   ", ID: " + v_clickedGridNode.p_gridNodeID + 
+					   ", aansluitingen: " + totalConnectedGCs + 
+					   ", Type station: " + v_clickedGridNode.p_description;
+ 
   }
 
   protected void f_setSpecialGISObjectLegendItem( OL_GISObjectType activeSpecialGISObjectType, ShapeText legendText, ShapeRectangle legendRect ) { 
@@ -4154,6 +4160,11 @@ switch(activeSpecialGISObjectType){
 		legendText.setText("Electrolyser");
 		legendRect.setFillColor(v_electrolyserColor);
 		legendRect.setLineColor(v_electrolyserLineColor);
+		break;
+	case DIESEL_GEN:
+		legendText.setText("Diesel Generator");
+		legendRect.setFillColor(v_dieselGeneratorColor);
+		legendRect.setLineColor(v_dieselGeneratorLineColor);
 		break;
 } 
   }
@@ -4591,6 +4602,12 @@ switch(selectedMapOverlayType){
 
   void f_setMapOverlay_ElectricityConsumption(  ) { 
 
+if(energyModel.v_rapidRunData == null || !b_resultsUpToDate){
+	f_setErrorScreen("Dit overzicht wordt pas beschikbaar na het uitvoeren van een jaarsimulatie. In plaats daarvan is de standaard kaart geselecteerd.", 0, 0);
+	rb_mapOverlay.setValue(c_loadedMapOverlayTypes.indexOf(OL_MapOverlayTypes.DEFAULT),true);
+	return;			
+}
+
 //Set legend
 b_updateLiveCongestionColors = true;
 gr_mapOverlayLegend_ElectricityConsumption.setVisible(true);
@@ -4654,7 +4671,7 @@ for (GridNode GN : energyModel.pop_gridNodes){
 
   void f_setMapOverlay_Congestion(  ) { 
 
-if(energyModel.v_rapidRunData == null){
+if(energyModel.v_rapidRunData == null || !b_resultsUpToDate){
 	f_setErrorScreen("Dit overzicht wordt pas beschikbaar na het uitvoeren van een jaarsimulatie. In plaats daarvan is de standaard kaart geselecteerd.", 0, 0);
 	rb_mapOverlay.setValue(c_loadedMapOverlayTypes.indexOf(OL_MapOverlayTypes.DEFAULT),true);
 	return;			
@@ -4881,8 +4898,11 @@ new Thread( () -> {
 	
 	//After rapid run: remove loading screen
 	f_removeAllSimulateYearScreens();
-
-	if (c_selectedGridConnections.size() == 0){//Update main area collection
+	
+	if(v_clickedGridNode != null){
+		uI_Results.f_updateUIresultsGridNode(v_clickedGridNode);
+	}
+	else if (c_selectedGridConnections.size() == 0){//Update main area collection
 		uI_Results.f_updateResultsUI(energyModel);
 	}
 	else if (c_selectedGridConnections.size() == 1){//Update selected GC area collection
@@ -5664,7 +5684,7 @@ for(String scenarioOption : scenarioOptions){
 rb_scenarios.setValue(customOptionIndex, true); 
   }
 
-  void f_setFilterComboBoxOptions(  ) { 
+  protected void f_setFilterComboBoxOptions(  ) { 
 
 //Check wheter a filter will result in anything. The order it is added here, is the order it will show up in the filter drop down menu.
 if(energyModel.Houses.size() > 0){
@@ -6371,463 +6391,463 @@ v_solarIrradiance
   @AnyLogicInternalCodegenAPI
   protected static final int _txt_mapOverlayFunctionalities = 56;
   @AnyLogicInternalCodegenAPI
-  protected static final int _uI_Tabs_presentation = 57;
+  protected static final int _rect_scenarioText = 57;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_scenarioText = 58;
+  protected static final int _txt_scenarioFunctions = 58;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_scenarioFunctions = 59;
+  protected static final int _map = 59;
   @AnyLogicInternalCodegenAPI
-  protected static final int _map = 60;
+  protected static final int _txt_sliderInitialization = 60;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_sliderInitialization = 61;
+  protected static final int _txt_GISObjectCreationFunctions = 61;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_GISObjectCreationFunctions = 62;
+  protected static final int _uI_Results_presentation = 62;
   @AnyLogicInternalCodegenAPI
-  protected static final int _uI_Results_presentation = 63;
+  protected static final int _gr_uI_Results_presentation = 63;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_uI_Results_presentation = 64;
+  protected static final int _rect_filterFunctions = 64;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_filterFunctions = 65;
+  protected static final int _t_selectionColors = 65;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_selectionColors = 66;
+  protected static final int _txt_filterFunctions = 66;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_filterFunctions = 67;
+  protected static final int _rect_filterInterface = 67;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_filterInterface = 68;
+  protected static final int _txt_filterDescription = 68;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_filterDescription = 69;
+  protected static final int _txt_activeFilters = 69;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_activeFilters = 70;
+  protected static final int _t_activeFilters = 70;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_activeFilters = 71;
+  protected static final int _txt_filterInterface = 71;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_filterInterface = 72;
+  protected static final int _t_selectedGridLoop = 72;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_selectedGridLoop = 73;
+  protected static final int _t_selectedNBh = 73;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_selectedNBh = 74;
+  protected static final int _gr_filterInterface = 74;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_filterInterface = 75;
+  protected static final int _rect_errorScreenGrayOut = 75;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_errorScreenGrayOut = 76;
+  protected static final int _rect_errorScreenClickBlocking = 76;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_errorScreenClickBlocking = 77;
+  protected static final int _rect_errorMessage = 77;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_errorMessage = 78;
+  protected static final int _t_errorMessage = 78;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_errorMessage = 79;
+  protected static final int _rect_errorOK = 79;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_errorOK = 80;
+  protected static final int _txt_errorOK = 80;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_errorOK = 81;
+  protected static final int _button_errorOK = 81;
   @AnyLogicInternalCodegenAPI
-  protected static final int _button_errorOK = 82;
+  protected static final int _gr_errorScreen = 82;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_errorScreen = 83;
+  protected static final int _rect_sliderClickBlocker = 83;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_sliderClickBlocker = 84;
+  protected static final int _rect_sliderClickBlocker2 = 84;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_sliderClickBlocker2 = 85;
+  protected static final int _gr_sliderClickBlocker = 85;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_sliderClickBlocker = 86;
+  protected static final int _txt_dataAccesibilityFunctionalities = 86;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_dataAccesibilityFunctionalities = 87;
+  protected static final int _rect_ìnfoBubbleFunctions = 87;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_ìnfoBubbleFunctions = 88;
+  protected static final int _txt_infoBubbleFunctions = 88;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_infoBubbleFunctions = 89;
+  protected static final int _txt_publicVersion = 89;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_publicVersion = 90;
+  protected static final int _i_publicVersionWarningMessage = 90;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_publicVersionWarningMessage = 91;
+  protected static final int _gr_publicVersionWarningMessage = 91;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_publicVersionWarningMessage = 92;
+  protected static final int _rect_dynamicLegend = 92;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_dynamicLegend = 93;
+  protected static final int _txt_dynamicLegend = 93;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_dynamicLegend = 94;
+  protected static final int _txt_visualObjects = 94;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_visualObjects = 95;
+  protected static final int _rect_infoText = 95;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_infoText = 96;
+  protected static final int _oval_closeInfoText = 96;
   @AnyLogicInternalCodegenAPI
-  protected static final int _oval_closeInfoText = 97;
+  protected static final int _line_closeInfoText1 = 97;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line_closeInfoText1 = 98;
+  protected static final int _line_closeInfoText2 = 98;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line_closeInfoText2 = 99;
+  protected static final int _gr_closeInfoText = 99;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_closeInfoText = 100;
+  protected static final int _t_infoTextHeader = 100;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_infoTextHeader = 101;
+  protected static final int _t_infoTextDescription = 101;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_infoTextDescription = 102;
+  protected static final int _gr_infoText = 102;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_infoText = 103;
+  protected static final int _rect_forceMapSelectionClickBlocker1 = 103;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_forceMapSelectionClickBlocker1 = 104;
+  protected static final int _rect_forceMapSelectionClickBlocker2 = 104;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_forceMapSelectionClickBlocker2 = 105;
+  protected static final int _rect_forceMapSelectionClickBlocker3 = 105;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_forceMapSelectionClickBlocker3 = 106;
+  protected static final int _rect_forceMapSelectionClickBlocker4 = 106;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_forceMapSelectionClickBlocker4 = 107;
+  protected static final int _rect_forceMapSelection1 = 107;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_forceMapSelection1 = 108;
+  protected static final int _rect_forceMapSelection2 = 108;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_forceMapSelection2 = 109;
+  protected static final int _rect_forceMapSelection3 = 109;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_forceMapSelection3 = 110;
+  protected static final int _rect_forceMapSelection4 = 110;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_forceMapSelection4 = 111;
+  protected static final int _rect_selectText = 111;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_selectText = 112;
+  protected static final int _t_forcedClickMessage = 112;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_forcedClickMessage = 113;
+  protected static final int _gr_ForceMapSelectionText = 113;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_ForceMapSelectionText = 114;
+  protected static final int _button_completeSelection_grayedOut = 114;
   @AnyLogicInternalCodegenAPI
-  protected static final int _button_completeSelection_grayedOut = 115;
+  protected static final int _txt_completeEnergyHubSelection_grayedOut = 115;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_completeEnergyHubSelection_grayedOut = 116;
+  protected static final int _gr_completeEnergyHubSelection_grayedOut = 116;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_completeEnergyHubSelection_grayedOut = 117;
+  protected static final int _button_completeSelection = 117;
   @AnyLogicInternalCodegenAPI
-  protected static final int _button_completeSelection = 118;
+  protected static final int _txt_completeEnergyHubSelection = 118;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_completeEnergyHubSelection = 119;
+  protected static final int _gr_completeEnergyHubSelection = 119;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_completeEnergyHubSelection = 120;
+  protected static final int _rect_energyHubConfigurator = 120;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_energyHubConfigurator = 121;
+  protected static final int _txt_energyHubConfigurator = 121;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_energyHubConfigurator = 122;
+  protected static final int _gr_energieHubConfiguratorTxt = 122;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_energieHubConfiguratorTxt = 123;
+  protected static final int _button_cancelEnergyHubConfiguration = 123;
   @AnyLogicInternalCodegenAPI
-  protected static final int _button_cancelEnergyHubConfiguration = 124;
+  protected static final int _txt_cancelEnergyHubConfiguration = 124;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_cancelEnergyHubConfiguration = 125;
+  protected static final int _gr_cancelEnergyHubConfiguration = 125;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_cancelEnergyHubConfiguration = 126;
+  protected static final int _gr_energyHubSelectionButtons = 126;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_energyHubSelectionButtons = 127;
+  protected static final int _gr_forceMapSelection = 127;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_forceMapSelection = 128;
+  protected static final int _rect_supportFunctions = 128;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_supportFunctions = 129;
+  protected static final int _t_supportFunctions = 129;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_supportFunctions = 130;
+  protected static final int _gr_supportFunctions = 130;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_supportFunctions = 131;
+  protected static final int _rect_legenda = 131;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_legenda = 132;
+  protected static final int _t_legenda = 132;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_legenda = 133;
+  protected static final int _line_legendaSeperator1 = 133;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line_legendaSeperator1 = 134;
+  protected static final int _line_legendaSeperator2 = 134;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line_legendaSeperator2 = 135;
+  protected static final int _t_infrastructure = 135;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_infrastructure = 136;
+  protected static final int _line_infrastructure = 136;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line_infrastructure = 137;
+  protected static final int _polyline_congestedGridnode = 137;
   @AnyLogicInternalCodegenAPI
-  protected static final int _polyline_congestedGridnode = 138;
+  protected static final int _txt_congestedGridnode = 138;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_congestedGridnode = 139;
+  protected static final int _polyline_gridnode = 139;
   @AnyLogicInternalCodegenAPI
-  protected static final int _polyline_gridnode = 140;
+  protected static final int _txt_gridnode = 140;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_gridnode = 141;
+  protected static final int _polyline_strainedGridnode = 141;
   @AnyLogicInternalCodegenAPI
-  protected static final int _polyline_strainedGridnode = 142;
+  protected static final int _txt_strainedGridnode = 142;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_strainedGridnode = 143;
+  protected static final int _gr_gridnodes = 143;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_gridnodes = 144;
+  protected static final int _t_MV = 144;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_MV = 145;
+  protected static final int _t_LV = 145;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_LV = 146;
+  protected static final int _line_LV = 146;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line_LV = 147;
+  protected static final int _line_MV = 147;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line_MV = 148;
+  protected static final int _gr_cablesLegend = 148;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_cablesLegend = 149;
+  protected static final int _gr_infrastructure = 149;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_infrastructure = 150;
+  protected static final int _t_buildings = 150;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_buildings = 151;
+  protected static final int _line_buildings = 151;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line_buildings = 152;
+  protected static final int _txt_colorings = 152;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_colorings = 153;
+  protected static final int _gr_colorings = 153;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_colorings = 154;
+  protected static final int _gr_buildings = 154;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_buildings = 155;
+  protected static final int _rect_mapOverlayLegend_ElectricityConsumption1 = 155;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_ElectricityConsumption1 = 156;
+  protected static final int _rect_mapOverlayLegend_ElectricityConsumption2 = 156;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_ElectricityConsumption2 = 157;
+  protected static final int _rect_mapOverlayLegend_ElectricityConsumption3 = 157;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_ElectricityConsumption3 = 158;
+  protected static final int _rect_mapOverlayLegend_ElectricityConsumption4 = 158;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_ElectricityConsumption4 = 159;
+  protected static final int _rect_mapOverlayLegend_ElectricityConsumption5 = 159;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_ElectricityConsumption5 = 160;
+  protected static final int _txt_mapOverlayLegend_ElectricityConsumption1 = 160;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_ElectricityConsumption1 = 161;
+  protected static final int _txt_mapOverlayLegend_ElectricityConsumption2 = 161;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_ElectricityConsumption2 = 162;
+  protected static final int _txt_mapOverlayLegend_ElectricityConsumption3 = 162;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_ElectricityConsumption3 = 163;
+  protected static final int _txt_mapOverlayLegend_ElectricityConsumption4 = 163;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_ElectricityConsumption4 = 164;
+  protected static final int _txt_mapOverlayLegend_ElectricityConsumption5 = 164;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_ElectricityConsumption5 = 165;
+  protected static final int _gr_mapOverlayLegend_ElectricityConsumption = 165;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_mapOverlayLegend_ElectricityConsumption = 166;
+  protected static final int _oval_defaultLegend4 = 166;
   @AnyLogicInternalCodegenAPI
-  protected static final int _oval_defaultLegend4 = 167;
+  protected static final int _t_defaultLegend2 = 167;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_defaultLegend2 = 168;
+  protected static final int _t_defaultLegend5 = 168;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_defaultLegend5 = 169;
+  protected static final int _oval_defaultLegend5 = 169;
   @AnyLogicInternalCodegenAPI
-  protected static final int _oval_defaultLegend5 = 170;
+  protected static final int _t_defaultLegend3 = 170;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_defaultLegend3 = 171;
+  protected static final int _oval_defaultLegend2 = 171;
   @AnyLogicInternalCodegenAPI
-  protected static final int _oval_defaultLegend2 = 172;
+  protected static final int _t_defaultLegend4 = 172;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_defaultLegend4 = 173;
+  protected static final int _oval_defaultLegend3 = 173;
   @AnyLogicInternalCodegenAPI
-  protected static final int _oval_defaultLegend3 = 174;
+  protected static final int _t_defaultLegend1 = 174;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_defaultLegend1 = 175;
+  protected static final int _oval_defaultLegend1 = 175;
   @AnyLogicInternalCodegenAPI
-  protected static final int _oval_defaultLegend1 = 176;
+  protected static final int _gr_defaultLegenda = 176;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_defaultLegenda = 177;
+  protected static final int _rect_mapOverlayLegend_PVProduction1 = 177;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_PVProduction1 = 178;
+  protected static final int _rect_mapOverlayLegend_PVProduction2 = 178;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_PVProduction2 = 179;
+  protected static final int _rect_mapOverlayLegend_PVProduction3 = 179;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_PVProduction3 = 180;
+  protected static final int _txt_mapOverlayLegend_PVProduction1 = 180;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_PVProduction1 = 181;
+  protected static final int _txt_mapOverlayLegend_PVProduction2 = 181;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_PVProduction2 = 182;
+  protected static final int _txt_mapOverlayLegend_PVProduction3 = 182;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_PVProduction3 = 183;
+  protected static final int _gr_mapOverlayLegend_PVProduction = 183;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_mapOverlayLegend_PVProduction = 184;
+  protected static final int _rect_mapOverlayLegend_gridNeighbours1 = 184;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_gridNeighbours1 = 185;
+  protected static final int _rect_mapOverlayLegend_gridNeighbours2 = 185;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_gridNeighbours2 = 186;
+  protected static final int _rect_mapOverlayLegend_gridNeighbours3 = 186;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_gridNeighbours3 = 187;
+  protected static final int _txt_mapOverlayLegend_gridNeighbours1 = 187;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_gridNeighbours1 = 188;
+  protected static final int _txt_mapOverlayLegend_gridNeighbours2 = 188;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_gridNeighbours2 = 189;
+  protected static final int _txt_mapOverlayLegend_gridNeighbours3 = 189;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_gridNeighbours3 = 190;
+  protected static final int _rect_mapOverlayLegend_gridNeighbours4 = 190;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_gridNeighbours4 = 191;
+  protected static final int _txt_mapOverlayLegend_gridNeighbours4 = 191;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_gridNeighbours4 = 192;
+  protected static final int _txt_mapOverlayLegend_gridNeighbours5 = 192;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_gridNeighbours5 = 193;
+  protected static final int _gr_mapOverlayLegend_gridNeighbours = 193;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_mapOverlayLegend_gridNeighbours = 194;
+  protected static final int _txt_mapOverlayLegend_congestion3 = 194;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_congestion3 = 195;
+  protected static final int _rect_mapOverlayLegend_congestion1 = 195;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_congestion1 = 196;
+  protected static final int _txt_mapOverlayLegend_congestion1 = 196;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_congestion1 = 197;
+  protected static final int _i_mapOverlayLegend_congestion_Degrees = 197;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_mapOverlayLegend_congestion_Degrees = 198;
+  protected static final int _rect_mapOverlayLegend_congestion21 = 198;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_congestion21 = 199;
+  protected static final int _rect_mapOverlayLegend_congestion22 = 199;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_congestion22 = 200;
+  protected static final int _rect_mapOverlayLegend_congestion23 = 200;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_congestion23 = 201;
+  protected static final int _gr_rect_mapOverlayLegend_congestion2 = 201;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_rect_mapOverlayLegend_congestion2 = 202;
+  protected static final int _txt_mapOverlayLegend_congestion2 = 202;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_congestion2 = 203;
+  protected static final int _i_mapOverlayLegend_congestion_Types = 203;
   @AnyLogicInternalCodegenAPI
-  protected static final int _i_mapOverlayLegend_congestion_Types = 204;
+  protected static final int _gr_mapOverlayLegend_congestion = 204;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_mapOverlayLegend_congestion = 205;
+  protected static final int _rect_mapOverlayLegend_EnergyLabelA = 205;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_EnergyLabelA = 206;
+  protected static final int _rect_mapOverlayLegend_EnergyLabelB = 206;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_EnergyLabelB = 207;
+  protected static final int _rect_mapOverlayLegend_EnergyLabelC = 207;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_EnergyLabelC = 208;
+  protected static final int _rect_mapOverlayLegend_EnergyLabelD = 208;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_EnergyLabelD = 209;
+  protected static final int _rect_mapOverlayLegend_EnergyLabelE = 209;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_EnergyLabelE = 210;
+  protected static final int _txt_mapOverlayLegend_EnergyLabelA = 210;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_EnergyLabelA = 211;
+  protected static final int _txt_mapOverlayLegend_EnergyLabelB = 211;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_EnergyLabelB = 212;
+  protected static final int _txt_mapOverlayLegend_EnergyLabelC = 212;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_EnergyLabelC = 213;
+  protected static final int _txt_mapOverlayLegend_EnergyLabelD = 213;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_EnergyLabelD = 214;
+  protected static final int _txt_mapOverlayLegend_EnergyLabelE = 214;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_EnergyLabelE = 215;
+  protected static final int _rect_mapOverlayLegend_EnergyLabelF = 215;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_EnergyLabelF = 216;
+  protected static final int _txt_mapOverlayLegend_EnergyLabelF = 216;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_EnergyLabelF = 217;
+  protected static final int _rect_mapOverlayLegend_EnergyLabelG = 217;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_EnergyLabelG = 218;
+  protected static final int _txt_mapOverlayLegend_EnergyLabelG = 218;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_EnergyLabelG = 219;
+  protected static final int _rect_mapOverlayLegend_EnergyLabelUnknown = 219;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_mapOverlayLegend_EnergyLabelUnknown = 220;
+  protected static final int _txt_mapOverlayLegend_EnergyLabelUnknown = 220;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayLegend_EnergyLabelUnknown = 221;
+  protected static final int _gr_mapOverlayLegend_EnergyLabel = 221;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_mapOverlayLegend_EnergyLabel = 222;
+  protected static final int _gr_mapOverlayLegenda = 222;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_mapOverlayLegenda = 223;
+  protected static final int _rect_specialGISObjectLegend1 = 223;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend1 = 224;
+  protected static final int _t_specialGISObjectLegend1 = 224;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend1 = 225;
+  protected static final int _rect_specialGISObjectLegend2 = 225;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend2 = 226;
+  protected static final int _t_specialGISObjectLegend2 = 226;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend2 = 227;
+  protected static final int _rect_specialGISObjectLegend3 = 227;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend3 = 228;
+  protected static final int _t_specialGISObjectLegend3 = 228;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend3 = 229;
+  protected static final int _rect_specialGISObjectLegend4 = 229;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend4 = 230;
+  protected static final int _t_specialGISObjectLegend4 = 230;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend4 = 231;
+  protected static final int _rect_specialGISObjectLegend5 = 231;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend5 = 232;
+  protected static final int _t_specialGISObjectLegend5 = 232;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend5 = 233;
+  protected static final int _rect_specialGISObjectLegend6 = 233;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend6 = 234;
+  protected static final int _t_specialGISObjectLegend6 = 234;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend6 = 235;
+  protected static final int _rect_extendedLegendLine = 235;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_extendedLegendLine = 236;
+  protected static final int _rect_extendedLegend = 236;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_extendedLegend = 237;
+  protected static final int _rect_specialGISObjectLegend7 = 237;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend7 = 238;
+  protected static final int _t_specialGISObjectLegend7 = 238;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend7 = 239;
+  protected static final int _rect_specialGISObjectLegend8 = 239;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend8 = 240;
+  protected static final int _t_specialGISObjectLegend8 = 240;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend8 = 241;
+  protected static final int _rect_specialGISObjectLegend9 = 241;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend9 = 242;
+  protected static final int _t_specialGISObjectLegend9 = 242;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend9 = 243;
+  protected static final int _rect_specialGISObjectLegend10 = 243;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend10 = 244;
+  protected static final int _t_specialGISObjectLegend10 = 244;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend10 = 245;
+  protected static final int _rect_specialGISObjectLegend11 = 245;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend11 = 246;
+  protected static final int _t_specialGISObjectLegend11 = 246;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend11 = 247;
+  protected static final int _rect_specialGISObjectLegend12 = 247;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_specialGISObjectLegend12 = 248;
+  protected static final int _t_specialGISObjectLegend12 = 248;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_specialGISObjectLegend12 = 249;
+  protected static final int _line = 249;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line = 250;
+  protected static final int _gr_extendedLegend = 250;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_extendedLegend = 251;
+  protected static final int _t_seeMoreLegend = 251;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_seeMoreLegend = 252;
+  protected static final int _gr_specificGISObjectLegend = 252;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_specificGISObjectLegend = 253;
+  protected static final int _gr_legenda = 253;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_legenda = 254;
+  protected static final int _rect_loadIconSmall = 254;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_loadIconSmall = 255;
+  protected static final int _image_loadIconSmall = 255;
   @AnyLogicInternalCodegenAPI
-  protected static final int _image_loadIconSmall = 256;
+  protected static final int _t_loadIconSmall = 256;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_loadIconSmall = 257;
+  protected static final int _gr_loadIconYearSimulation = 257;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_loadIconYearSimulation = 258;
+  protected static final int _rect_simulateYearScreenSmall = 258;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_simulateYearScreenSmall = 259;
+  protected static final int _t_simulateYearToCalculateCostsSmall = 259;
   @AnyLogicInternalCodegenAPI
-  protected static final int _t_simulateYearToCalculateCostsSmall = 260;
+  protected static final int _image_simulateYearToCalculateCostsSmall = 260;
   @AnyLogicInternalCodegenAPI
-  protected static final int _image_simulateYearToCalculateCostsSmall = 261;
+  protected static final int _gr_simulateYearButton = 261;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_simulateYearButton = 262;
+  protected static final int _gr_simulateYear = 262;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_simulateYear = 263;
+  protected static final int _gr_simulateYearScreen = 263;
   @AnyLogicInternalCodegenAPI
-  protected static final int _gr_simulateYearScreen = 264;
+  protected static final int _txt_cablesAndPipesColors = 264;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_cablesAndPipesColors = 265;
+  protected static final int _txt_mapOverlayColors = 265;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_mapOverlayColors = 266;
+  protected static final int _zenmocolor_blue3 = 266;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_blue3 = 267;
+  protected static final int _zenmocolor_blue = 267;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_blue = 268;
+  protected static final int _zenmocolor_blue1 = 268;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_blue1 = 269;
+  protected static final int _zenmocolor_yellow = 269;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_yellow = 270;
+  protected static final int _zenmocolor_yellow1 = 270;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_yellow1 = 271;
+  protected static final int _zenmocolor_yellow2 = 271;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_yellow2 = 272;
+  protected static final int _zenmocolor_yellow3 = 272;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_yellow3 = 273;
+  protected static final int _zenmocolor_red = 273;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_red = 274;
+  protected static final int _zenmocolor_red1 = 274;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_red1 = 275;
+  protected static final int _zenmocolor_red2 = 275;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_red2 = 276;
+  protected static final int _zenmocolor_red3 = 276;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_red3 = 277;
+  protected static final int _zenmocolor_blue2 = 277;
   @AnyLogicInternalCodegenAPI
-  protected static final int _zenmocolor_blue2 = 278;
+  protected static final int _line1 = 278;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line1 = 279;
+  protected static final int _line2 = 279;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line2 = 280;
+  protected static final int _line3 = 280;
   @AnyLogicInternalCodegenAPI
-  protected static final int _line3 = 281;
+  protected static final int _txt_projectSpecificScenarios = 281;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_projectSpecificScenarios = 282;
+  protected static final int _image_loadingScreenIcon = 282;
   @AnyLogicInternalCodegenAPI
-  protected static final int _image_loadingScreenIcon = 283;
+  protected static final int _rect_defaultSliderNames = 283;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rect_defaultSliderNames = 284;
+  protected static final int _txt_defaultSliderNames = 284;
   @AnyLogicInternalCodegenAPI
-  protected static final int _txt_defaultSliderNames = 285;
+  protected static final int _uI_Tabs_presentation = 285;
   @AnyLogicInternalCodegenAPI
   protected static final int _plot_outsideTemperature = 286;
   @AnyLogicInternalCodegenAPI
@@ -6870,8 +6890,8 @@ v_solarIrradiance
 
   @AnyLogicInternalCodegenAPI
   public boolean isEmbeddedAgentPresentationVisible( Agent _a ) {
-    if (_a == uI_Tabs) { return true; }
     if (_a == uI_Results) { return true; }
+    if (_a == uI_Tabs) { return true; }
     return super.isEmbeddedAgentPresentationVisible( _a );
   }
   @AnyLogicInternalCodegenAPI
@@ -6912,7 +6932,7 @@ v_solarIrradiance
   }
   @AnyLogicInternalCodegenAPI
   private void _initialize_level_xjal() {
-	  level.addAll(rect_sliderCollectionOrdering, rect_canvas, rect_gismap, gr_energyHubPresentation, gr_logos, rect_mainFunctions, rect_simulationEngine, rect_input, t_input, line_simulationEngine, t_simulationEngine, t_date, gr_zoomButton, t_legendaColors, t_mapClickingFunctions, t_stylingFunctions, gr_clickedObjectInfo, t_buildingColors, t_gridnodeColors, t_specificBuildingColors, t_areaColors, txt_generalColors, button_goToUI, txt_additionalUIs, rb_scenarios_template, t_scenarios, gr_scenarioDescription, t_resultsUIFunctions, t_scenarioDictionaries, t_initializationFunctions, t_inputParameters, button_gotoEngine, line_ordereringDescription, t_ordereringDescription, t_outsideTemperature, t_solarIrradiance, t_windSpeed, plot_outsideTemperature, plot_solarIrradiance, gr_multipleBuildingInfo, rect_CustomColors, txt_mapOverlayFunctionalities, uI_Tabs_presentation, rect_scenarioText, txt_scenarioFunctions, checkbox_cables, map, txt_sliderInitialization, txt_GISObjectCreationFunctions, gr_uI_Results_presentation, rect_filterFunctions, t_selectionColors, txt_filterFunctions, cb_showFilterInterface, gr_filterInterface, gr_errorScreen, gr_sliderClickBlocker, txt_dataAccesibilityFunctionalities, rect_ìnfoBubbleFunctions, txt_infoBubbleFunctions, gr_publicVersionWarningMessage, rect_dynamicLegend, txt_dynamicLegend, txt_visualObjects, gr_infoText, gr_forceMapSelection, gr_supportFunctions, gr_legenda, gr_simulateYearScreen, txt_cablesAndPipesColors, txt_mapOverlayColors, zenmocolor_blue3, zenmocolor_blue, zenmocolor_blue1, zenmocolor_yellow, zenmocolor_yellow1, zenmocolor_yellow2, zenmocolor_yellow3, zenmocolor_red, zenmocolor_red1, zenmocolor_red2, zenmocolor_red3, zenmocolor_blue2, line1, line2, line3, txt_projectSpecificScenarios, image_loadingScreenIcon, rect_defaultSliderNames, txt_defaultSliderNames);
+	  level.addAll(rect_sliderCollectionOrdering, rect_canvas, rect_gismap, gr_energyHubPresentation, gr_logos, rect_mainFunctions, rect_simulationEngine, rect_input, t_input, line_simulationEngine, t_simulationEngine, t_date, gr_zoomButton, t_legendaColors, t_mapClickingFunctions, t_stylingFunctions, gr_clickedObjectInfo, t_buildingColors, t_gridnodeColors, t_specificBuildingColors, t_areaColors, txt_generalColors, button_goToUI, txt_additionalUIs, rb_scenarios_template, t_scenarios, gr_scenarioDescription, t_resultsUIFunctions, t_scenarioDictionaries, t_initializationFunctions, t_inputParameters, button_gotoEngine, line_ordereringDescription, t_ordereringDescription, t_outsideTemperature, t_solarIrradiance, t_windSpeed, plot_outsideTemperature, plot_solarIrradiance, gr_multipleBuildingInfo, rect_CustomColors, txt_mapOverlayFunctionalities, rect_scenarioText, txt_scenarioFunctions, checkbox_cables, map, txt_sliderInitialization, txt_GISObjectCreationFunctions, gr_uI_Results_presentation, rect_filterFunctions, t_selectionColors, txt_filterFunctions, cb_showFilterInterface, gr_filterInterface, gr_errorScreen, gr_sliderClickBlocker, txt_dataAccesibilityFunctionalities, rect_ìnfoBubbleFunctions, txt_infoBubbleFunctions, gr_publicVersionWarningMessage, rect_dynamicLegend, txt_dynamicLegend, txt_visualObjects, gr_infoText, gr_forceMapSelection, gr_supportFunctions, gr_legenda, gr_simulateYearScreen, txt_cablesAndPipesColors, txt_mapOverlayColors, zenmocolor_blue3, zenmocolor_blue, zenmocolor_blue1, zenmocolor_yellow, zenmocolor_yellow1, zenmocolor_yellow2, zenmocolor_yellow3, zenmocolor_red, zenmocolor_red1, zenmocolor_red2, zenmocolor_red3, zenmocolor_blue2, line1, line2, line3, txt_projectSpecificScenarios, image_loadingScreenIcon, rect_defaultSliderNames, txt_defaultSliderNames, uI_Tabs_presentation);
   }
   @AnyLogicInternalCodegenAPI
   private void _initialize_level1_xjal() {
@@ -7660,7 +7680,6 @@ v_selectedGridConnectionIndex > 0 ?
   protected ShapeGroup gr_multipleBuildingInfo;
   protected ShapeRectangle rect_CustomColors;
   protected ShapeText txt_mapOverlayFunctionalities;
-  protected ShapeEmbeddedObjectPresentation uI_Tabs_presentation;
   protected ShapeRectangle rect_scenarioText;
   protected ShapeText txt_scenarioFunctions;
   protected ShapeGISMap map;
@@ -8615,6 +8634,7 @@ zenmocolor_blue2.getFillColor()
   protected ShapeImage image_loadingScreenIcon;
   protected ShapeRectangle rect_defaultSliderNames;
   protected ShapeText txt_defaultSliderNames;
+  protected ShapeEmbeddedObjectPresentation uI_Tabs_presentation;
   protected com.anylogic.engine.markup.Level level;
   protected com.anylogic.engine.markup.Level level1;
 
@@ -8926,8 +8946,8 @@ _rb_mapOverlayLegend_congestion_Font, true,
     };
     rect_logoBackground.setVisible( false );
     image_tueLogo = new ShapeImage(
-		Zero_Interface.this, SHAPE_DRAW_2D3D, true, 730.0, 25.0, 0.0, 0.0,
-205.802, 60.0, "/zerointerfaceloader/",
+		Zero_Interface.this, SHAPE_DRAW_2D3D, true, 730.0, 20.861, 0.0, 0.0,
+220.0, 64.139, "/zerointerfaceloader/",
 			new String[]{"logo_TUe_red.png","logo_TUe_white.png",} ) {
 
       @Override
@@ -8948,8 +8968,8 @@ _rb_mapOverlayLegend_congestion_Font, true,
       }
     };
     image_zenmoLogo = new ShapeImage(
-		Zero_Interface.this, SHAPE_DRAW_2D3D, true, 532.0, 16.0, 0.0, 0.0,
-170.0, 73.0, "/zerointerfaceloader/",
+		Zero_Interface.this, SHAPE_DRAW_2D3D, true, 562.0, 9.932, 0.0, 0.0,
+153.0, 80.068, "/zerointerfaceloader/",
 			new String[]{"logo_zenmo.png",} ) {
 
       @Override
@@ -10670,10 +10690,6 @@ Zero_Interface.this, true, 1335.0, 38.0,
     }
     gr_multipleBuildingInfo.setVisible( false );
     {
-    uI_Tabs_presentation = new ShapeEmbeddedObjectPresentation( Zero_Interface.this, SHAPE_DRAW_2D3D, true, 0.0, 0.0, 0.0, 0.0,
-		false, true, null );
-    }
-    {
     uI_Results_presentation = new ShapeEmbeddedObjectPresentation( Zero_Interface.this, SHAPE_DRAW_2D3D, true, 0.0, 0.0, 0.0, 0.0,
 		false, true, null );
     }
@@ -11213,14 +11229,18 @@ Zero_Interface.this, true, 1335.0, 38.0,
 	     , gr_loadIconYearSimulation
 	     , gr_simulateYear );
     }
+    {
+    uI_Tabs_presentation = new ShapeEmbeddedObjectPresentation( Zero_Interface.this, SHAPE_DRAW_2D3D, true, 0.0, 0.0, 0.0, 0.0,
+		false, true, null );
+    }
   }
 
   @AnyLogicInternalCodegenAPI
   private void _createPersistentElementsBS0_xjal() {
-    uI_Tabs_presentation.setEmbeddedObject_xjal( uI_Tabs );
     uI_Results_presentation.setEmbeddedObject_xjal( uI_Results );
     uI_Tabs_presentation.setEmbeddedObject_xjal( uI_Tabs );
     uI_Results_presentation.setEmbeddedObject_xjal( uI_Results );
+    uI_Tabs_presentation.setEmbeddedObject_xjal( uI_Tabs );
   }
 
 
@@ -11680,6 +11700,12 @@ gray
 ;
     v_currentViewArea = 
 va_Interface 
+;
+    v_dieselGeneratorColor = 
+black 
+;
+    v_dieselGeneratorLineColor = 
+darkGray 
 ;
   }
 

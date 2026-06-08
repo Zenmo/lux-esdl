@@ -81,7 +81,6 @@ import static zero_engine.OL_MobilityPatternType.*;
 import static zero_engine.OL_ChargingAttitude.*;
 import static zero_engine.OL_BatteryOperationMode.*;
 import static zero_engine.OL_ElectrolyserOperationMode.*;
-import static zero_engine.OL_ConnectionOwnerType.*;
 import static zero_engine.OL_ProfileUnits.*;
 import static zero_engine.OL_HouseholdCookingMethod.*;
 import static zero_engine.OL_FlowsMapKeys.*;
@@ -366,44 +365,6 @@ Actor  p_heatSupplier;
   }
 
 
-  public 
-OL_ConnectionOwnerType  p_connectionOwnerType;
-
-  /**
-   * Returns default value for parameter <code>p_connectionOwnerType</code>.
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  public OL_ConnectionOwnerType _p_connectionOwnerType_DefaultValue_xjal() {
-    final ConnectionOwner self = this;
-    return null;
-  }
-
-  public void set_p_connectionOwnerType( OL_ConnectionOwnerType value ) {
-    if (value == this.p_connectionOwnerType) {
-      return;
-    }
-    OL_ConnectionOwnerType _oldValue_xjal = this.p_connectionOwnerType;
-    this.p_connectionOwnerType = value;
-    onChange_p_connectionOwnerType_xjal( _oldValue_xjal );
-    onChange();
-  }
-
-  /**
-   * Calls "On change" action for parameter p_connectionOwnerType.<br>
-   * Note that 'oldValue' in that action will be unavailable if this method is called by user
-   * (current parameter value will be passed as 'oldValue').<br>
-   * Please call <code>set_p_connectionOwnerType()</code> method instead.
-   */
-  protected void onChange_p_connectionOwnerType() {
-    onChange_p_connectionOwnerType_xjal( p_connectionOwnerType );
-  }
-
-  @AnyLogicInternalCodegenAPI
-  protected void onChange_p_connectionOwnerType_xjal( OL_ConnectionOwnerType oldValue ) {  
-  }
-
-
   /**
    * Is it a company that filled in the survey
    */
@@ -637,7 +598,6 @@ true
     p_methaneSupplier = _p_methaneSupplier_DefaultValue_xjal();
     p_hydrogenSupplier = _p_hydrogenSupplier_DefaultValue_xjal();
     p_heatSupplier = _p_heatSupplier_DefaultValue_xjal();
-    p_connectionOwnerType = _p_connectionOwnerType_DefaultValue_xjal();
     p_detailedCompany = _p_detailedCompany_DefaultValue_xjal();
     p_energySupplierID = _p_energySupplierID_DefaultValue_xjal();
     p_energyCoopID = _p_energyCoopID_DefaultValue_xjal();
@@ -690,13 +650,6 @@ true
         p_heatSupplier = (Actor) _value_xjal;
       }
       return true;
-    case "p_connectionOwnerType":
-      if ( _callOnChange_xjal ) {
-        set_p_connectionOwnerType( (OL_ConnectionOwnerType) _value_xjal );
-      } else {
-        p_connectionOwnerType = (OL_ConnectionOwnerType) _value_xjal;
-      }
-      return true;
     case "p_detailedCompany":
       if ( _callOnChange_xjal ) {
         set_p_detailedCompany( (Boolean) _value_xjal );
@@ -747,7 +700,6 @@ true
     case "p_methaneSupplier": _result_xjal = p_methaneSupplier; break;
     case "p_hydrogenSupplier": _result_xjal = p_hydrogenSupplier; break;
     case "p_heatSupplier": _result_xjal = p_heatSupplier; break;
-    case "p_connectionOwnerType": _result_xjal = p_connectionOwnerType; break;
     case "p_detailedCompany": _result_xjal = p_detailedCompany; break;
     case "p_energySupplierID": _result_xjal = p_energySupplierID; break;
     case "p_energyCoopID": _result_xjal = p_energyCoopID; break;
@@ -772,7 +724,6 @@ true
       list.add( "p_methaneSupplier" );
       list.add( "p_hydrogenSupplier" );
       list.add( "p_heatSupplier" );
-      list.add( "p_connectionOwnerType" );
       list.add( "p_detailedCompany" );
       list.add( "p_energySupplierID" );
       list.add( "p_energyCoopID" );
@@ -1455,27 +1406,13 @@ private double _datasetUpdateTime_xjal() {
   @AnyLogicInternalCodegenAPI
   protected static final Font _text1_Font = new Font("SansSerif", 0, 11 );
   @AnyLogicInternalCodegenAPI
-  protected static final Font _text12_Font = _text1_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _text13_Font = _text1_Font;
-  @AnyLogicInternalCodegenAPI
-  protected static final Font _text14_Font = _text1_Font;
-  @AnyLogicInternalCodegenAPI
   protected static final int _line1 = zero_engine.Actor._SHAPE_NEXT_ID_xjal + 1;
   @AnyLogicInternalCodegenAPI
   protected static final int _text1 = zero_engine.Actor._SHAPE_NEXT_ID_xjal + 2;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _rectangle5 = zero_engine.Actor._SHAPE_NEXT_ID_xjal + 3;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _text12 = zero_engine.Actor._SHAPE_NEXT_ID_xjal + 4;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _text13 = zero_engine.Actor._SHAPE_NEXT_ID_xjal + 5;
-  @AnyLogicInternalCodegenAPI
-  protected static final int _text14 = zero_engine.Actor._SHAPE_NEXT_ID_xjal + 6;
 
   /** Internal constant, shouldn't be accessed by user */
   @AnyLogicInternalCodegenAPI
-  protected static final int _SHAPE_NEXT_ID_xjal = zero_engine.Actor._SHAPE_NEXT_ID_xjal + 7;
+  protected static final int _SHAPE_NEXT_ID_xjal = zero_engine.Actor._SHAPE_NEXT_ID_xjal + 3;
 
   @AnyLogicInternalCodegenAPI
   public boolean isPublicPresentationDefined() {
@@ -1488,15 +1425,11 @@ private double _datasetUpdateTime_xjal() {
   }
   @AnyLogicInternalCodegenAPI
   private void _initialize_level_xjal() {
-	  level.addAll(line1, text1, rectangle5, text12, text13, text14);
+	  level.addAll(line1, text1);
   }
 
   protected ShapeLine line1;
   protected ShapeText text1;
-  protected ShapeRectangle rectangle5;
-  protected ShapeText text12;
-  protected ShapeText text13;
-  protected ShapeText text14;
   protected com.anylogic.engine.markup.Level level;
 
   private com.anylogic.engine.markup.Level[] _getLevels_xjal;
@@ -1515,22 +1448,6 @@ private double _datasetUpdateTime_xjal() {
         SHAPE_DRAW_2D, true,950.0, 40.0, 0.0, 0.0,
         black,"Contracts",
         _text1_Font, ALIGNMENT_LEFT );
-    rectangle5 = new ShapeRectangle(
-       SHAPE_DRAW_2D3D, false,510.0, 630.0, 0.0, 0.0,
-            silver, white,
-			730.0, 189.967, 10.0, 2.0, LINE_STYLE_DASHED );
-    text12 = new ShapeText(
-        SHAPE_DRAW_2D, false,730.0, 660.0, 0.0, 0.0,
-        gray,"Current consumption volumes",
-        _text12_Font, ALIGNMENT_LEFT );
-    text13 = new ShapeText(
-        SHAPE_DRAW_2D, false,970.0, 660.0, 0.0, 0.0,
-        gray,"Electricity financial accounting",
-        _text13_Font, ALIGNMENT_LEFT );
-    text14 = new ShapeText(
-        SHAPE_DRAW_2D, false,540.0, 660.0, 0.0, 0.0,
-        gray,"Total consumption",
-        _text14_Font, ALIGNMENT_LEFT );
   }
 
   @AnyLogicInternalCodegenAPI
@@ -1606,7 +1523,7 @@ private double _datasetUpdateTime_xjal() {
   /**
    * Simple constructor. Please add created agent to some population by calling goToPopulation() function.
    */
-  public ConnectionOwner( String p_actorID, String p_actorGroup, String p_actorSubgroup, EnergyCoop p_coopParent, Actor p_electricitySupplier, Actor p_gridOperator, Actor p_methaneSupplier, Actor p_hydrogenSupplier, Actor p_heatSupplier, OL_ConnectionOwnerType p_connectionOwnerType, boolean p_detailedCompany, String p_energySupplierID, String p_energyCoopID, boolean b_dataSharingAgreed, boolean b_dataIsAccessible ) {
+  public ConnectionOwner( String p_actorID, String p_actorGroup, String p_actorSubgroup, EnergyCoop p_coopParent, Actor p_electricitySupplier, Actor p_gridOperator, Actor p_methaneSupplier, Actor p_hydrogenSupplier, Actor p_heatSupplier, boolean p_detailedCompany, String p_energySupplierID, String p_energyCoopID, boolean b_dataSharingAgreed, boolean b_dataIsAccessible ) {
     super( p_actorID, p_actorGroup, p_actorSubgroup );
     this.p_coopParent = p_coopParent;
     this.p_electricitySupplier = p_electricitySupplier;
@@ -1614,7 +1531,6 @@ private double _datasetUpdateTime_xjal() {
     this.p_methaneSupplier = p_methaneSupplier;
     this.p_hydrogenSupplier = p_hydrogenSupplier;
     this.p_heatSupplier = p_heatSupplier;
-    this.p_connectionOwnerType = p_connectionOwnerType;
     this.p_detailedCompany = p_detailedCompany;
     this.p_energySupplierID = p_energySupplierID;
     this.p_energyCoopID = p_energyCoopID;
@@ -1653,13 +1569,6 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     super.doStart();
   }
 
-  @AnyLogicInternalCodegenAPI
-  public void onStartup() {
-    super.onStartup();
-
-energyModel.c_actors.add(this);
-energyModel.c_connectionOwners.add(this); 
- }
 
   /**
    * Assigning initial values for plain variables<br>
@@ -1705,5 +1614,16 @@ energyModel.c_connectionOwners.add(this);
     return (List<? extends ConnectionOwner>) super.agentsInRange( distance );
   }
 
+  // Additional class code
+
+@Override
+public void onCreate() {
+    super.onCreate();
+    
+    energyModel.c_actors.add(this);
+    energyModel.c_connectionOwners.add(this);
+}
+ 
+  // End of additional class code
 
 }

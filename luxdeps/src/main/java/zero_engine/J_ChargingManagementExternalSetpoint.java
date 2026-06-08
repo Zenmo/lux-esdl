@@ -81,7 +81,6 @@ import static zero_engine.OL_MobilityPatternType.*;
 import static zero_engine.OL_ChargingAttitude.*;
 import static zero_engine.OL_BatteryOperationMode.*;
 import static zero_engine.OL_ElectrolyserOperationMode.*;
-import static zero_engine.OL_ConnectionOwnerType.*;
 import static zero_engine.OL_ProfileUnits.*;
 import static zero_engine.OL_HouseholdCookingMethod.*;
 import static zero_engine.OL_FlowsMapKeys.*;
@@ -119,7 +118,7 @@ public class J_ChargingManagementExternalSetpoint implements I_ChargingManagemen
 
     private GridConnection gc;
     private J_TimeParameters timeParameters;
-    private OL_ChargingAttitude activeChargingType = OL_ChargingAttitude.SIMPLE;
+    private OL_ChargingAttitude activeChargingType = OL_ChargingAttitude.CUSTOM;
     private boolean V2GActive = false;
     
     private Map<I_ChargingRequest, Double> map_chargingSetpoints_kW = new HashMap<>();

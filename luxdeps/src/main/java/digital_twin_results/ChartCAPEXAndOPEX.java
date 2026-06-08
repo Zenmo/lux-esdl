@@ -134,6 +134,8 @@ Map.entry(OL_EnergyAssetType.HEAT_PUMP_AIR, cb_includeAssetHeatpump),
 Map.entry(OL_EnergyAssetType.PHOTOTHERMAL, cb_includeAssetPT),
 Map.entry(OL_EnergyAssetType.WINDMILL, cb_includeAssetWindTurbine),
 Map.entry(OL_EnergyAssetType.ELECTROLYSER, cb_includeAssetElectrolyser),
+Map.entry(OL_EnergyAssetType.HYDROGEN_STORAGE, cb_includeAssetHydrogenStorage),
+Map.entry(OL_EnergyAssetType.FUEL_CELL, cb_includeAssetHydrogenFuelCell),
 Map.entry(OL_EnergyAssetType.DIESEL_GENERATOR, cb_includeAssetDieselGenerator),
 Map.entry(OL_EnergyAssetType.METHANE_GENERATOR, cb_includeAssetGasGenerator),
 Map.entry(OL_EnergyAssetType.GAS_BURNER, cb_includeAssetGasburner),
@@ -580,6 +582,10 @@ private double _datasetUpdateTime_xjal() {
   @AnyLogicInternalCodegenAPI
   protected static final Font _cb_includeAssetPT_Font = _cb_assetSelection_Font;
   @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_includeAssetHydrogenFuelCell_Font = _cb_assetSelection_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_includeAssetHydrogenStorage_Font = _cb_assetSelection_Font;
+  @AnyLogicInternalCodegenAPI
   protected static final Font _txt_CAPEXAndOPEX_Font = new Font("SansSerif", 1, 26 );
   @AnyLogicInternalCodegenAPI
   protected static final Font _txt_openIncludeAssetSelection_Font = new Font("SansSerif", 1, 12 );
@@ -735,10 +741,14 @@ private double _datasetUpdateTime_xjal() {
   protected static final int _cb_includeAssetH2Truck = digital_twin_results.ChartArea._SHAPE_NEXT_ID_xjal + 51;
   @AnyLogicInternalCodegenAPI
   protected static final int _cb_includeAssetPT = digital_twin_results.ChartArea._SHAPE_NEXT_ID_xjal + 52;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_includeAssetHydrogenFuelCell = digital_twin_results.ChartArea._SHAPE_NEXT_ID_xjal + 53;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_includeAssetHydrogenStorage = digital_twin_results.ChartArea._SHAPE_NEXT_ID_xjal + 54;
 
   /** Internal constant, shouldn't be accessed by user */
   @AnyLogicInternalCodegenAPI
-  protected static final int _SHAPE_NEXT_ID_xjal = digital_twin_results.ChartArea._SHAPE_NEXT_ID_xjal + 53;
+  protected static final int _SHAPE_NEXT_ID_xjal = digital_twin_results.ChartArea._SHAPE_NEXT_ID_xjal + 55;
 
   @AnyLogicInternalCodegenAPI
   public boolean isPublicPresentationDefined() {
@@ -944,6 +954,30 @@ else{
 f_setChartCAPEXAndOPEX(); 
 ;}
         break;
+      case _cb_includeAssetHydrogenFuelCell: {
+          ShapeCheckBox self = this.cb_includeAssetHydrogenFuelCell;
+if(!cb_includeAssetHydrogenFuelCell.isSelected()){
+	c_includeAssetSelection.remove(OL_EnergyAssetType.FUEL_CELL);
+}
+else{
+	c_includeAssetSelection.add(OL_EnergyAssetType.FUEL_CELL);
+}
+
+f_setChartCAPEXAndOPEX(); 
+;}
+        break;
+      case _cb_includeAssetHydrogenStorage: {
+          ShapeCheckBox self = this.cb_includeAssetHydrogenStorage;
+if(!cb_includeAssetHydrogenStorage.isSelected()){
+	c_includeAssetSelection.remove(OL_EnergyAssetType.HYDROGEN_STORAGE);
+}
+else{
+	c_includeAssetSelection.add(OL_EnergyAssetType.HYDROGEN_STORAGE);
+}
+
+f_setChartCAPEXAndOPEX(); 
+;}
+        break;
       default:
         super.executeShapeControlAction( _shape, index, value );
         break;
@@ -1020,6 +1054,12 @@ true
       case _cb_includeAssetPT: return 
 true 
 ;
+      case _cb_includeAssetHydrogenFuelCell: return 
+true 
+;
+      case _cb_includeAssetHydrogenStorage: return 
+true 
+;
       default: return super.getShapeControlDefaultValueBoolean( _shape, index );
     }
   }
@@ -1038,6 +1078,8 @@ true
   protected ShapeCheckBox cb_includeAssetWindTurbine;
   protected ShapeCheckBox cb_includeAssetH2Truck;
   protected ShapeCheckBox cb_includeAssetPT;
+  protected ShapeCheckBox cb_includeAssetHydrogenFuelCell;
+  protected ShapeCheckBox cb_includeAssetHydrogenStorage;
   
   /**
    * <i>This method should not be called by user</i>
@@ -1158,7 +1200,7 @@ ChartCAPEXAndOPEX.this,true,-140.0, -40.0,
       }
     };
     cb_includeAssetECar = new ShapeCheckBox(
-ChartCAPEXAndOPEX.this,true,40.0, -20.0,
+ChartCAPEXAndOPEX.this,true,40.0, 20.0,
 		130.0, 30.0,
             black, true,
             _cb_includeAssetECar_Font,
@@ -1176,7 +1218,7 @@ ChartCAPEXAndOPEX.this,true,40.0, -20.0,
       }
     };
     cb_includeAssetEVan = new ShapeCheckBox(
-ChartCAPEXAndOPEX.this,true,40.0, 0.0,
+ChartCAPEXAndOPEX.this,true,40.0, 40.0,
 		150.0, 30.0,
             black, true,
             _cb_includeAssetEVan_Font,
@@ -1194,7 +1236,7 @@ ChartCAPEXAndOPEX.this,true,40.0, 0.0,
       }
     };
     cb_includeAssetETruck = new ShapeCheckBox(
-ChartCAPEXAndOPEX.this,true,40.0, 20.0,
+ChartCAPEXAndOPEX.this,true,40.0, 60.0,
 		140.0, 30.0,
             black, true,
             _cb_includeAssetETruck_Font,
@@ -1230,7 +1272,7 @@ ChartCAPEXAndOPEX.this,true,-140.0, 0.0,
       }
     };
     cb_includeAssetGasburner = new ShapeCheckBox(
-ChartCAPEXAndOPEX.this,true,40.0, -40.0,
+ChartCAPEXAndOPEX.this,true,40.0, 0.0,
 		100.0, 30.0,
             black, true,
             _cb_includeAssetGasburner_Font,
@@ -1266,7 +1308,7 @@ ChartCAPEXAndOPEX.this,true,-140.0, 60.0,
       }
     };
     cb_includeAssetDieselGenerator = new ShapeCheckBox(
-ChartCAPEXAndOPEX.this,true,-140.0, 80.0,
+ChartCAPEXAndOPEX.this,true,40.0, -40.0,
 		110.0, 30.0,
             black, true,
             _cb_includeAssetDieselGenerator_Font,
@@ -1284,7 +1326,7 @@ ChartCAPEXAndOPEX.this,true,-140.0, 80.0,
       }
     };
     cb_includeAssetGasGenerator = new ShapeCheckBox(
-ChartCAPEXAndOPEX.this,true,-140.0, 100.0,
+ChartCAPEXAndOPEX.this,true,40.0, -20.0,
 		100.0, 30.0,
             black, true,
             _cb_includeAssetGasGenerator_Font,
@@ -1338,7 +1380,7 @@ ChartCAPEXAndOPEX.this,true,-140.0, 40.0,
       }
     };
     cb_includeAssetH2Truck = new ShapeCheckBox(
-ChartCAPEXAndOPEX.this,true,40.0, 40.0,
+ChartCAPEXAndOPEX.this,true,40.0, 80.0,
 		140.0, 30.0,
             black, true,
             _cb_includeAssetH2Truck_Font,
@@ -1371,6 +1413,42 @@ ChartCAPEXAndOPEX.this,true,-140.0, 20.0,
       @Override
       public void setValueToDefault() {
 		setSelected( getShapeControlDefaultValueBoolean( _cb_includeAssetPT, 0 ) );
+      }
+    };
+    cb_includeAssetHydrogenFuelCell = new ShapeCheckBox(
+ChartCAPEXAndOPEX.this,true,-140.0, 100.0,
+		135.0, 30.0,
+            black, true,
+            _cb_includeAssetHydrogenFuelCell_Font,
+			"Waterstof Fuelcell" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_includeAssetHydrogenFuelCell, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_includeAssetHydrogenFuelCell, 0 ) );
+      }
+    };
+    cb_includeAssetHydrogenStorage = new ShapeCheckBox(
+ChartCAPEXAndOPEX.this,true,-140.0, 80.0,
+		125.0, 30.0,
+            black, true,
+            _cb_includeAssetHydrogenStorage_Font,
+			"Waterstof tank" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_includeAssetHydrogenStorage, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_includeAssetHydrogenStorage, 0 ) );
       }
     };
     rect_headerKPI = new ShapeRectangle(
@@ -1591,7 +1669,9 @@ ChartCAPEXAndOPEX.this,true,-140.0, 20.0,
 	     , cb_includeAssetWindTurbine
 	     , cb_includeAssetH2Truck
 	     , cb_includeAssetPT
-	     , gr_closeIncludeAssetSelectionGroup ) {
+	     , gr_closeIncludeAssetSelectionGroup
+	     , cb_includeAssetHydrogenFuelCell
+	     , cb_includeAssetHydrogenStorage ) {
 	
       @Override
 	
@@ -1704,6 +1784,8 @@ OL_EnergyAssetType.HEAT_PUMP_AIR,
 OL_EnergyAssetType.PHOTOTHERMAL,
 OL_EnergyAssetType.WINDMILL,
 OL_EnergyAssetType.ELECTROLYSER,
+OL_EnergyAssetType.HYDROGEN_STORAGE,
+OL_EnergyAssetType.FUEL_CELL,
 OL_EnergyAssetType.DIESEL_GENERATOR,
 OL_EnergyAssetType.METHANE_GENERATOR,
 OL_EnergyAssetType.GAS_BURNER,
@@ -1721,6 +1803,8 @@ OL_EnergyAssetType.HEAT_PUMP_AIR,
 OL_EnergyAssetType.PHOTOTHERMAL,
 OL_EnergyAssetType.WINDMILL,
 OL_EnergyAssetType.ELECTROLYSER,
+OL_EnergyAssetType.HYDROGEN_STORAGE,
+OL_EnergyAssetType.FUEL_CELL,
 OL_EnergyAssetType.DIESEL_GENERATOR,
 OL_EnergyAssetType.METHANE_GENERATOR,
 OL_EnergyAssetType.GAS_BURNER,
@@ -1752,6 +1836,8 @@ OL_EnergyAssetType.HYDROGEN_TRUCK
     cb_includeAssetWindTurbine.setValueToDefault();
     cb_includeAssetH2Truck.setValueToDefault();
     cb_includeAssetPT.setValueToDefault();
+    cb_includeAssetHydrogenFuelCell.setValueToDefault();
+    cb_includeAssetHydrogenStorage.setValueToDefault();
   }
 
   @Override

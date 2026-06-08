@@ -1451,7 +1451,7 @@ gr_trafoReinforcement.setVisible(true);
           ShapeButton self = this.t_confirmTrafoReinforcement;
 zero_Interface.v_clickedGridNode.p_capacity_kW += sl_trafoReinforcement.getValue();
 
-zero_Interface.f_setTrafoText(); 
+zero_Interface.f_setSelectedGNText(); 
 ;}
         break;
       case _t_resetTrafoReinforcement: {
@@ -1462,7 +1462,7 @@ for (GridNode GN : zero_Interface.energyModel.f_getGridNodesNotTopLevel() ){
 for (GridNode GN : zero_Interface.energyModel.f_getGridNodesTopLevel() ){
 	GN.p_capacity_kW = GN.p_originalCapacity_kW;
 } 
-zero_Interface.f_setTrafoText();
+zero_Interface.f_setSelectedGNText();
  
 ;}
         break;

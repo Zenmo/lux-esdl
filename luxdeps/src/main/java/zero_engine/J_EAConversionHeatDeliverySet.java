@@ -81,7 +81,6 @@ import static zero_engine.OL_MobilityPatternType.*;
 import static zero_engine.OL_ChargingAttitude.*;
 import static zero_engine.OL_BatteryOperationMode.*;
 import static zero_engine.OL_ElectrolyserOperationMode.*;
-import static zero_engine.OL_ConnectionOwnerType.*;
 import static zero_engine.OL_ProfileUnits.*;
 import static zero_engine.OL_HouseholdCookingMethod.*;
 import static zero_engine.OL_FlowsMapKeys.*;

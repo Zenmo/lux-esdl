@@ -81,7 +81,6 @@ import static zero_engine.OL_MobilityPatternType.*;
 import static zero_engine.OL_ChargingAttitude.*;
 import static zero_engine.OL_BatteryOperationMode.*;
 import static zero_engine.OL_ElectrolyserOperationMode.*;
-import static zero_engine.OL_ConnectionOwnerType.*;
 import static zero_engine.OL_ProfileUnits.*;
 import static zero_engine.OL_HouseholdCookingMethod.*;
 import static zero_engine.OL_FlowsMapKeys.*;
@@ -196,10 +195,14 @@ public class J_AssetsMetaData {
 	    						break;
 	    					case DIESEL_GENERATOR:
 	    					case METHANE_GENERATOR:
+	    					case FUEL_CELL:
 	    						capacityEA_kW += ((J_EAConversion)ea).getOutputCapacity_kW();
 	    						break;
 	    					case STORAGE_ELECTRIC:
 	    						capacityEA_kW += ((J_EAStorageElectric)ea).getCapacityElectric_kW();
+	    						break;
+	    					case HYDROGEN_STORAGE:
+	    						capacityEA_kW += ((J_EAStorage)ea).getChargeCapacity_kW();
 	    						break;
 	    					case ELECTRIC_VEHICLE:	
 	    					case ELECTRIC_VAN:

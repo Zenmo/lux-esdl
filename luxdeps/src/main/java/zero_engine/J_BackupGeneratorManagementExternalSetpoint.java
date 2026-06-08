@@ -101,53 +101,48 @@ import static zero_engine.OL_PVOrientation.*;
 import static com.anylogic.engine.Utilities.*;
 
 /**
- * J_CurtailManagementPrice
+ * J_BackupGeneratorManagementExternalSetpoint: Very simple management: backup generator is used to stay within contracted delivery capacity.
  */	
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-
-@JsonAutoDetect(
-    fieldVisibility = Visibility.ANY,    // 
-    getterVisibility = Visibility.NONE,
-    isGetterVisibility = Visibility.NONE,
-    setterVisibility = Visibility.NONE,
-    creatorVisibility = Visibility.NONE
-)
-
-public class J_CurtailManagementPrice implements I_CurtailManagement {
+public class J_BackupGeneratorManagementExternalSetpoint implements I_BackupGeneratorManagement {
 	
-	GridConnection gc;
-	J_TimeParameters timeParameters;
-	double curtailPrice_eurpMWh = 0;
+	private GridConnection gc;
+	private J_TimeParameters timeParameters;
+
+	private double backupGeneratorPowerSetpoint_kW;
+	
     /**
      * Empty constructor for serialization
      */
-    public J_CurtailManagementPrice() {
+    public J_BackupGeneratorManagementExternalSetpoint() {
     }
-
+    
     /**
      * Default constructor
      */
-    public J_CurtailManagementPrice(GridConnection gc, J_TimeParameters timeParameters) {
+    public J_BackupGeneratorManagementExternalSetpoint(GridConnection gc, J_TimeParameters timeParameters) {
     	this.gc = gc;
     	this.timeParameters = timeParameters;
     }
     
-	//Manage curtailment
-	public void manageCurtailment(J_TimeVariables timeVariables) {
-		if(gc.energyModel.pp_dayAheadElectricityPricing_eurpMWh.getCurrentValue() < this.curtailPrice_eurpMWh) {
-			if (gc.fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.ELECTRICITY) < 0.0) { // Feedin, bring to zero!
-				for (J_EAProduction j_ea : gc.c_productionAssets) {
-					J_FlowPacket flowPacket = j_ea.curtailEnergyCarrierProduction(OL_EnergyCarriers.ELECTRICITY, - gc.fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.ELECTRICITY));
-					gc.f_removeFlows(flowPacket, j_ea);
-					if (!(gc.fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.ELECTRICITY) < 0.0)) {
-						break;
-					}
-				}
-			}
-		}
-	}
-	
+    public void manageBackupGenerator(J_TimeVariables timeVariables) {
+    	//Get the backup generator asset
+    	J_EAConversion backupGenerator = findFirst(gc.c_conversionAssets, asset -> asset.getEAType() == OL_EnergyAssetType.DIESEL_GENERATOR || 
+																	    		   asset.getEAType() == OL_EnergyAssetType.METHANE_GENERATOR ||
+																	    		   asset.getEAType() == OL_EnergyAssetType.FUEL_CELL);
+
+    	//Calculate power fraction (if output capacity > 0) else: power fraction = 0.
+    	double backupGeneratorPowerFraction_fr = backupGenerator.getOutputCapacity_kW() > 0 ? this.backupGeneratorPowerSetpoint_kW/backupGenerator.getOutputCapacity_kW() : 0;
+    	
+    	//Update f_updateFlexAssetFlows of asset (and with that fm_currentBalanceFlows_kW of gc) with found setpoint
+    	gc.f_updateFlexAssetFlows(backupGenerator, backupGeneratorPowerFraction_fr, timeVariables);
+    	
+    	this.backupGeneratorPowerSetpoint_kW = 0;
+    }
+    
+    public void setBackupGeneratorSetpoint_kW(double backupGeneratorPowerSetpoint_kW) {
+    	this.backupGeneratorPowerSetpoint_kW = backupGeneratorPowerSetpoint_kW;
+    }
+    
     ////Store and reset states
 	public void storeStatesAndReset() {
 		//Nothing to store and reset
@@ -158,6 +153,8 @@ public class J_CurtailManagementPrice implements I_CurtailManagement {
 	
 	@Override
 	public String toString() {
-		return super.toString();
+		return "J_BackupGeneratorManagementExternalSetpoint: " + System.lineSeparator() +
+				"Current setpoint = " + this.backupGeneratorPowerSetpoint_kW;
 	}
+
 } 

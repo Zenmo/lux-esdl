@@ -81,7 +81,6 @@ import static zero_engine.OL_MobilityPatternType.*;
 import static zero_engine.OL_ChargingAttitude.*;
 import static zero_engine.OL_BatteryOperationMode.*;
 import static zero_engine.OL_ElectrolyserOperationMode.*;
-import static zero_engine.OL_ConnectionOwnerType.*;
 import static zero_engine.OL_ProfileUnits.*;
 import static zero_engine.OL_HouseholdCookingMethod.*;
 import static zero_engine.OL_FlowsMapKeys.*;
@@ -1186,26 +1185,8 @@ J_ProfileForecaster
 J_ProfilePointer 
  pp_dayAheadElectricityPricing_eurpMWh;
   public 
-J_FlowsMap 
- fm_currentBalanceFlows_kW;
-  public 
-J_FlowsMap 
- fm_currentConsumptionFlows_kW;
-  public 
-J_FlowsMap 
- fm_currentProductionFlows_kW;
-  public 
 J_RapidRunData 
  v_rapidRunData;
-  public 
-J_LiveData 
- v_liveData;
-  public 
-J_AssetsMetaData 
- v_liveAssetsMetaData;
-  public 
-J_ConnectionMetaData 
- v_liveConnectionMetaData;
   /**
    * Fraction of yearly demand in MWh per hour, multiplied by demand in MWh per year = MW for that hour
    */
@@ -1225,17 +1206,8 @@ J_ProfileForecaster
 J_ProfileForecaster 
  pf_ambientTemperature_degC;
   public 
-J_ValueMap<OL_AssetFlowCategories> 
- fm_currentAssetFlows_kW;
-  public 
 double 
  v_batteryStoredEnergy_kWh;
-  public 
-J_FlowsMap 
- fm_consumptionForHeating_kW;
-  public 
-J_FlowsMap 
- fm_heatFromEnergyCarrier_kW;
   public 
 J_ProfilePointer 
  pp_CO2EmissionFactorElectricityImport_kgpkWh;
@@ -1294,6 +1266,9 @@ double
 double 
  v_maxDLRfactor_fr;
   public 
+J_FlowsMap 
+ fm_currentBalanceFlows_kW;
+  public 
 double 
  v_totalEnergyImport_MWh;
   public 
@@ -1303,8 +1278,32 @@ double
 double 
  v_totalEnergyConsumed_MWh;
   public 
+J_FlowsMap 
+ fm_currentConsumptionFlows_kW;
+  public 
+J_FlowsMap 
+ fm_currentProductionFlows_kW;
+  public 
 J_RapidRunData 
  v_previousRunData;
+  public 
+J_LiveData 
+ v_liveData;
+  public 
+J_AssetsMetaData 
+ v_liveAssetsMetaData;
+  public 
+J_ConnectionMetaData 
+ v_liveConnectionMetaData;
+  public 
+J_ValueMap<OL_AssetFlowCategories> 
+ fm_currentAssetFlows_kW;
+  public 
+J_FlowsMap 
+ fm_consumptionForHeating_kW;
+  public 
+J_FlowsMap 
+ fm_heatFromEnergyCarrier_kW;
   public 
 int 
  v_liveSimLoopCount;
@@ -2205,7 +2204,6 @@ Class<? extends I_HeatingManagement> > c_defaultHeatingStrategies = new LinkedHa
    * @param p_methaneSupplier
    * @param p_hydrogenSupplier
    * @param p_heatSupplier
-   * @param p_connectionOwnerType
    * @param p_detailedCompany
    * @param p_energySupplierID
    * @param p_energyCoopID
@@ -2213,7 +2211,7 @@ Class<? extends I_HeatingManagement> > c_defaultHeatingStrategies = new LinkedHa
    * @param b_dataIsAccessible
    * @return newly created embedded object
    */
-  public ConnectionOwner add_pop_connectionOwners( String p_actorID, String p_actorGroup, String p_actorSubgroup, EnergyCoop p_coopParent, Actor p_electricitySupplier, Actor p_gridOperator, Actor p_methaneSupplier, Actor p_hydrogenSupplier, Actor p_heatSupplier, OL_ConnectionOwnerType p_connectionOwnerType, boolean p_detailedCompany, String p_energySupplierID, String p_energyCoopID, boolean b_dataSharingAgreed, boolean b_dataIsAccessible ) {
+  public ConnectionOwner add_pop_connectionOwners( String p_actorID, String p_actorGroup, String p_actorSubgroup, EnergyCoop p_coopParent, Actor p_electricitySupplier, Actor p_gridOperator, Actor p_methaneSupplier, Actor p_hydrogenSupplier, Actor p_heatSupplier, boolean p_detailedCompany, String p_energySupplierID, String p_energyCoopID, boolean b_dataSharingAgreed, boolean b_dataIsAccessible ) {
     int index = pop_connectionOwners.size();
     ConnectionOwner _result_xjal = instantiate_pop_connectionOwners_xjal( index );
     // Setup parameters
@@ -2227,7 +2225,6 @@ Class<? extends I_HeatingManagement> > c_defaultHeatingStrategies = new LinkedHa
     _result_xjal.p_methaneSupplier = p_methaneSupplier;
     _result_xjal.p_hydrogenSupplier = p_hydrogenSupplier;
     _result_xjal.p_heatSupplier = p_heatSupplier;
-    _result_xjal.p_connectionOwnerType = p_connectionOwnerType;
     _result_xjal.p_detailedCompany = p_detailedCompany;
     _result_xjal.p_energySupplierID = p_energySupplierID;
     _result_xjal.p_energyCoopID = p_energyCoopID;
@@ -3726,7 +3723,6 @@ double _x_xjal =
     self.p_methaneSupplier = self._p_methaneSupplier_DefaultValue_xjal();
     self.p_hydrogenSupplier = self._p_hydrogenSupplier_DefaultValue_xjal();
     self.p_heatSupplier = self._p_heatSupplier_DefaultValue_xjal();
-    self.p_connectionOwnerType = self._p_connectionOwnerType_DefaultValue_xjal();
     self.p_detailedCompany = self._p_detailedCompany_DefaultValue_xjal();
     self.p_energySupplierID = self._p_energySupplierID_DefaultValue_xjal();
     self.p_energyCoopID = self._p_energyCoopID_DefaultValue_xjal();
@@ -4604,22 +4600,24 @@ v_totalBatteryChargeAmount_MWh = 0;
 v_totalBatteryEnergyUsed_MWh = 0;
 
 for(J_EA ea : c_energyAssets) { // Single loop of all assets without using c_EVs and c_storageAssets
-	if( ea instanceof J_EAStorageElectric storageElectric) {
-		v_totalBatteryDischargeAmount_MWh += storageElectric.getTotalDischargeAmount_kWh() / 1000;
-		v_totalBatteryChargeAmount_MWh += storageElectric.getTotalChargeAmount_kWh() / 1000;
-		v_totalBatteryEnergyUsed_MWh += storageElectric.getEnergyUsed_kWh() / 1000;
-	}
-	
-	if( ea instanceof J_EAEV ev) {
-		v_totalBatteryDischargeAmount_MWh += ev.getTotalDischargeAmount_kWh() / 1000;
-		v_totalBatteryChargeAmount_MWh += ev.getTotalChargeAmount_kWh() / 1000;
-		v_totalBatteryEnergyUsed_MWh += ev.getEnergyUsed_kWh() / 1000;
-	}
-	
-	if( ea instanceof J_EAChargingSession cs) {
-		v_totalBatteryDischargeAmount_MWh += cs.getTotalDischargeAmount_kWh() / 1000;
-		v_totalBatteryChargeAmount_MWh += cs.getTotalChargeAmount_kWh() / 1000;
-		v_totalBatteryEnergyUsed_MWh += cs.getEnergyUsed_kWh() / 1000;
+	if (ea.ownerIsActive()) {
+		if( ea instanceof J_EAStorageElectric storageElectric) {
+			v_totalBatteryDischargeAmount_MWh += storageElectric.getTotalDischargeAmount_kWh() / 1000;
+			v_totalBatteryChargeAmount_MWh += storageElectric.getTotalChargeAmount_kWh() / 1000;
+			v_totalBatteryEnergyUsed_MWh += storageElectric.getEnergyUsed_kWh() / 1000;
+		}
+		
+		if( ea instanceof J_EAEV ev) {
+			v_totalBatteryDischargeAmount_MWh += ev.getTotalDischargeAmount_kWh() / 1000;
+			v_totalBatteryChargeAmount_MWh += ev.getTotalChargeAmount_kWh() / 1000;
+			v_totalBatteryEnergyUsed_MWh += ev.getEnergyUsed_kWh() / 1000;
+		}
+		
+		if( ea instanceof J_EAChargingSession cs) {
+			v_totalBatteryDischargeAmount_MWh += cs.getTotalDischargeAmount_kWh() / 1000;
+			v_totalBatteryChargeAmount_MWh += cs.getTotalChargeAmount_kWh() / 1000;
+			v_totalBatteryEnergyUsed_MWh += cs.getEnergyUsed_kWh() / 1000;
+		}
 	}
 }
 
@@ -6540,26 +6538,6 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     nationalEnergyMarket.startAsEmbedded();
   }
 
-  @AnyLogicInternalCodegenAPI
-  public void onStartup() {
-    super.onStartup();
-
-v_liveData = new J_LiveData();
-v_liveData.activeEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
-v_liveData.activeProductionEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
-v_liveData.activeConsumptionEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
-v_liveConnectionMetaData = new J_ConnectionMetaData(this);
-v_liveAssetsMetaData = new J_AssetsMetaData(this);
-v_liveData.connectionMetaData = v_liveConnectionMetaData;
-v_liveData.assetsMetaData = v_liveAssetsMetaData;
-
-fm_currentProductionFlows_kW = new J_FlowsMap();
-fm_currentConsumptionFlows_kW = new J_FlowsMap();
-fm_currentBalanceFlows_kW = new J_FlowsMap();
-fm_heatFromEnergyCarrier_kW = new J_FlowsMap();
-fm_consumptionForHeating_kW = new J_FlowsMap();
-fm_currentAssetFlows_kW = new J_ValueMap(OL_AssetFlowCategories.class); 
- }
 
   /**
    * Assigning initial values for plain variables<br>
@@ -6627,6 +6605,9 @@ false
     v_maxDLRfactor_fr = 
 1 
 ;
+    fm_currentBalanceFlows_kW = 
+new J_FlowsMap(); 
+;
     v_totalEnergyImport_MWh = 
 0 
 ;
@@ -6636,8 +6617,32 @@ false
     v_totalEnergyConsumed_MWh = 
 0 
 ;
+    fm_currentConsumptionFlows_kW = 
+new J_FlowsMap(); 
+;
+    fm_currentProductionFlows_kW = 
+new J_FlowsMap(); 
+;
     v_previousRunData = 
 null 
+;
+    v_liveData = 
+new J_LiveData(); 
+;
+    v_liveAssetsMetaData = 
+new J_AssetsMetaData(this); 
+;
+    v_liveConnectionMetaData = 
+new J_ConnectionMetaData(this); 
+;
+    fm_currentAssetFlows_kW = 
+new J_ValueMap(OL_AssetFlowCategories.class); 
+;
+    fm_consumptionForHeating_kW = 
+new J_FlowsMap(); 
+;
+    fm_heatFromEnergyCarrier_kW = 
+new J_FlowsMap(); 
 ;
     v_liveSimLoopCount = 
 0 
@@ -6819,7 +6824,20 @@ public static void forceSetOwner(Agent agent, AgentArrayList pop) throws Excepti
     traceln("Field c: %s", c);
     c.setAccessible(true);
     c.toString();*/
-} 
+}
+
+@Override
+public void onCreate() {
+    super.onCreate();
+    
+    v_liveData = new J_LiveData();
+    v_liveData.activeEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
+    v_liveData.activeProductionEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
+    v_liveData.activeConsumptionEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
+    v_liveData.connectionMetaData = v_liveConnectionMetaData;
+    v_liveData.assetsMetaData = v_liveAssetsMetaData;
+}
+ 
   // End of additional class code
 
 }

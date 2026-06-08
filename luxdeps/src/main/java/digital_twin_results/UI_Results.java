@@ -2401,6 +2401,10 @@ switch (assetType) {
 		return "Windturbine";
 	case ELECTROLYSER:
 		return "Electrolyser";
+	case HYDROGEN_STORAGE:
+		return "Waterstof tank";
+	case FUEL_CELL:
+		return "Fuelcell";
 	case DIESEL_GENERATOR:
 		return "Diesel generator";
 	case METHANE_GENERATOR:
@@ -3529,7 +3533,10 @@ v_electricAssetFlows.add(OL_AssetFlowCategories.pvProductionElectric_kW);
 v_electricAssetFlows.add(OL_AssetFlowCategories.V2GPower_kW);
 v_electricAssetFlows.add(OL_AssetFlowCategories.windProductionElectric_kW);
 v_electricAssetFlows.add(OL_AssetFlowCategories.airConditionersElectricPower_kW);
-v_electricAssetFlows.add(OL_AssetFlowCategories.hydrogenFuelCellProductionElectric_kW); 
+v_electricAssetFlows.add(OL_AssetFlowCategories.hydrogenFuelCellProductionElectric_kW);
+v_electricAssetFlows.add(OL_AssetFlowCategories.dieselGeneratorProductionElectric_kW);
+v_electricAssetFlows.add(OL_AssetFlowCategories.methaneGeneratorProductionElectric_kW);
+ 
  }
 
   /**

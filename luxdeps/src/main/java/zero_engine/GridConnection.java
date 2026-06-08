@@ -81,7 +81,6 @@ import static zero_engine.OL_MobilityPatternType.*;
 import static zero_engine.OL_ChargingAttitude.*;
 import static zero_engine.OL_BatteryOperationMode.*;
 import static zero_engine.OL_ElectrolyserOperationMode.*;
-import static zero_engine.OL_ConnectionOwnerType.*;
 import static zero_engine.OL_ProfileUnits.*;
 import static zero_engine.OL_HouseholdCookingMethod.*;
 import static zero_engine.OL_FlowsMapKeys.*;
@@ -1280,20 +1279,11 @@ double
 boolean 
  v_hasQuarterHourlyValues;
   public 
-J_FlowsMap 
- fm_currentConsumptionFlows_kW;
-  public 
-J_FlowsMap 
- fm_currentProductionFlows_kW;
-  public 
 double 
  v_currentPrimaryEnergyProduction_kW;
   public 
 double 
  v_currentFinalEnergyConsumption_kW;
-  public 
-J_FlowsMap 
- fm_currentBalanceFlows_kW;
   public 
 double 
  v_batteryStoredEnergy_kWh;
@@ -1304,23 +1294,8 @@ J_RapidRunData
 J_LiveData 
  v_liveData;
   public 
-J_AssetsMetaData 
- v_liveAssetsMetaData;
-  public 
-J_ConnectionMetaData 
- v_liveConnectionMetaData;
-  public 
-J_ValueMap 
- fm_currentAssetFlows_kW;
-  public 
 J_RapidRunData 
  v_originalRapidRunData;
-  public 
-J_FlowsMap 
- fm_consumptionForHeating_kW;
-  public 
-J_FlowsMap 
- fm_heatFromEnergyCarrier_kW;
   private 
 J_ChargePoint 
  p_chargePoint;
@@ -1340,8 +1315,32 @@ double
 double 
  v_previousPowerHeat_kW;
   public 
+J_FlowsMap 
+ fm_currentConsumptionFlows_kW;
+  public 
+J_FlowsMap 
+ fm_currentProductionFlows_kW;
+  public 
+J_FlowsMap 
+ fm_currentBalanceFlows_kW;
+  public 
 J_RapidRunData 
  v_previousRunData;
+  public 
+J_AssetsMetaData 
+ v_liveAssetsMetaData;
+  public 
+J_ConnectionMetaData 
+ v_liveConnectionMetaData;
+  public 
+J_ValueMap 
+ fm_currentAssetFlows_kW;
+  public 
+J_FlowsMap 
+ fm_consumptionForHeating_kW;
+  public 
+J_FlowsMap 
+ fm_heatFromEnergyCarrier_kW;
 
   // Collection Variables
   public 
@@ -3305,30 +3304,6 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     _pl_powerFlows_autoUpdateEvent_xjal.start();
   }
 
-  @AnyLogicInternalCodegenAPI
-  public void onStartup() {
-    super.onStartup();
-
-energyModel.c_gridConnections.add(this);
-
-
-v_liveData = new J_LiveData();
-v_liveData.activeEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
-v_liveData.activeProductionEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
-v_liveData.activeConsumptionEnergyCarriers= EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
-v_liveConnectionMetaData = new J_ConnectionMetaData(this);
-v_liveAssetsMetaData = new J_AssetsMetaData(this);
-v_liveData.connectionMetaData = v_liveConnectionMetaData;
-v_liveData.assetsMetaData = v_liveAssetsMetaData;
-
-fm_currentProductionFlows_kW = new J_FlowsMap();
-fm_currentConsumptionFlows_kW = new J_FlowsMap();
-fm_currentBalanceFlows_kW = new J_FlowsMap();
-fm_currentAssetFlows_kW = new J_ValueMap(OL_AssetFlowCategories.class);
-
-fm_consumptionForHeating_kW = new J_FlowsMap();
-fm_heatFromEnergyCarrier_kW = new J_FlowsMap(); 
- }
 
   /**
    * Assigning initial values for plain variables<br>
@@ -3351,8 +3326,32 @@ fm_heatFromEnergyCarrier_kW = new J_FlowsMap();
     v_previousPowerHeat_kW = 
 0 
 ;
+    fm_currentConsumptionFlows_kW = 
+new J_FlowsMap(); 
+;
+    fm_currentProductionFlows_kW = 
+new J_FlowsMap(); 
+;
+    fm_currentBalanceFlows_kW = 
+new J_FlowsMap(); 
+;
     v_previousRunData = 
 null 
+;
+    v_liveAssetsMetaData = 
+new J_AssetsMetaData(this); 
+;
+    v_liveConnectionMetaData = 
+new J_ConnectionMetaData(this); 
+;
+    fm_currentAssetFlows_kW = 
+new J_ValueMap(OL_AssetFlowCategories.class); 
+;
+    fm_consumptionForHeating_kW = 
+new J_FlowsMap(); 
+;
+    fm_heatFromEnergyCarrier_kW = 
+new J_FlowsMap(); 
 ;
   }
 
@@ -3424,6 +3423,19 @@ public static void forceSetOwner(Agent agent, AgentArrayList pop) throws Excepti
     c.toString();*/
 }
 
+@Override
+public void onCreate() {
+    super.onCreate();
+    
+    energyModel.c_gridConnections.add(this);
+
+    v_liveData = new J_LiveData();
+    v_liveData.activeEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
+    v_liveData.activeProductionEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
+    v_liveData.activeConsumptionEnergyCarriers= EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
+    v_liveData.connectionMetaData = v_liveConnectionMetaData;
+    v_liveData.assetsMetaData = v_liveAssetsMetaData;
+}
  
   // End of additional class code
 

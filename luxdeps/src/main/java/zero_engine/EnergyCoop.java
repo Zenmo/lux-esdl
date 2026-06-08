@@ -81,7 +81,6 @@ import static zero_engine.OL_MobilityPatternType.*;
 import static zero_engine.OL_ChargingAttitude.*;
 import static zero_engine.OL_BatteryOperationMode.*;
 import static zero_engine.OL_ElectrolyserOperationMode.*;
-import static zero_engine.OL_ConnectionOwnerType.*;
 import static zero_engine.OL_ProfileUnits.*;
 import static zero_engine.OL_HouseholdCookingMethod.*;
 import static zero_engine.OL_FlowsMapKeys.*;
@@ -592,15 +591,6 @@ double
 ZeroAccumulator 
  acc_totalCustomerFeedIn_kW;
   public 
-J_FlowsMap 
- fm_currentConsumptionFlows_kW;
-  public 
-J_FlowsMap 
- fm_currentProductionFlows_kW;
-  public 
-J_FlowsMap 
- fm_currentBalanceFlows_kW;
-  public 
 double 
  v_currentPrimaryEnergyProduction_kW;
   public 
@@ -655,15 +645,6 @@ J_RapidRunData
 J_LiveData 
  v_liveData;
   public 
-J_AssetsMetaData 
- v_liveAssetsMetaData;
-  public 
-J_ConnectionMetaData 
- v_liveConnectionMetaData;
-  public 
-J_ValueMap 
- fm_currentAssetFlows_kW;
-  public 
 double 
  v_batteryStoredEnergy_kWh;
   public 
@@ -675,12 +656,6 @@ double
   public 
 double 
  v_cumulativeIndividualPeakDeliveryOriginal_kW;
-  public 
-J_FlowsMap 
- fm_consumptionForHeating_kW;
-  public 
-J_FlowsMap 
- fm_heatFromEnergyCarrier_kW;
   /**
    * Is variable to be able to make it private, but functions as a parameter -> doesnt change during rapid run.
    */
@@ -709,8 +684,32 @@ double
 double 
  v_electricitySurplusLowPassed_kW;
   public 
+J_FlowsMap 
+ fm_currentConsumptionFlows_kW;
+  public 
+J_FlowsMap 
+ fm_currentProductionFlows_kW;
+  public 
+J_FlowsMap 
+ fm_currentBalanceFlows_kW;
+  public 
 J_RapidRunData 
  v_previousRunData;
+  public 
+J_AssetsMetaData 
+ v_liveAssetsMetaData;
+  public 
+J_ConnectionMetaData 
+ v_liveConnectionMetaData;
+  public 
+J_ValueMap 
+ fm_currentAssetFlows_kW;
+  public 
+J_FlowsMap 
+ fm_consumptionForHeating_kW;
+  public 
+J_FlowsMap 
+ fm_heatFromEnergyCarrier_kW;
 
   // Collection Variables
   public 
@@ -2341,29 +2340,6 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     super.doStart();
   }
 
-  @AnyLogicInternalCodegenAPI
-  public void onStartup() {
-    super.onStartup();
-
-v_liveData = new J_LiveData();
-v_liveData.activeEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
-v_liveData.activeProductionEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
-v_liveData.activeConsumptionEnergyCarriers= EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
-
-v_liveConnectionMetaData = new J_ConnectionMetaData(this);
-v_liveAssetsMetaData = new J_AssetsMetaData(this);
-v_liveData.connectionMetaData = v_liveConnectionMetaData;
-v_liveData.assetsMetaData = v_liveAssetsMetaData;
-energyModel.c_actors.add(this);
-
-fm_currentProductionFlows_kW = new J_FlowsMap();
-fm_currentConsumptionFlows_kW = new J_FlowsMap();
-fm_currentBalanceFlows_kW = new J_FlowsMap();
-fm_heatFromEnergyCarrier_kW = new J_FlowsMap();
-fm_consumptionForHeating_kW = new J_FlowsMap();
-fm_currentAssetFlows_kW = new J_ValueMap(OL_AssetFlowCategories.class);
- 
- }
 
   /**
    * Assigning initial values for plain variables<br>
@@ -2402,8 +2378,32 @@ fm_currentAssetFlows_kW = new J_ValueMap(OL_AssetFlowCategories.class);
     v_electricitySurplusLowPassed_kW = 
 0 
 ;
+    fm_currentConsumptionFlows_kW = 
+new J_FlowsMap(); 
+;
+    fm_currentProductionFlows_kW = 
+new J_FlowsMap(); 
+;
+    fm_currentBalanceFlows_kW = 
+new J_FlowsMap(); 
+;
     v_previousRunData = 
 null 
+;
+    v_liveAssetsMetaData = 
+new J_AssetsMetaData(this); 
+;
+    v_liveConnectionMetaData = 
+new J_ConnectionMetaData(this); 
+;
+    fm_currentAssetFlows_kW = 
+new J_ValueMap(OL_AssetFlowCategories.class); 
+;
+    fm_consumptionForHeating_kW = 
+new J_FlowsMap(); 
+;
+    fm_heatFromEnergyCarrier_kW = 
+new J_FlowsMap(); 
 ;
   }
 
@@ -2435,7 +2435,20 @@ null
 public OL_ResultScope getScope(){return OL_ResultScope.ENERGYCOOP;}
 public J_RapidRunData getRapidRunData(){return v_rapidRunData;}
 public J_LiveData getLiveData(){return v_liveData;}
-public J_RapidRunData getPreviousRapidRunData(){return v_previousRunData;} 
+public J_RapidRunData getPreviousRapidRunData(){return v_previousRunData;}
+
+@Override
+public void onCreate() {
+    super.onCreate();
+    
+    v_liveData = new J_LiveData();
+    v_liveData.activeEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
+    v_liveData.activeProductionEnergyCarriers = EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
+    v_liveData.activeConsumptionEnergyCarriers= EnumSet.of(OL_EnergyCarriers.ELECTRICITY);
+    v_liveData.connectionMetaData = v_liveConnectionMetaData;
+    v_liveData.assetsMetaData = v_liveAssetsMetaData;
+    energyModel.c_actors.add(this);
+} 
   // End of additional class code
 
 }

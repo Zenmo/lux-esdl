@@ -81,7 +81,6 @@ import static zero_engine.OL_MobilityPatternType.*;
 import static zero_engine.OL_ChargingAttitude.*;
 import static zero_engine.OL_BatteryOperationMode.*;
 import static zero_engine.OL_ElectrolyserOperationMode.*;
-import static zero_engine.OL_ConnectionOwnerType.*;
 import static zero_engine.OL_ProfileUnits.*;
 import static zero_engine.OL_HouseholdCookingMethod.*;
 import static zero_engine.OL_FlowsMapKeys.*;
@@ -374,12 +373,6 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     super.doStart();
   }
 
-  @AnyLogicInternalCodegenAPI
-  public void onStartup() {
-    super.onStartup();
-
-energyModel.c_actors.add(this); 
- }
 
   /**
    * Assigning initial values for plain variables<br>
@@ -431,5 +424,14 @@ false
     return (List<? extends GridOperator>) super.agentsInRange( distance );
   }
 
+  // Additional class code
+
+@Override
+public void onCreate() {
+    super.onCreate();
+    
+    energyModel.c_actors.add(this);
+} 
+  // End of additional class code
 
 }
