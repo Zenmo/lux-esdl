@@ -28,11 +28,12 @@ dependencies {
     implementation("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.40.0")
 
     implementation("org.slf4j:slf4j-api:2.0.13")
-    implementation("ch.qos.logback:logback-classic:1.5.6")
+
 
     //testImplementation(platform("org.junit:junit-bom:6.0.3"))
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
     testImplementation("org.assertj:assertj-core:3.27.7")
+    testImplementation("ch.qos.logback:logback-classic:1.5.6")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
