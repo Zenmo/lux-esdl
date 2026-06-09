@@ -83,7 +83,7 @@ public class AreaIterator {
         } else if (asset instanceof Joint) {
             processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets);
         } else if (asset instanceof Transformer transformer) {
-            var childGridNode = GridNodeLoader.loadTransformer(transformer, luxLoader.energyModel);
+            var childGridNode = GridNodeLoader.loadTransformer(transformer, luxLoader.energyModel, currentGridNode);
             processExitPorts(asset.getPort(), luxLoader, childGridNode, visitedAssets);
         } else if (asset instanceof EConnection eConnection) {
             GridConnectionLoader.loadGridConnection(eConnection, luxLoader, currentGridNode);

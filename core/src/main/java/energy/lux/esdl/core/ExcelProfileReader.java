@@ -44,6 +44,22 @@ public class ExcelProfileReader {
         return values;
     }
 
+    public List<Double> readQuarterHourlyYearColumn(String columnHeader) {
+        var values = readColumn(columnHeader);
+        var expectedSize = 365 * 24 * 4;
+        if (values.size() != expectedSize) {
+            throw new RuntimeException(
+                    String.format(
+                            "Expected %s values for column %s, but got %s",
+                            expectedSize,
+                            columnHeader,
+                            values.size()
+                    )
+            );
+        }
+        return values;
+    }
+
     int findColumnIndex(String columnHeader) {
         Row headerRow = sheet.getRow(0);
         if (headerRow == null) {
@@ -95,25 +111,37 @@ public class ExcelProfileReader {
         return result;
     }
 
-    public static DefaultProfiles_data loadDefaultProfiles2025() throws IOException, InvalidFormatException {
-        var reader = new ExcelProfileReader(
-                new File("data_Generic/db_profiles.xlsx"),
-                "profiles_2025"
-        );
+    public static DefaultProfiles_data loadDefaultProfiles2025() {
+        var filename = "data_Generic/db_profiles.xlsx";
+        try {
 
-        return DefaultProfiles_data.builder()
-                .arguments_hr(reader.readHourlyYearColumn("t_h"))
-                .ambientTemperatureProfile_degC(reader.readHourlyYearColumn("ambientTemperature_degC"))
-                .PVProductionProfile35DegSouth_fr(reader.readHourlyYearColumn("solar_e_prod_south35deg_normalized"))
-                .PVProductionProfile15DegEastWest_fr(reader.readHourlyYearColumn("solar_e_prod_eastwest15deg_normalized"))
-                .windProductionProfile_fr(reader.readHourlyYearColumn("wind_e_prod_normalized"))
-                .epexProfile_eurpMWh(reader.readHourlyYearColumn("day_ahead_price_eur_p_mwh"))
-                .CO2EmissionFactorElectricityImport_kgpkWh(reader.readHourlyYearColumn("co2_factor_kg_per_kwh"))
-                .defaultHouseElectricityDemandProfile_fr(reader.readHourlyYearColumn("house_e_demand_other"))
-                .defaultHouseHotWaterDemandProfile_fr(reader.readHourlyYearColumn("house_h_demand_hot_water"))
-                .defaultHouseCookingDemandProfile_fr(reader.readHourlyYearColumn("house_cooking_demand"))
-                .defaultOfficeElectricityDemandProfile_fr(reader.readHourlyYearColumn("building_e_demand_other"))
-                .defaultBuildingHeatDemandProfile_fr(reader.readHourlyYearColumn("building_h_demand"))
-                .build();
+            var reader = new ExcelProfileReader(
+                    new File(filename),
+                    "profiles_2025"
+            );
+
+            return DefaultProfiles_data.builder()
+                    .arguments_hr(reader.readQuarterHourlyYearColumn("t_h"))
+                    .ambientTemperatureProfile_degC(reader.readQuarterHourlyYearColumn("ambientTemperature_degC"))
+                    .PVProductionProfile35DegSouth_fr(reader.readQuarterHourlyYearColumn("solar_e_prod_south35deg_normalized"))
+                    .PVProductionProfile15DegEastWest_fr(reader.readQuarterHourlyYearColumn("solar_e_prod_eastwest15deg_normalized"))
+                    .windProductionProfile_fr(reader.readQuarterHourlyYearColumn("wind_e_prod_normalized"))
+                    .epexProfile_eurpMWh(reader.readQuarterHourlyYearColumn("day_ahead_price_eur_p_mwh"))
+                    .CO2EmissionFactorElectricityImport_kgpkWh(reader.readQuarterHourlyYearColumn("co2_factor_kg_per_kwh"))
+                    .defaultHouseElectricityDemandProfile_fr(reader.readQuarterHourlyYearColumn("house_e_demand_other"))
+                    .defaultHouseHotWaterDemandProfile_fr(reader.readQuarterHourlyYearColumn("house_h_demand_hot_water"))
+                    .defaultHouseCookingDemandProfile_fr(reader.readQuarterHourlyYearColumn("house_cooking_demand"))
+                    .defaultOfficeElectricityDemandProfile_fr(reader.readQuarterHourlyYearColumn("building_e_demand_other"))
+                    .defaultBuildingHeatDemandProfile_fr(reader.readQuarterHourlyYearColumn("building_h_demand"))
+                    .build();
+        } catch (Exception e) {
+            throw new EsdlException(
+                    String.format(
+                            "Error reading file %s: %s",
+                            filename,
+                            e.getMessage()
+                    )
+            );
+        }
     }
 }

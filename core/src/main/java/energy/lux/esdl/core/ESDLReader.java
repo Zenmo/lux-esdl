@@ -17,6 +17,15 @@ public class ESDLReader {
         EsdlPackage.eINSTANCE.eClass();
     }
 
+    public static EnergySystem readResource(String fileName) {
+        try {
+            var javaUrl = new URL("file:" + fileName);
+            return readResource(javaUrl);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static EnergySystem readResource(URL javaUrl) {
         var eclipseUri = URI.createURI(javaUrl.toString());
 

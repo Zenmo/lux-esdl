@@ -16,9 +16,10 @@ public class GridNodeLoader {
         return gridNode;
     }
 
-    public static GridNode loadTransformer(Transformer transformer, EnergyModel luxEngine) {
+    public static GridNode loadTransformer(Transformer transformer, EnergyModel luxEngine, GridNode currentGridNode) {
         var gridNode = luxEngine.add_pop_gridNodes();
         gridNode.p_gridNodeID = transformer.getId();
+        gridNode.set_p_parentNodeID(currentGridNode.p_gridNodeID);
         gridNode.p_description = transformer.getName();
         gridNode.p_energyCarrier = OL_EnergyCarriers.ELECTRICITY;
         return gridNode;
