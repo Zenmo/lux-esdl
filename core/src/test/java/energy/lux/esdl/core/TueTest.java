@@ -87,5 +87,7 @@ public class TueTest {
         // 32 m2 of solar = 6 kWp
         assertThat(supplyDataSet.getYMean()).isBetween(0.001, 1.0);
         assertThat(supplyDataSet.getYMax()).isBetween(0.01, 3.0);
+
+        luxEngine.f_runRapidSimulation();
     }
 }

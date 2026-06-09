@@ -70,6 +70,7 @@ tasks.register<Jar>("anylogicJar") {
 
 tasks.test {
     useJUnitPlatform()
+    maxHeapSize = "2g"
     testLogging {
         events("passed", "skipped", "failed")
         showStandardStreams = true
