@@ -2,7 +2,7 @@
 rootProject.name = "lux-esdl"
 
 include(
-    "esdl",
+    "core",
     "luxdeps",
 )
 
