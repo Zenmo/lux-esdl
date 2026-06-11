@@ -56,7 +56,6 @@ public class TimeSeriesProfileConverter {
                     esdlTimeSeries.getId(),
                     profileDuration
             );
-            return;
         }
 
         logger.error(

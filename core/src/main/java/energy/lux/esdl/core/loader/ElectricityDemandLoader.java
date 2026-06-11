@@ -36,7 +36,8 @@ public class ElectricityDemandLoader {
             GridConnection luxGridConnection,
             Zero_Loader luxLoader
     ) {
-        var startYear = luxLoader.energyModel.p_timeParameters.getStartYear();
+        var luxEngine = luxLoader.energyModel;
+        var startYear = luxEngine.p_timeParameters.getStartYear();
 
         val unitlessProfile = ProfileConverterSwitch.builder()
                 .luxStartYear(startYear)
@@ -44,20 +45,14 @@ public class ElectricityDemandLoader {
                 .build()
                 .doSwitch(profile);
 
-        var profilePointer = new J_ProfilePointer(
-                demand.getId() + "_demand",
-                unitlessProfile.values(),
-                unitlessProfile.step_h(),
-                unitlessProfile.startRelativeToLuxStart_h(),
-                OL_ProfileUnits.KWHPQUARTERHOUR
-        );
+        var luxProfile = unitlessProfile.toLuxProfile(luxEngine, demand.getId() + "_demand", OL_ProfileUnits.KWHPQUARTERHOUR);
 
         var demandAsset = new J_EAProfile(
                 luxGridConnection,
                 OL_EnergyCarriers.ELECTRICITY,
-                profilePointer,
+                luxProfile,
                 OL_AssetFlowCategories.fixedConsumptionElectric_kW,
-                luxLoader.energyModel.p_timeParameters
+                luxEngine.p_timeParameters
         );
         demandAsset.setEnergyAssetName(demand.getName());
         return demandAsset;
