@@ -2448,7 +2448,8 @@ public void onCreate() {
     v_liveData.connectionMetaData = v_liveConnectionMetaData;
     v_liveData.assetsMetaData = v_liveAssetsMetaData;
     energyModel.c_actors.add(this);
-} 
+}
+ 
   // End of additional class code
 
 }

@@ -1091,7 +1091,7 @@ if(settings.reloadDatabase()){
   /**
    * Function used to generate solar parks: grid connections and park owner (connection owner actor)
    */
-  protected void f_createSolarParks(  ) { 
+  public void f_createSolarParks(  ) { 
 
 GCEnergyProduction solarpark;
 
@@ -1190,7 +1190,7 @@ for (Solarfarm_data dataSolarfarm : f_getSolarfarmsInSubScope(c_solarfarm_data))
   /**
    * Function used to create (neighborhood) battery grid connection and actor
    */
-  protected void f_createBatteries(  ) { 
+  public void f_createBatteries(  ) { 
 
 GCGridBattery gridbattery;
 
@@ -1407,7 +1407,7 @@ for (Electrolyser_data dataElectrolyser : f_getElectrolysersInSubScope(c_electro
   /**
    * Function used to create all windfarm grid connections, actors, EAs and GISObjects
    */
-  protected void f_createWindFarms(  ) { 
+  public void f_createWindFarms(  ) { 
 
 GCEnergyProduction windfarm;
 
@@ -3830,7 +3830,7 @@ zero_Interface.c_GISNodes.add(GN.gisRegion);
 return GN_heat; 
   }
 
-  protected void f_addSliderSolarfarm( String sliderGCID, String gridNodeID ) { 
+  public void f_addSliderSolarfarm( String sliderGCID, String gridNodeID ) { 
 
 c_solarfarm_data.add(0, Solarfarm_data.builder().
 isSliderGC(true).
@@ -3860,7 +3860,7 @@ polygon(null).
 build()); 
   }
 
-  protected void f_addSliderWindfarm( String sliderGCID, String gridNodeID ) { 
+  public void f_addSliderWindfarm( String sliderGCID, String gridNodeID ) { 
 
 c_windfarm_data.add(0, Windfarm_data.builder().
 isSliderGC(true).
@@ -3889,7 +3889,7 @@ build());
  
   }
 
-  protected void f_addSliderBattery( String sliderGCID, String gridNodeID ) { 
+  public void f_addSliderBattery( String sliderGCID, String gridNodeID ) { 
 
 c_battery_data.add(0, Battery_data.builder().
 isSliderGC(true).
@@ -3919,7 +3919,7 @@ polygon(null).
 build()); 
   }
 
-  protected void f_initializeSpecificSliderGC(  ) { 
+  public void f_initializeSpecificSliderGC(  ) { 
 
 //Create slider GC data packages for assetGC that do not have a sliderGC data package yet 
 Solarfarm_data sliderSolarfarm_data = findFirst(c_solarfarm_data, sf_data -> sf_data.isSliderGC());
@@ -5264,7 +5264,7 @@ v_probabilityForAdditionalCar_publicParking = ((double) leftOverForPublicParking
  
   }
 
-  void f_initializeInterfacePointers(  ) { 
+  public void f_initializeInterfacePointers(  ) { 
 
 //Set parameters/pointers in the interface
 zero_Interface.zero_loader = this;

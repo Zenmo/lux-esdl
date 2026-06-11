@@ -3,13 +3,10 @@ package energy.lux.esdl.core;
 import energy.lux.esdl.core.iterator.RootIterator;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-import java.time.Instant;
-
-public class Bu31VeelFlexTest {
+public class Bu31VeelFlexTimeSeriesTest {
     @Test
-    public void testVeelFlex() {
-        var javaUrl = getClass().getResource("/decorated_BU31_veelflex_test_updated.esdl");
+    public void test() {
+        var javaUrl = getClass().getResource("/BU31_veelflex_vTimeSeries.esdl");
         var esdl = ESDLReader.readResource(javaUrl);
 
         var luxLoader = LuxModelFactory.createEnergyModel();

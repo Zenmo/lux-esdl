@@ -1,8 +1,17 @@
 package energy.lux.esdl.core.util;
 
 import esdl.Item;
+import org.eclipse.emf.ecore.EObject;
 
 public class Util {
+    public static String printObject(EObject eCoreObject) {
+        if (eCoreObject instanceof Item item) {
+            return printItem(item);
+        } else {
+            return eCoreObject.eClass().getInstanceClassName();
+        }
+    }
+
     public static String printItem(Item esdlItem) {
         return esdlItem.eClass().getInstanceClassName() + "[id=" + esdlItem.getId() + "]";
     }

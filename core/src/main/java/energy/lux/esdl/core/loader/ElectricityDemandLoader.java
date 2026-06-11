@@ -1,8 +1,11 @@
 package energy.lux.esdl.core.loader;
 
 import energy.lux.esdl.core.NotImplemented;
+import energy.lux.esdl.core.loader.profile.ProfileConverterSwitch;
+import energy.lux.esdl.core.loader.profile.ProfileLoader;
 import energy.lux.esdl.core.util.Util;
 import esdl.*;
+import lombok.val;
 import zero_engine.*;
 import zerointerfaceloader.Zero_Loader;
 
@@ -12,7 +15,7 @@ public class ElectricityDemandLoader {
             GridConnection luxGridConnection,
             Zero_Loader luxLoader
     ) {
-        var dateTimeProfile = findFirstDateTimeProfile(demand);
+        var dateTimeProfile = findFirstProfile(demand);
         if (dateTimeProfile != null) {
             loadProfile(dateTimeProfile, demand, luxGridConnection, luxLoader);
             return;
@@ -28,18 +31,27 @@ public class ElectricityDemandLoader {
     }
 
     private static J_EAProfile loadProfile(
-            DateTimeProfile dateTimeProfile,
+            GenericProfile profile,
             ElectricityDemand demand,
             GridConnection luxGridConnection,
             Zero_Loader luxLoader
     ) {
-        var profilePointer = DateTimeProfileLoader.createProfilePointer(
-                luxLoader,
-                dateTimeProfile,
+        var startYear = luxLoader.energyModel.p_timeParameters.getStartYear();
+
+        val unitlessProfile = ProfileConverterSwitch.builder()
+                .luxStartYear(startYear)
+                .valueTransformer(v -> v * 0.001)
+                .build()
+                .doSwitch(profile);
+
+        var profilePointer = new J_ProfilePointer(
                 demand.getId() + "_demand",
-                OL_ProfileUnits.KWHPQUARTERHOUR,
-                v -> v * 0.001
+                unitlessProfile.values(),
+                unitlessProfile.step_h(),
+                unitlessProfile.startRelativeToLuxStart_h(),
+                OL_ProfileUnits.KWHPQUARTERHOUR
         );
+
         var demandAsset = new J_EAProfile(
                 luxGridConnection,
                 OL_EnergyCarriers.ELECTRICITY,
@@ -48,14 +60,14 @@ public class ElectricityDemandLoader {
                 luxLoader.energyModel.p_timeParameters
         );
         demandAsset.setEnergyAssetName(demand.getName());
-        return  demandAsset;
+        return demandAsset;
     }
 
-    private static DateTimeProfile findFirstDateTimeProfile(EnergyAsset asset) {
+    private static GenericProfile findFirstProfile(EnergyAsset asset) {
         for (Port port : asset.getPort()) {
             for (GenericProfile profile : port.getProfile()) {
-                if (profile instanceof DateTimeProfile dateTimeProfile) {
-                    return dateTimeProfile;
+                if (profile != null) {
+                    return profile;
                 }
             }
         }

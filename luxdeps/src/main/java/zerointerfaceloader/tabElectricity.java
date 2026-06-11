@@ -1456,12 +1456,9 @@ zero_Interface.f_setSelectedGNText();
         break;
       case _t_resetTrafoReinforcement: {
           ShapeButton self = this.t_resetTrafoReinforcement;
-for (GridNode GN : zero_Interface.energyModel.f_getGridNodesNotTopLevel() ){
+for (GridNode GN : zero_Interface.energyModel.pop_gridNodes){
 	GN.p_capacity_kW = GN.p_originalCapacity_kW;
 }
-for (GridNode GN : zero_Interface.energyModel.f_getGridNodesTopLevel() ){
-	GN.p_capacity_kW = GN.p_originalCapacity_kW;
-} 
 zero_Interface.f_setSelectedGNText();
  
 ;}

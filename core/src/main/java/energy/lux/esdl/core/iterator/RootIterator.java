@@ -1,7 +1,7 @@
 package energy.lux.esdl.core.iterator;
 
 import energy.lux.esdl.core.EsdlException;
-import energy.lux.esdl.core.loader.DateTimeProfileLoader;
+import energy.lux.esdl.core.loader.profile.ProfileLoader;
 import esdl.*;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -172,8 +172,8 @@ public class RootIterator {
         EnvironmentalProfiles environmentalProfiles = info.getEnvironmentalProfiles();
         if (environmentalProfiles == null) return;
 
-        DateTimeProfileLoader.loadOutsideTemperature(environmentalProfiles, luxLoader);
-        DateTimeProfileLoader.loadSolarIrradiance(environmentalProfiles, luxLoader);
+        ProfileLoader.loadOutsideTemperature(environmentalProfiles, luxLoader);
+        ProfileLoader.loadSolarIrradiance(environmentalProfiles, luxLoader);
 
         if (environmentalProfiles.getSoilTemperatureProfile() != null) {
             logger.info("Skipping soil temperature profile, not implemented in LUX");
@@ -201,7 +201,7 @@ public class RootIterator {
         if (services == null) return;
         for (Service service : services.getService()) {
             if (service instanceof EnergyMarket energyMarket) {
-                DateTimeProfileLoader.loadDayAheadElectricityPricing(energyMarket, luxLoader);
+                ProfileLoader.loadDayAheadElectricityPricing(energyMarket, luxLoader);
             } else {
                 logger.warn("Loading ESDL service type {} not implemented", service.getClass());
             }
