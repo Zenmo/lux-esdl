@@ -31,14 +31,11 @@ public class ProfileLoader {
         var luxModel = luxLoader.energyModel;
         var startYear = luxLoader.energyModel.p_timeParameters.getStartYear();
 
-        var unitlessProfile = ProfileConverterSwitch.builder().luxStartYear(startYear).build().doSwitch(temperatureProfile);
-        luxModel.pp_ambientTemperature_degC = new J_ProfilePointer(
-                "esdl_outside_temperature_deg_c",
-                unitlessProfile.values(),
-                unitlessProfile.step_h(),
-                unitlessProfile.startRelativeToLuxStart_h(),
-                OL_ProfileUnits.TEMPERATURE_DEGC
-        );
+        luxModel.pp_ambientTemperature_degC = ProfileConverterSwitch.builder()
+                .luxStartYear(startYear)
+                .build()
+                .doSwitch(temperatureProfile)
+                .toLuxProfile(luxModel, "esdl_outside_temperature_deg_c", OL_ProfileUnits.TEMPERATURE_DEGC);
     }
 
     public static double kelvinToCelsius(double v) {
@@ -63,11 +60,9 @@ public class ProfileLoader {
             }
         }
 
-        luxLoader.energyModel.pp_dayAheadElectricityPricing_eurpMWh = new J_ProfilePointer(
+        luxLoader.energyModel.pp_dayAheadElectricityPricing_eurpMWh = unitlessProfile.toLuxProfile(
+                luxLoader.energyModel,
                 "esdl_day_ahead_electricity_pricing_eur_per_mwh",
-                unitlessProfile.values(),
-                unitlessProfile.step_h(),
-                unitlessProfile.startRelativeToLuxStart_h(),
                 OL_ProfileUnits.PRICE_EURPMWH
         );
     }
