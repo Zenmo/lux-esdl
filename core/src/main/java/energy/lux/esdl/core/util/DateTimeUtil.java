@@ -12,6 +12,11 @@ public class DateTimeUtil {
                 .toInstant();
     }
 
+    public static double hoursBetween(Date from, Date to) {
+        var milliseconds = to.getTime() - from.getTime();
+        return (double) milliseconds / Duration.ofHours(1).toMillis();
+    }
+
     public static double hoursBetween(Instant from, Date to) {
          var milliseconds = to.getTime() - from.toEpochMilli();
          return (double) milliseconds / Duration.ofHours(1).toMillis();

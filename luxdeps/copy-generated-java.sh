@@ -1,5 +1,5 @@
 #!/bin/bash
-rsync -archive\
+rsync -archive \
     --verbose \
     --include='*/' \
     --include='*.java' \
