@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import zero_engine.OL_EnergyCarriers;
 
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.time.ZoneId;
 
 import static energy.lux.esdl.core.TestUtil.runLux;
@@ -36,7 +37,7 @@ public class TueTest {
 
         var timeZone = ZoneId.of("Europe/Amsterdam");
         var timestampToCheck = LocalDateTime.parse("2020-08-11T01:30:00.000000").atZone(timeZone);
-        var hourOffset = DateTimeUtil.getHourOffset(2025, timestampToCheck);
+        var hourOffset = DateTimeUtil.getHourOffset(Year.of(2025), timestampToCheck);
 
         var degC = luxEngine.pp_ambientTemperature_degC.getValue(hourOffset);
         // The ESDL file seems to have kelvin,
