@@ -1,23 +1,49 @@
 package energy.lux.esdl.core.loader;
 
+import com.zenmo.timeseries.untyped.ArrayTimeSeries;
+import com.zenmo.timeseries.untyped.TimeSeries;
 import energy.lux.esdl.core.NotImplemented;
-import energy.lux.esdl.core.loader.profile.ProfileConverterSwitch;
-import energy.lux.esdl.core.loader.profile.ProfileLoader;
+import energy.lux.esdl.core.loader.profile.ProfilePointerFactory;
+import energy.lux.esdl.core.loader.profile.bare.BareProfileChecker;
+import energy.lux.esdl.core.loader.profile.bare.BareProfileReader;
+import energy.lux.esdl.core.util.DateTimeUtil;
 import energy.lux.esdl.core.util.Util;
 import esdl.*;
-import lombok.val;
 import zero_engine.*;
 import zerointerfaceloader.Zero_Loader;
 
+import java.time.Year;
+
 public class ElectricityDemandLoader {
-    public static void loadElectricityDemand(
-            ElectricityDemand demand,
-            GridConnection luxGridConnection,
+
+    private final Zero_Loader luxLoader;
+
+    private final ProfilePointerFactory profilePointerFactory;
+
+    private final BareProfileReader bareProfileReader;
+
+    public ElectricityDemandLoader(
             Zero_Loader luxLoader
+    ) {
+        this.luxLoader = luxLoader;
+
+        var energyModel = luxLoader.energyModel;
+        var timeParameters = energyModel.p_timeParameters;
+
+        this.profilePointerFactory = new ProfilePointerFactory(energyModel);
+        this.bareProfileReader = new BareProfileReader(
+                DateTimeUtil.hoursToDuration(timeParameters.getTimeStep_h()),
+                new BareProfileChecker(Year.of(timeParameters.getStartYear()))
+        );
+    }
+
+    public void loadElectricityDemand(
+            ElectricityDemand demand,
+            GridConnection luxGridConnection
     ) {
         var dateTimeProfile = findFirstProfile(demand);
         if (dateTimeProfile != null) {
-            loadProfile(dateTimeProfile, demand, luxGridConnection, luxLoader);
+            loadProfile(dateTimeProfile, demand, luxGridConnection);
             return;
         }
 
@@ -30,23 +56,31 @@ public class ElectricityDemandLoader {
         throw new NotImplemented("This type of ElectricityDemand is not implemented: " + Util.printItem(demand));
     }
 
-    private static J_EAProfile loadProfile(
+    private J_EAProfile loadProfile(
             GenericProfile profile,
             ElectricityDemand demand,
-            GridConnection luxGridConnection,
-            Zero_Loader luxLoader
+            GridConnection luxGridConnection
     ) {
+        var timeSeries = this.bareProfileReader.readProfile(profile);
+
+        // Convert W to kW
+        // TODO: read units from ESDL, warn if not present
+        var values = timeSeries.copyValuesArray();
+        for (int i = 0; i < values.length; i++) {
+            values[i] *= 0.001;
+        }
+
+        var transformedTimeSeries = (ArrayTimeSeries) timeSeries.toBuilder()
+                .values(values)
+                .build();
+
+        var luxProfile = this.profilePointerFactory.timeSeriesToProfilePointer(
+                transformedTimeSeries,
+                demand.getId() + "_demand",
+                OL_ProfileUnits.KW
+        );
+
         var luxEngine = luxLoader.energyModel;
-        var startYear = luxEngine.p_timeParameters.getStartYear();
-
-        val unitlessProfile = ProfileConverterSwitch.builder()
-                .luxStartYear(startYear)
-                .valueTransformer(v -> v * 0.001)
-                .build()
-                .doSwitch(profile);
-
-        var luxProfile = unitlessProfile.toLuxProfile(luxEngine, demand.getId() + "_demand", OL_ProfileUnits.KWHPQUARTERHOUR);
-
         var demandAsset = new J_EAProfile(
                 luxGridConnection,
                 OL_EnergyCarriers.ELECTRICITY,
@@ -58,7 +92,7 @@ public class ElectricityDemandLoader {
         return demandAsset;
     }
 
-    private static GenericProfile findFirstProfile(EnergyAsset asset) {
+    private GenericProfile findFirstProfile(EnergyAsset asset) {
         for (Port port : asset.getPort()) {
             for (GenericProfile profile : port.getProfile()) {
                 if (profile != null) {
