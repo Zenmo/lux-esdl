@@ -40,7 +40,8 @@ public class BareProfileChecker {
         }
 
         var profileDuration = Duration.between(profileStart, profileEnd);
-        if (profileDuration.toDays() < 365) {
+        var isTooShort = profileDuration.toDays() < 365;
+        if (isTooShort) {
             logger.error(
                     "Time series is shorter than one year. Id {}, duration {}, start {}",
                     id,
@@ -49,14 +50,34 @@ public class BareProfileChecker {
             );
         }
 
-        logger.error(
-                "Time series does not eclipse simulation year. Id {}, start {}, end {}",
-                id,
-                profileStart,
-                profileEnd
-        );
+        if (profileEnd.isBefore(luxStart)) {
+            logger.error(
+                    "Time series is entirely before simulation year {}. Id {}, start {}, end {}",
+                    luxStartYear,
+                    id,
+                    profileStart,
+                    profileEnd
+            );
+            return;
+        }
 
-        // We could check the alignment of the timeseries to prevent erroneous wrap-around behaviour,
-        // but I think this is more of a core LUX issue.
+        if (profileStart.isAfter(luxEnd)) {
+            logger.error(
+                    "Time series is entirely after simulation year. Id {}, start {}, end {}",
+                    id,
+                    profileStart,
+                    profileEnd
+            );
+            return;
+        }
+
+        if (!isTooShort) {
+            logger.error(
+                    "Time series does not fully eclipse simulation year. Id {}, start {}, end {}",
+                    id,
+                    profileStart,
+                    profileEnd
+            );
+        }
     }
 }

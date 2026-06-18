@@ -70,7 +70,7 @@ public class ElectricityDemandLoader {
             values[i] *= 0.001;
         }
 
-        var transformedTimeSeries = (ArrayTimeSeries) timeSeries.toBuilder()
+        var transformedTimeSeries = timeSeries.toBuilder()
                 .values(values)
                 .build();
 

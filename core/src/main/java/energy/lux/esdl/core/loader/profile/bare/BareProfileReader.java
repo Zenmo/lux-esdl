@@ -29,6 +29,6 @@ public class BareProfileReader {
 
         var timeSeriesWithLuxStep = timeSeriesWithEsdlStep.convertStep(luxTimeStep);
 
-        return (ArrayTimeSeries) timeSeriesWithLuxStep;
+        return timeSeriesWithLuxStep;
     }
 }

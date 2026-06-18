@@ -46,13 +46,13 @@ dependencies {
     implementation("org.eclipse.emf:org.eclipse.emf.common:2.45.0")
     implementation("org.eclipse.emf:org.eclipse.emf.ecore:2.42.0")
     implementation("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.40.0")
-    implementation("com.zenmo:timeseries:0.0.1")
+    implementation("com.zenmo:timeseries:0.0.2")
 
     anylogicJarDependencies("nl.tno.esdl:esdl:2.26.5")
     anylogicJarDependencies("org.eclipse.emf:org.eclipse.emf.common:2.45.0")
     anylogicJarDependencies("org.eclipse.emf:org.eclipse.emf.ecore:2.42.0")
     anylogicJarDependencies("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.40.0")
-    anylogicJarDependencies("com.zenmo:timeseries:0.0.1")
+    anylogicJarDependencies("com.zenmo:timeseries:0.0.2")
 
     //testImplementation(platform("org.junit:junit-bom:6.0.3"))
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")

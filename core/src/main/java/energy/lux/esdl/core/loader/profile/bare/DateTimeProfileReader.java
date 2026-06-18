@@ -26,13 +26,13 @@ class DateTimeProfileReader {
             i++;
         }
 
-        var timeSeriesWithEsdlStep = TimeSeries.builder()
+        var timeSeriesWithEsdlStep = ArrayTimeSeries.builder()
                 .step(getStep(profileElements))
                 .values(values)
                 .start(profileElements.get(0).getFrom().toInstant())
                 .build();
 
-        return (ArrayTimeSeries) timeSeriesWithEsdlStep;
+        return timeSeriesWithEsdlStep;
     }
 
     private static List<ProfileElement> sorted(List<ProfileElement> profileElements) {

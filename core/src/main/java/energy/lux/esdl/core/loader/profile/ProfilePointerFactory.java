@@ -1,6 +1,7 @@
 package energy.lux.esdl.core.loader.profile;
 
 import com.zenmo.timeseries.untyped.ArrayTimeSeries;
+import energy.lux.esdl.core.loader.profile.unit.TimeSeriesWithUnit;
 import zero_engine.EnergyModel;
 import zero_engine.J_ProfilePointer;
 import zero_engine.OL_ProfileUnits;
@@ -27,10 +28,11 @@ public class ProfilePointerFactory {
      * and register it with the LUX Engine.
      */
     public J_ProfilePointer timeSeriesToProfilePointer(
-            ArrayTimeSeries timeSeries,
-            String name,
-            OL_ProfileUnits unit
+            TimeSeriesWithUnit timeSeriesWithUnit,
+            String name
     ) {
+        var timeSeries = timeSeriesWithUnit.timeSeries();
+
         var startRelativeToLuxStart_h = getHourOffset(luxStart, timeSeries.getStart());
         var stepHours = durationToHours(timeSeries.getStep());
 
@@ -39,11 +41,26 @@ public class ProfilePointerFactory {
                 timeSeries.copyValuesArray(),
                 stepHours,
                 startRelativeToLuxStart_h,
-                unit
+                timeSeriesWithUnit.unit()
         );
 
         luxModel.f_addProfile(luxProfile);
 
         return luxProfile;
+    }
+
+    /**
+     * Convert from a Zenmo TimeSeries to a LUX ProfilePointer
+     * and register it with the LUX Engine.
+     */
+    public J_ProfilePointer timeSeriesToProfilePointer(
+            ArrayTimeSeries timeSeries,
+            String name,
+            OL_ProfileUnits unit
+    ) {
+        return timeSeriesToProfilePointer(
+                new TimeSeriesWithUnit(timeSeries, unit),
+                name
+        );
     }
 }

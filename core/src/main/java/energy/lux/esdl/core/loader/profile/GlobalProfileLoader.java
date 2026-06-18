@@ -2,6 +2,7 @@ package energy.lux.esdl.core.loader.profile;
 
 import energy.lux.esdl.core.loader.profile.bare.BareProfileChecker;
 import energy.lux.esdl.core.loader.profile.bare.BareProfileReader;
+import energy.lux.esdl.core.loader.profile.unit.OutsideTemperatureConverter;
 import energy.lux.esdl.core.util.DateTimeUtil;
 import esdl.EnergyMarket;
 import esdl.EnvironmentalProfiles;
@@ -53,18 +54,17 @@ public class GlobalProfileLoader {
             return;
         }
 
-        var temperatureTimeSeries = this.bareProfileReader.readProfile(temperatureProfile);
+        var bareTemperatureTimeSeries = this.bareProfileReader.readProfile(temperatureProfile);
+        var temperatureTimeSeriesWithUnit = OutsideTemperatureConverter.timeSeriesToLuxUnit(
+                bareTemperatureTimeSeries,
+                temperatureProfile.getProfileQuantityAndUnit()
+        );
         var temperatureProfilePointer = this.profilePointerFactory.timeSeriesToProfilePointer(
-                temperatureTimeSeries,
-                "esdl_outside_temperature_deg_c",
-                OL_ProfileUnits.TEMPERATURE_DEGC
+                temperatureTimeSeriesWithUnit,
+                "esdl_outside_temperature_deg_c"
         );
 
         luxLoader.energyModel.pp_ambientTemperature_degC = temperatureProfilePointer;
-    }
-
-    public static double kelvinToCelsius(double v) {
-        return v - 273.15;
     }
 
     /**
