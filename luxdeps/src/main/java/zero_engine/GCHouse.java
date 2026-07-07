@@ -97,6 +97,7 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import java.awt.geom.Arc2D;
 
@@ -399,7 +400,7 @@ super.f_operateFlexAssets(timeVariables);
 if (p_cookingTracker != null) { // check for presence of cooking asset
 	p_cookingTracker.manageActivities(timeVariables); // also calls f_updateAllFlows in HOB asset	
 	
-	double residualHeatGasPit_kW = -p_cookingTracker.HOB.getLastFlows().get(OL_EnergyCarriers.HEAT);
+	double residualHeatGasPit_kW = -p_cookingTracker.getHob().getLastFlows().get(OL_EnergyCarriers.HEAT);
 	throw new RuntimeException("Cooking trackers and HOBs are not properly integrated with current heating management!");
 	/*if (p_BuildingThermalAsset != null) {
 		p_BuildingThermalAsset.v_powerFraction_fr += residualHeatGasPit_kW / p_BuildingThermalAsset.getCapacityHeat_kW(); // Does this work out correctly with new heatingManagement structure??
@@ -534,6 +535,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 	_initialize_level_xjal();
     level.initialize();
     presentation.initialize_xjal( false, false , level );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     icon.initialize_xjal( this.<ModelElementDescriptorUtils[]>getElementProperty( "zero_engine.GCHouse.icon", IElementDescriptor.MODEL_ELEMENT_DESCRIPTORS ), false, true  );
     icon.setIconOffsets( 0.0, 0.0 );

@@ -97,15 +97,13 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import static com.anylogic.engine.Utilities.*;
 
 /**
 * J_EAEV
 */
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
-//@JsonTypeName("J_EAEV")
 public class J_EAEV extends J_EAFlex implements I_Vehicle, I_ChargingRequest {
  
 	private boolean available = true;
@@ -113,12 +111,12 @@ public class J_EAEV extends J_EAFlex implements I_Vehicle, I_ChargingRequest {
 	private double energyConsumption_kWhpkm;
 	private double vehicleScaling;
 	private J_ActivityTrackerTrips tripTracker;
-	
-	public OL_EnergyCarriers storageMedium = OL_EnergyCarriers.ELECTRICITY;
+	private OL_VehicleType vehicleType;
+	private OL_EnergyCarriers storageMedium = OL_EnergyCarriers.ELECTRICITY;
 	private double stateOfCharge_fr;
 	private double initialstateOfCharge_fr;
 	private double stateOfChargeStored_r;
-	protected double capacityElectric_kW;
+	private double capacityElectric_kW;
 	private double storageCapacity_kWh;
  
 	private boolean V2GCapable = true; // For now default true: Add to constructor, where constructor calls: setV2GCapable(boolean isV2GCapable) to adjust min rato of capacity accordingly
@@ -127,13 +125,13 @@ public class J_EAEV extends J_EAFlex implements I_Vehicle, I_ChargingRequest {
 	// Should this be in here?	
 	private double energyNeedForNextTrip_kWh;
 	private double energyNeedForNextTripStored_kWh;
-	//public OL_EVChargingNeed chargingNeed;
 	private double energyChargedOutsideModelArea_kWh = 0;
 	private double energyChargedOutsideModelAreaStored_kWh;
 	private double charged_kWh = 0;
 	private double discharged_kWh = 0;
-    /**
-     * Default constructor
+    
+	/**
+     * Empty constructor for serialization
      */
     public J_EAEV() {
     }
@@ -141,11 +139,11 @@ public class J_EAEV extends J_EAFlex implements I_Vehicle, I_ChargingRequest {
     /**
      * Constructor initializing the fields
      */
-    public J_EAEV(I_AssetOwner owner, double capacityElectricity_kW, double storageCapacity_kWh, double stateOfCharge_fr, J_TimeParameters timeParameters, double energyConsumption_kWhpkm, double vehicleScaling, OL_EnergyAssetType energyAssetType, J_ActivityTrackerTrips tripTracker) {
-    	this(owner, capacityElectricity_kW, storageCapacity_kWh, stateOfCharge_fr, timeParameters, energyConsumption_kWhpkm, vehicleScaling, energyAssetType, tripTracker, true);
+    public J_EAEV(I_AssetOwner owner, double capacityElectricity_kW, double storageCapacity_kWh, double stateOfCharge_fr, J_TimeParameters timeParameters, double energyConsumption_kWhpkm, double vehicleScaling, OL_VehicleType vehicleType, J_ActivityTrackerTrips tripTracker) {
+    	this(owner, capacityElectricity_kW, storageCapacity_kWh, stateOfCharge_fr, timeParameters, energyConsumption_kWhpkm, vehicleScaling, vehicleType, tripTracker, true);
     }
     
-    public J_EAEV(I_AssetOwner owner, double capacityElectricity_kW, double storageCapacity_kWh, double stateOfCharge_fr, J_TimeParameters timeParameters, double energyConsumption_kWhpkm, double vehicleScaling, OL_EnergyAssetType energyAssetType, J_ActivityTrackerTrips tripTracker, boolean available) {    
+    public J_EAEV(I_AssetOwner owner, double capacityElectricity_kW, double storageCapacity_kWh, double stateOfCharge_fr, J_TimeParameters timeParameters, double energyConsumption_kWhpkm, double vehicleScaling, OL_VehicleType vehicleType, J_ActivityTrackerTrips tripTracker, boolean available) {    
 		this.setOwner(owner);
 		this.timeParameters = timeParameters;
 		this.capacityElectric_kW = capacityElectricity_kW; // for EV, this is max charging power.
@@ -154,11 +152,12 @@ public class J_EAEV extends J_EAFlex implements I_Vehicle, I_ChargingRequest {
 		this.stateOfCharge_fr = initialstateOfCharge_fr;
 		this.energyConsumption_kWhpkm = energyConsumption_kWhpkm;
 		this.vehicleScaling = vehicleScaling;
-	    this.energyAssetType = energyAssetType;
+		this.vehicleType = vehicleType;
+	    this.setEnergyAssetType(vehicleType); // Temporary, till EA type is removed!
 	    this.tripTracker = tripTracker;
     	this.available = available;
 	    if (tripTracker != null) {
-	    	tripTracker.vehicle=this;	    	
+	    	tripTracker.setVehicle(this);	    	
 	    }
 	    // Validation checks
 	    if (capacityElectric_kW <= 0 || storageCapacity_kWh <= 0 || energyConsumption_kWhpkm <= 0) {
@@ -183,7 +182,9 @@ public class J_EAEV extends J_EAFlex implements I_Vehicle, I_ChargingRequest {
 			throw new RuntimeException("Trying to charge EV that is not available for charging!");
 		}
 		double chargeSetpoint_kW = ratioOfChargeCapacity_r * this.capacityElectric_kW * vehicleScaling; // capped between -1 and 1. (does already happen in f_updateAllFlows()!)
-    	double chargePower_kW = max(min(chargeSetpoint_kW, (1 - stateOfCharge_fr) * storageCapacity_kWh * vehicleScaling / this.timeParameters.getTimeStep_h()), -stateOfCharge_fr * storageCapacity_kWh * vehicleScaling / this.timeParameters.getTimeStep_h()); // Limit charge power to stay within SoC 0-100
+    	
+		double boundedSOC_fr = min(1, max(0, stateOfCharge_fr));
+		double chargePower_kW = max(min(chargeSetpoint_kW, (1 - boundedSOC_fr) * storageCapacity_kWh * vehicleScaling / this.timeParameters.getTimeStep_h()), -boundedSOC_fr * storageCapacity_kWh * vehicleScaling / this.timeParameters.getTimeStep_h()); // Limit charge power to stay within SoC 0-100
     	
     	//traceln("state of charge: " + stateOfCharge_fr * storageCapacity_kWh + ", charged: " + discharge_kW / 4+ " kWh, charging power kW: " + discharge_kW);
 		double electricityProduction_kW = max(-chargePower_kW, 0);
@@ -260,33 +261,32 @@ public class J_EAEV extends J_EAFlex implements I_Vehicle, I_ChargingRequest {
 	public void setVehicleScaling(double vehicleScaling) {
     	this.vehicleScaling = vehicleScaling;
     }
-    
 	public void setTripTracker(J_ActivityTrackerTrips tracker) {
 		this.tripTracker = tracker;
 	}
-	
 	public void setEnergyNeedForNextTrip_kWh(double energyNeedForNextTrip_kWh) {
 		this.energyNeedForNextTrip_kWh = energyNeedForNextTrip_kWh;
 	}
-	
 	public J_ActivityTrackerTrips getTripTracker() {
 		return this.tripTracker;
 	}
-	
 	public boolean getAvailability() {
 		return this.available;
 	}
-	
 	public void setAvailability(boolean available) {
     	this.available = available;
     }
-	
 	public double getVehicleScaling_fr() {
 		return this.vehicleScaling;
 	}
-	
 	public double getEnergyConsumption_kWhpkm() {
 		return this.energyConsumption_kWhpkm * this.vehicleScaling;
+	}
+	public OL_VehicleType getVehicleType() {
+		return this.vehicleType;
+	}
+	public OL_EnergyCarriers getFuelType() {
+		return this.storageMedium;
 	}
 	
 	// Methods from I_ChargingRequest
@@ -403,6 +403,19 @@ public class J_EAEV extends J_EAFlex implements I_Vehicle, I_ChargingRequest {
 			"storageCapacity_kWh = " + storageCapacity_kWh + " " +
 			"charged_kWh = " + roundToDecimal( charged_kWh, 2 );
 	}
-}
- 
- 
+	
+	//Temporary, till OL_EnergyAssetType is removed!!!!
+	private void setEnergyAssetType(OL_VehicleType vehicleType) {
+		switch(vehicleType) {
+			case CAR:
+				this.energyAssetType = OL_EnergyAssetType.ELECTRIC_VEHICLE;
+				break;
+			case VAN:
+				this.energyAssetType = OL_EnergyAssetType.ELECTRIC_VAN;
+				break;
+			case TRUCK:
+				this.energyAssetType = OL_EnergyAssetType.ELECTRIC_TRUCK;
+				break;
+		}
+	}
+} 

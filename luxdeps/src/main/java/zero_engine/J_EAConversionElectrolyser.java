@@ -97,6 +97,7 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import static com.anylogic.engine.Utilities.*;
 
@@ -121,7 +122,7 @@ public class J_EAConversionElectrolyser extends zero_engine.J_EAConversion imple
 	
     
     /**
-     * Default constructor for serialization
+     * Empty constructor for serialization
      */
     public J_EAConversionElectrolyser() {
     }

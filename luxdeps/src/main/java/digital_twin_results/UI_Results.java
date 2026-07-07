@@ -2455,6 +2455,11 @@ for(OL_ResultScope supportedScope : supportedResultScopes){
 }
 t_chartBlockerMessage.setText(warningScreenMessage); 
   }
+
+  public void f_enablePublicVersion( boolean enable ) { 
+
+chartProfielen.f_enableExportFunctionality(!enable); 
+  }
 private double _datasetUpdateTime_xjal() {
 	return time();
 }
@@ -2915,17 +2920,17 @@ UI_Results.this,true,5.0, -30.0,
         black,"Locations and styling",
         _txt_resultsUISetupAndStylingFunctions_Font, ALIGNMENT_LEFT );
     rect_areaCollectionUpdateFunctions = new ShapeRectangle(
-       SHAPE_DRAW_2D3D, false,1120.0, 320.0, 0.0, 0.0,
+       SHAPE_DRAW_2D3D, false,1120.0, 340.0, 0.0, 0.0,
             dodgerBlue, white,
 			380.0, 160.0, 10.0, 3.0, LINE_STYLE_SOLID );
     txt_resultsUIDataUpdateFunctions = new ShapeText(
-        SHAPE_DRAW_2D, false,1130.0, 330.0, 0.0, 0.0,
+        SHAPE_DRAW_2D, false,1130.0, 350.0, 0.0, 0.0,
         black,"Update data functions",
         _txt_resultsUIDataUpdateFunctions_Font, ALIGNMENT_LEFT );
     rect_areaCollectionUpdateFunctions1 = new ShapeRectangle(
        SHAPE_DRAW_2D3D, false,1120.0, 20.0, 0.0, 0.0,
             black, white,
-			380.0, 280.0, 10.0, 3.0, LINE_STYLE_SOLID );
+			380.0, 300.0, 10.0, 3.0, LINE_STYLE_SOLID );
     txt_resultsUIInitialization = new ShapeText(
         SHAPE_DRAW_2D, false,1140.0, 30.0, 0.0, 0.0,
         black,"Initialization",
@@ -3316,6 +3321,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 	_initialize_level_xjal();
     level.initialize();
     presentation = new ShapeTopLevelPresentationGroup( UI_Results.this, true, 0, 0, 0, 0 , level );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     addAll( c_defaultOrderEC, new OL_EnergyCarriers[] 
 {

@@ -312,6 +312,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 	_initialize_level_xjal();
     level.initialize();
     presentation = new ShapeTopLevelPresentationGroup( ChartArea.this, true, 0, 0, 0, 0 , level );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     icon = new ShapeModelElementsGroup( ChartArea.this, getElementProperty( "digital_twin_results.ChartArea.icon", IElementDescriptor.MODEL_ELEMENT_DESCRIPTORS )  );
     icon.setIconOffsets( 0.0, 0.0 );

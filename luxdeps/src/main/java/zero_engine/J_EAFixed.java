@@ -97,6 +97,7 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import static com.anylogic.engine.Utilities.*;
 
@@ -123,10 +124,4 @@ abstract public class J_EAFixed extends J_EA {
     }
     
 	public abstract void operate(J_TimeVariables timeVariables);
-
-
-	@Override
-	public String toString() {
-		return super.toString();
-	}
 } 

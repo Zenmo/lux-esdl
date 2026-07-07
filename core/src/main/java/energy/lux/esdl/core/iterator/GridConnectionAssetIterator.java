@@ -126,7 +126,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     public SwitchStatus caseEVChargingStation(EVChargingStation evChargingStation) {
         if (this.processedAssets.add(evChargingStation)) {
             var maxChargingPowerKw = evChargingStation.getPower() * 0.001;
-            luxLoader.f_addElectricVehicle(luxGridConnection, OL_EnergyAssetType.ELECTRIC_VEHICLE, true, 8_000, maxChargingPowerKw);
+            luxLoader.f_addElectricVehicle(luxGridConnection, OL_VehicleType.CAR, true, 8_000, maxChargingPowerKw);
         }
         return DONE;
     }

@@ -310,6 +310,9 @@ boolean
   public 
 ShapeRadioButtonGroup 
  v_periodRadioButton;
+  private 
+boolean 
+ b_exportFunctionalityEnabled;
 
   // Collection Variables
   public 
@@ -1565,6 +1568,15 @@ for(OL_AssetFlowCategories AC : map_ACToCheckBox.keySet()){
 
   void f_enableExportButton( boolean enable ) { 
 
+if(b_exportFunctionalityEnabled){
+	gr_exportMenuButton.setVisible(enable);
+	gr_exportMenuButtonDisabled.setVisible(!enable);
+} 
+  }
+
+  public void f_enableExportFunctionality( boolean enable ) { 
+
+b_exportFunctionalityEnabled = enable;
 gr_exportMenuButton.setVisible(enable);
 gr_exportMenuButtonDisabled.setVisible(!enable); 
   }
@@ -3496,11 +3508,11 @@ _rb_exportUnit_Font, false,
       }
     };
     rect_exportToExcelFunctions = new ShapeRectangle(
-       SHAPE_DRAW_2D3D, false,1260.0, 1080.0, 0.0, 0.0,
+       SHAPE_DRAW_2D3D, false,1260.0, 1060.0, 0.0, 0.0,
             black, white,
-			570.0, 310.0, 10.0, 1.0, LINE_STYLE_SOLID );
+			570.0, 330.0, 10.0, 1.0, LINE_STYLE_SOLID );
     txt_writeToExcelFunctions = new ShapeText(
-        SHAPE_DRAW_2D, false,1300.0, 1100.0, 0.0, 0.0,
+        SHAPE_DRAW_2D, false,1300.0, 1080.0, 0.0, 0.0,
         black,"Write data to excel",
         _txt_writeToExcelFunctions_Font, ALIGNMENT_LEFT );
     rect_exportMenu = new ShapeRectangle(
@@ -3971,7 +3983,7 @@ ChartProfielen.this, true, 0.0, 0.0,
     }
     gr_loadingScreen.setVisible( false );
     {
-    gr_exportMenuButtonDisabled = new ShapeGroup( ChartProfielen.this, SHAPE_DRAW_2D3D, true, 1930.0, 1200.0, 0.0, 0.0
+    gr_exportMenuButtonDisabled = new ShapeGroup( ChartProfielen.this, SHAPE_DRAW_2D3D, true, 1730.0, 1150.0, 0.0, 0.0
 	
 	     , rect_exportMenuButton1
 	     , image_exportMenuButton1 ) {
@@ -4097,6 +4109,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 	_initialize_level_xjal();
     level.initialize();
     presentation.initialize_xjal( false, false , level );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     addAll( c_selectedExportEC, new OL_EnergyCarriers[] 
 {OL_EnergyCarriers.ELECTRICITY} 
@@ -4178,6 +4197,9 @@ false
 ;
     v_periodRadioButton = 
 rb_periodPeaksIncludingYear 
+;
+    b_exportFunctionalityEnabled = 
+true 
 ;
   }
 

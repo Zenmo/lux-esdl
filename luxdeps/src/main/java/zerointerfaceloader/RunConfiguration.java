@@ -95,7 +95,6 @@ public class RunConfiguration implements IRunConfiguration<Zero_Interface> {
     engine.setSolverODE( Engine.SOLVER_ODE_EULER );
     engine.setSolverNAE( Engine.SOLVER_NAE_MODIFIED_NEWTON );
     engine.setSolverDAE( Engine.SOLVER_DAE_RK45_NEWTON );
-    engine.setInspectionWindowColorTheme(InspectionWindowColorTheme.DEFAULT);
     engine.setVMethods( 427029 );
 
 		engine.setSimultaneousEventsSelectionMode(Engine.EVENT_SELECTION_LIFO);

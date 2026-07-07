@@ -97,6 +97,7 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import static com.anylogic.engine.Utilities.*;
 import java.util.Optional;
@@ -119,7 +120,6 @@ public class RunConfiguration implements IRunConfiguration<EnergyModel> {
     engine.setSolverODE( Engine.SOLVER_ODE_EULER );
     engine.setSolverNAE( Engine.SOLVER_NAE_MODIFIED_NEWTON );
     engine.setSolverDAE( Engine.SOLVER_DAE_RK45_NEWTON );
-    engine.setInspectionWindowColorTheme(InspectionWindowColorTheme.DEFAULT);
     engine.setVMethods( 427029 );
 
 		engine.setSimultaneousEventsSelectionMode(Engine.EVENT_SELECTION_LIFO);

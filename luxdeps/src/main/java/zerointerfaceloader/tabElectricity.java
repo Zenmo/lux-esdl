@@ -710,7 +710,7 @@ while ( nbHousesWithElectricCooking > nbHousesWithElectricCookingGoal ) { // rem
 		cookingAsset.removeEnergyAsset();
    		
    		J_ProfilePointer pp = zero_Interface.energyModel.f_findProfile("default_house_cooking_demand_fr");
-		new J_EAConsumption(house, OL_EnergyAssetType.GAS_PIT, "default_house_cooking_demand_fr", yearlyCookingDemand_kWh, OL_EnergyCarriers.METHANE, zero_Interface.energyModel.p_timeParameters, pp);
+		new J_EAConsumption(house, OL_EnergyAssetType.GAS_HOB, "default_house_cooking_demand_fr", yearlyCookingDemand_kWh, OL_EnergyCarriers.METHANE, zero_Interface.energyModel.p_timeParameters, pp);
 		house.p_cookingMethod = OL_HouseholdCookingMethod.GAS;
 		nbHousesWithElectricCooking --; 
 	}
@@ -725,7 +725,7 @@ while ( nbHousesWithElectricCooking < nbHousesWithElectricCookingGoal) {
 		throw new RuntimeException("No gridconnection without GAS cooking asset found! Current electric cooking count: " + nbHousesWithElectricCooking);
 	}
 	else {
-		J_EAConsumption cookingAsset = findFirst(house.c_consumptionAssets, p -> p.getEAType() == OL_EnergyAssetType.GAS_PIT );
+		J_EAConsumption cookingAsset = findFirst(house.c_consumptionAssets, p -> p.getEAType() == OL_EnergyAssetType.GAS_HOB );
 		if (cookingAsset != null) {
 			double yearlyCookingDemand_kWh = cookingAsset.getBaseConsumption_kWh();
 			cookingAsset.removeEnergyAsset();
@@ -3620,6 +3620,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 	_initialize_level_xjal();
     level.initialize();
     presentation.initialize_xjal( false, false , level );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     icon.initialize_xjal( this.<ModelElementDescriptorUtils[]>getElementProperty( "zerointerfaceloader.tabElectricity.icon", IElementDescriptor.MODEL_ELEMENT_DESCRIPTORS ), false, true  );
     icon.setIconOffsets( 0.0, 0.0 );

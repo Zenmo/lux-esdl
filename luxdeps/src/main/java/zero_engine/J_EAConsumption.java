@@ -97,18 +97,19 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import static com.anylogic.engine.Utilities.*;
 
 /**
  * J_EAConsumption
  */
-public class J_EAConsumption extends zero_engine.J_EAProfile implements Serializable {
+public class J_EAConsumption extends zero_engine.J_EAProfile{
 
 	private double yearlyDemand_kWh;
-	//public double loadLoad_kWh = 0;
+
 	/**
-     * Default constructor
+     * Empty constructor for serialization
      */
     public J_EAConsumption() {
     }
@@ -222,10 +223,5 @@ public class J_EAConsumption extends zero_engine.J_EAProfile implements Serializ
 			"energyCarrier = " + this.energyCarrier + " " + 
 			"yearlyDemand_kWh = " + this.yearlyDemand_kWh;
 	}
-	/**
-	 * This number is here for model snapshot storing purpose<br>
-	 * It needs to be changed when this class gets changed
-	 */
-	private static final long serialVersionUID = 1L;
 }
  
