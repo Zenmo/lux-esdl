@@ -1,11 +1,15 @@
 # Coding instructions
 
+This document attempts to provide guidance to programming agents.
 
 ## Functions
 
 Create small functions. Each small step should be a separate function.
 For example, finding something in a list, or initializing a data class, or asserting a precondition.
-When you find a class that is unexpected or not implemented, log a warning or throw an exception. 
+
+## Checking
+
+When you find a case that is unexpected or not implemented, log a warning or throw an exception. 
 Do not silently ignore cases that are not implemented.
 
 ## Names
@@ -41,7 +45,7 @@ exception messages or log messages.
 
 Rather it should explain the background:
 
-- in which context is this class needed
+- broader context of the class within the program
 - what assumptions are made that are not possible to check in the code
 - what do the parameters represent, how did they come into existence
 

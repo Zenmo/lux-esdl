@@ -2,6 +2,7 @@ package energy.lux.esdl.core.loader.profile;
 
 import energy.lux.esdl.core.loader.profile.bare.BareProfileChecker;
 import energy.lux.esdl.core.loader.profile.bare.BareProfileReader;
+import energy.lux.esdl.core.loader.profile.unit.DayAheadElectricityPriceConverter;
 import energy.lux.esdl.core.loader.profile.unit.OutsideTemperatureConverter;
 import energy.lux.esdl.core.util.DateTimeUtil;
 import esdl.EnergyMarket;
@@ -67,9 +68,6 @@ public class GlobalProfileLoader {
         luxLoader.energyModel.pp_ambientTemperature_degC = temperatureProfilePointer;
     }
 
-    /**
-     * TODO: This assumes that only electricity prices are given.
-     */
     public void loadDayAheadElectricityPricing(
             EnergyMarket energyMarket
     ) {
@@ -78,19 +76,15 @@ public class GlobalProfileLoader {
             return;
         }
 
-        var priceTimeSeries = this.bareProfileReader.readProfile(marketPrice);
-        for (var value : priceTimeSeries.copyValuesArray()) {
-            if (value < -1000 || value > 10_000) {
-                logger.error(
-                        "Day-ahead electricity price {} €/MWh is outside the expected range [-1000, 10_000] €/MWh",
-                        value
-                );
-            }
-        }
+        var barePriceTimeSeries = this.bareProfileReader.readProfile(marketPrice);
+        var priceTimeSeriesWithUnit = DayAheadElectricityPriceConverter.timeSeriesToLuxUnit(
+                barePriceTimeSeries,
+                marketPrice.getProfileQuantityAndUnit()
+        );
         var priceProfilePointer = this.profilePointerFactory.timeSeriesToProfilePointer(
-                priceTimeSeries,
+                priceTimeSeriesWithUnit.timeSeries(),
                 "esdl_day_ahead_electricity_pricing_eur_per_mwh",
-                OL_ProfileUnits.PRICE_EURPMWH
+                priceTimeSeriesWithUnit.unit()
         );
         luxLoader.energyModel.pp_dayAheadElectricityPricing_eurpMWh = priceProfilePointer;
     }

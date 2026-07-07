@@ -1,9 +1,7 @@
 package energy.lux.esdl.core.profile;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import energy.lux.esdl.core.EsdlException;
 import energy.lux.esdl.core.LuxModelFactory;
 import energy.lux.esdl.core.loader.profile.GlobalProfileLoader;
@@ -12,13 +10,13 @@ import esdl.EsdlFactory;
 import esdl.PhysicalQuantityEnum;
 import esdl.UnitEnum;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static energy.lux.esdl.core.TestUtil.captureLogs;
 import static energy.lux.esdl.core.util.DateTimeUtil.luxJan1stInstant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -207,21 +205,5 @@ public class OutsideTemperatureTest {
             values.add((double) (i % 24));
         }
         return values;
-    }
-
-    /**
-     * TODO: unregister after use by implementing Closeable.
-     */
-    private static List<ILoggingEvent> captureLogs() {
-        var loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-
-        var listAppender = new ListAppender<ILoggingEvent>();
-        listAppender.setContext(loggerContext);
-        listAppender.start();
-
-        var rootLogger = loggerContext.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-        rootLogger.addAppender(listAppender);
-
-        return listAppender.list;
     }
 }

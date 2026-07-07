@@ -203,6 +203,7 @@ public class RootIterator {
         for (Service service : services.getService()) {
             if (service instanceof EnergyMarket energyMarket) {
                 var profileLoader = new GlobalProfileLoader(luxLoader);
+                // TODO: verify that carrier is electricity
                 profileLoader.loadDayAheadElectricityPricing(energyMarket);
             } else {
                 logger.warn("Loading ESDL service type {} not implemented", service.getClass());
