@@ -6,6 +6,7 @@ import energy.lux.esdl.core.NotImplemented;
 import energy.lux.esdl.core.loader.profile.ProfilePointerFactory;
 import energy.lux.esdl.core.loader.profile.bare.BareProfileChecker;
 import energy.lux.esdl.core.loader.profile.bare.BareProfileReader;
+import energy.lux.esdl.core.loader.profile.unit.ElectricityDemandConverter;
 import energy.lux.esdl.core.util.DateTimeUtil;
 import energy.lux.esdl.core.util.Util;
 import esdl.*;
@@ -63,21 +64,15 @@ public class ElectricityDemandLoader {
     ) {
         var timeSeries = this.bareProfileReader.readProfile(profile);
 
-        // Convert W to kW
-        // TODO: read units from ESDL, warn if not present
-        var values = timeSeries.copyValuesArray();
-        for (int i = 0; i < values.length; i++) {
-            values[i] *= 0.001;
-        }
-
-        var transformedTimeSeries = timeSeries.toBuilder()
-                .values(values)
-                .build();
+        var timeSeriesWithUnit = ElectricityDemandConverter.timeSeriesToLuxUnit(
+                timeSeries,
+                profile.getProfileQuantityAndUnit()
+        );
 
         var luxProfile = this.profilePointerFactory.timeSeriesToProfilePointer(
-                transformedTimeSeries,
+                timeSeriesWithUnit.timeSeries(),
                 demand.getId() + "_demand",
-                OL_ProfileUnits.KW
+                timeSeriesWithUnit.unit()
         );
 
         var luxEngine = luxLoader.energyModel;

@@ -1,10 +1,9 @@
-package energy.lux.esdl.core.profile;
+package energy.lux.esdl.core.loader.profile;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import energy.lux.esdl.core.EsdlException;
 import energy.lux.esdl.core.LuxModelFactory;
-import energy.lux.esdl.core.loader.profile.GlobalProfileLoader;
 import energy.lux.esdl.core.util.DateTimeUtil;
 import esdl.EsdlFactory;
 import esdl.PhysicalQuantityEnum;
