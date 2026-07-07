@@ -97,6 +97,7 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import static com.anylogic.engine.Utilities.*;
 
@@ -107,8 +108,8 @@ public class J_EAConversionGasBurner extends zero_engine.J_EAConversion implemen
 
 	protected double outputTemperature_degC;
 
-	/**
-     * Default constructor
+    /**
+     * Empty constructor for serialization
      */
     public J_EAConversionGasBurner() {
     }

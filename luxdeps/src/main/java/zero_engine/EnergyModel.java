@@ -97,6 +97,7 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import java.awt.geom.Arc2D;
 
@@ -3387,10 +3388,9 @@ Class<? extends I_HeatingManagement> > c_defaultHeatingStrategies = new LinkedHa
    * @param v_isActive
    * @param p_energyLabel
    * @param p_airco
-   * @param p_isChargingCentre
    * @return newly created embedded object
    */
-  public GCPublicCharger add_PublicChargers( String p_parentNodeElectricID, String p_gridConnectionID, String p_parentNodeHeatID, J_EABuilding p_BuildingThermalAsset, String p_ownerID, J_EAStorageElectric p_batteryAsset, J_EAStorageHeat p_heatBuffer, J_EAStorageGas p_gasBuffer, J_ActivityTrackerCooking p_cookingTracker, OL_GridConnectionInsulationLabel p_insulationLabel, J_EAProfile p_DHWAsset, double p_longitude, double p_latitude, double p_floorSurfaceArea_m2, ConnectionOwner p_owner, double p_roofSurfaceArea_m2, String p_purposeBAG, J_Address p_address, GridNode p_parentNodeHeat, GridNode p_parentNodeElectric, boolean v_isActive, OL_GridConnectionEnergyLabel p_energyLabel, J_EAConversionAirConditioner p_airco, boolean p_isChargingCentre ) {
+  public GCPublicCharger add_PublicChargers( String p_parentNodeElectricID, String p_gridConnectionID, String p_parentNodeHeatID, J_EABuilding p_BuildingThermalAsset, String p_ownerID, J_EAStorageElectric p_batteryAsset, J_EAStorageHeat p_heatBuffer, J_EAStorageGas p_gasBuffer, J_ActivityTrackerCooking p_cookingTracker, OL_GridConnectionInsulationLabel p_insulationLabel, J_EAProfile p_DHWAsset, double p_longitude, double p_latitude, double p_floorSurfaceArea_m2, ConnectionOwner p_owner, double p_roofSurfaceArea_m2, String p_purposeBAG, J_Address p_address, GridNode p_parentNodeHeat, GridNode p_parentNodeElectric, boolean v_isActive, OL_GridConnectionEnergyLabel p_energyLabel, J_EAConversionAirConditioner p_airco ) {
     int index = PublicChargers.size();
     GCPublicCharger _result_xjal = instantiate_PublicChargers_xjal( index );
     // Setup parameters
@@ -3418,7 +3418,6 @@ Class<? extends I_HeatingManagement> > c_defaultHeatingStrategies = new LinkedHa
     _result_xjal.v_isActive = v_isActive;
     _result_xjal.p_energyLabel = p_energyLabel;
     _result_xjal.p_airco = p_airco;
-    _result_xjal.p_isChargingCentre = p_isChargingCentre;
     // Finish embedded object creation
     PublicChargers.callCreate( _result_xjal, index );
     _result_xjal.start();
@@ -4363,7 +4362,6 @@ double _x_xjal =
    * This method should not be called by user
    */
   private void setupParameters_PublicChargers_xjal( final GCPublicCharger self, final int index, TableInput _t ) {
-    self.p_isChargingCentre = self._p_isChargingCentre_DefaultValue_xjal();
     self.p_parentNodeElectricID = self._p_parentNodeElectricID_DefaultValue_xjal();
     self.p_gridConnectionID = self._p_gridConnectionID_DefaultValue_xjal();
     self.p_parentNodeHeatID = self._p_parentNodeHeatID_DefaultValue_xjal();
@@ -5339,7 +5337,7 @@ for( J_EA e : c_ambientDependentAssets ) {
 				((J_EAStorageHeat)e).updateAmbientTemperature( pp_ambientTemperature_degC.getCurrentValue() );
 				break;
 			case BUILDING:
-				new RuntimeException("AmbientTempType 'BUILDING' is not supported yet for J_EAStorageHeat!");
+				throw new RuntimeException("AmbientTempType 'BUILDING' is not supported yet for J_EAStorageHeat!");
 				/*
 				GridConnection parentGC = (GridConnection)e.getParentAgent();
 				if(parentGC.p_BuildingThermalAsset == null){
@@ -5349,17 +5347,15 @@ for( J_EA e : c_ambientDependentAssets ) {
 					((J_EAStorageHeat)e).updateAmbientTemperature(parentGC.p_BuildingThermalAsset.getCurrentTemperature());
 				}
 				*/
-				break;
 			case HEAT_GRID:
 				// Do Nothing, keep fixed temp for now
-				//new RuntimeException("AmbientTempType 'HEAT_GRID' is not supported yet for J_EAStorageHeat!");
+				//throw new RuntimeException("AmbientTempType 'HEAT_GRID' is not supported yet for J_EAStorageHeat!");
 				break;
 			case HEAT_STORAGE:
-				new RuntimeException("AmbientTempType 'HEAT_STORAGE' is not supported yet for J_EAStorageHeat!");
-				break;
+				throw new RuntimeException("AmbientTempType 'HEAT_STORAGE' is not supported yet for J_EAStorageHeat!");
 		}	
 	}
-	if (e instanceof J_EAConversionHeatPump) {
+	if (e instanceof J_EAConversionHeatPump hp) {
 			switch(((J_EAConversionHeatPump) e).getAmbientTempType()){
 			case FIXED:
 				//Do nothing, use preset ambient temp
@@ -5368,7 +5364,7 @@ for( J_EA e : c_ambientDependentAssets ) {
 				((J_EAConversionHeatPump)e).updateAmbientTemperature( pp_ambientTemperature_degC.getCurrentValue() );
 				break;
 			case BUILDING:
-				new RuntimeException("AmbientTempType 'BUILDING' is not supported yet for J_EAConversionHeatPump!");
+				throw new RuntimeException("AmbientTempType 'BUILDING' is not supported yet for J_EAConversionHeatPump!");
 				/*
 				GridConnection parentGC = (GridConnection)e.getParentAgent();
 				if(parentGC.p_BuildingThermalAsset == null){
@@ -5378,13 +5374,12 @@ for( J_EA e : c_ambientDependentAssets ) {
 					((J_EAConversionHeatPump)e).updateAmbientTemperature(parentGC.p_BuildingThermalAsset.getCurrentTemperature());
 				}
 				*/
-				break;
 			case HEAT_GRID:
-				new RuntimeException("AmbientTempType 'HEAT_GRID' is not supported yet for J_EAConversionHeatPump!");
+				// Do Nothing, keep fixed temp for now
+				//throw new RuntimeException("AmbientTempType 'HEAT_GRID' is not supported yet for J_EAConversionHeatPump!");
 				break;
 			case HEAT_STORAGE:
-				new RuntimeException("AmbientTempType 'HEAT_STORAGE' is not supported yet for J_EAConversionHeatPump!");
-				break;
+				throw new RuntimeException("AmbientTempType 'HEAT_STORAGE' is not supported yet for J_EAConversionHeatPump!");
 			}		
 	}
 	if( e instanceof J_EABuilding ) {
@@ -6340,6 +6335,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     level.initialize();
     level1.initialize();
     presentation = new ShapeTopLevelPresentationGroup( EnergyModel.this, true, 0, 0, 0, 0 , level, level1 );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     // Creating embedded object instances
     instantiatePopulations_xjal();

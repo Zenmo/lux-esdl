@@ -97,6 +97,7 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import static com.anylogic.engine.Utilities.*;
 
@@ -106,13 +107,9 @@ import static com.anylogic.engine.Utilities.*;
 public class J_EAStorageElectric extends J_EAStorage implements Serializable {
 	
 	protected OL_EnergyCarriers storageMedium = OL_EnergyCarriers.ELECTRICITY;
-	
-	//protected double etaCharge_r; // charging efficiency
-	//protected double etaDischarge_r;
-	//protected double capacityElectric_kW;
-	
+
     /**
-     * Default constructor
+     * Empty constructor for serialization
      */
     public J_EAStorageElectric() {
     }

@@ -742,7 +742,7 @@ b_capacitySharingContractWeekendDistinction
   @AnyLogicInternalCodegenAPI
   private void _button_add_capacitySharingContract_SetDynamicParams_xjal( ShapeButton shape ) {
     shape.setEnabled(
-!zero_Interface.settings.isPublicModel() 
+!zero_Interface.settings.isPublicModel() && zero_Interface.user.GCAccessType == OL_UserGCAccessType.FULL 
 );
   }
   
@@ -769,7 +769,7 @@ b_capacitySharingContractWeekendDistinction
   @AnyLogicInternalCodegenAPI
   private void _button_createEnergyHub_SetDynamicParams_xjal( ShapeButton shape ) {
     shape.setEnabled(
-!zero_Interface.settings.isPublicModel() 
+!zero_Interface.settings.isPublicModel() && zero_Interface.user.GCAccessType == OL_UserGCAccessType.FULL 
 );
   }
   
@@ -781,7 +781,7 @@ b_capacitySharingContractWeekendDistinction
   @AnyLogicInternalCodegenAPI
   private void _button_loadScenario_SetDynamicParams_xjal( ShapeButton shape ) {
     shape.setEnabled(
-!zero_Interface.settings.isPublicModel() 
+!zero_Interface.settings.isPublicModel() && zero_Interface.user.GCAccessType == OL_UserGCAccessType.FULL 
 );
   }
   
@@ -967,7 +967,7 @@ _button_add_capacitySharingContract_Font,
     button_remove_capacitySharingContracts = new ShapeButton(
 tabEHub.this, true, 40.0, 85.0,
 			290.0, 30.0,
-            black, true,
+            black, false,
 _button_remove_capacitySharingContracts_Font,
 			"Verwijder alle contractuele capaciteitsdelingen" ) {
 	
@@ -1433,6 +1433,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 	_initialize_level_xjal();
     level.initialize();
     presentation.initialize_xjal( false, false , level );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     icon.initialize_xjal( this.<ModelElementDescriptorUtils[]>getElementProperty( "zerointerfaceloader.tabEHub.icon", IElementDescriptor.MODEL_ELEMENT_DESCRIPTORS ), false, true  );
     icon.setIconOffsets( 0.0, 0.0 );

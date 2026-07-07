@@ -102,62 +102,64 @@ import static zero_engine.OL_HeatpumpType.*;
 import static com.anylogic.engine.Utilities.*;
 
 /**
- * J_CurtailManagementContractCapacity
+ * J_EAConversionHob
  */	
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+public class J_EAConversionHob extends J_EAConversion{
 
-@JsonAutoDetect(
-    fieldVisibility = Visibility.ANY,    // 
-    getterVisibility = Visibility.NONE,
-    isGetterVisibility = Visibility.NONE,
-    setterVisibility = Visibility.NONE,
-    creatorVisibility = Visibility.NONE
-)
+	//protected double outputTemperature_degC;
 
-public class J_CurtailManagementContractCapacity implements I_CurtailManagement {
-	
-	GridConnection gc;
-	J_TimeParameters timeParameters;
-	
     /**
      * Empty constructor for serialization
      */
-    public J_CurtailManagementContractCapacity() {
-    }
-
+	public J_EAConversionHob() {
+	}
+	
     /**
      * Default constructor
      */
-    public J_CurtailManagementContractCapacity(GridConnection gc, J_TimeParameters timeParameters) {
-    	this.gc = gc;
-    	this.timeParameters = timeParameters;
+    public J_EAConversionHob(I_AssetOwner owner, OL_EnergyCarriers energyCarrierConsumed, double inputCapacity_kW, double efficiency, J_TimeParameters timeParameters, double outputTemperature_degC) {
+    	this.setOwner(owner);
+	    this.timeParameters = timeParameters;
+	    this.inputCapacity_kW = inputCapacity_kW;
+	    this.eta_r = efficiency; // The efficiency is the amount of heat that is retained within the building
+	    this.outputCapacity_kW = inputCapacity_kW * efficiency;
+	    //this.outputTemperature_degC = outputTemperature_degC;
+		this.energyCarrierProduced = OL_EnergyCarriers.HEAT;
+		this.energyCarrierConsumed = energyCarrierConsumed;
+
+	    if(energyCarrierConsumed == OL_EnergyCarriers.ELECTRICITY) {
+		    this.assetFlowCategory = OL_AssetFlowCategories.electricHobConsumption_kW;
+		    this.energyAssetType = OL_EnergyAssetType.ELECTRIC_HOB;
+	    }
+	    else if (energyCarrierConsumed == OL_EnergyCarriers.METHANE){
+		    this.energyAssetType = OL_EnergyAssetType.GAS_HOB;
+	    }
+	    else {
+	    	throw new RuntimeException("EnergyCarrierConsumed (" + energyCarrierConsumed + ") found for J_EAConversionHob that is not supported!");
+	    }
+	    
+	    this.activeProductionEnergyCarriers.add(this.energyCarrierProduced);		
+		this.activeConsumptionEnergyCarriers.add(this.energyCarrierConsumed);
+		registerEnergyAsset(timeParameters);
+    }
+
+    @Override
+    public void operate( double powerFraction_fr, J_TimeVariables timeVariables ) {
+    	double heatProduction_kW = this.inputCapacity_kW * powerFraction_fr * eta_r;
+		double energyInput_kW = this.inputCapacity_kW * powerFraction_fr;
+		this.energyUse_kW = (energyInput_kW - heatProduction_kW);
+		this.energyUsed_kWh += this.timeParameters.getTimeStep_h() * (energyInput_kW - heatProduction_kW); // This represents losses!
+		flowsMap.put(this.energyCarrierConsumed, energyInput_kW);		
+		flowsMap.put(OL_EnergyCarriers.HEAT, -heatProduction_kW);	
+		assetFlowsMap.put(this.assetFlowCategory, energyInput_kW);
     }
     
-	//Manage curtailment
-	public void manageCurtailment(J_TimeVariables timeVariables) {
-		// Keep feedin power within contract capacity
-		if (gc.fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.ELECTRICITY) < - gc.v_liveConnectionMetaData.getContractedFeedinCapacity_kW()) { // overproduction!
-			for (J_EAProduction j_ea : gc.c_productionAssets) {
-				J_FlowPacket flowPacket = j_ea.curtailEnergyCarrierProduction(OL_EnergyCarriers.ELECTRICITY, - gc.fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.ELECTRICITY) - gc.v_liveConnectionMetaData.getContractedFeedinCapacity_kW());
-				gc.f_removeFlows(flowPacket, j_ea);
-				if (!(gc.fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.ELECTRICITY) < - gc.v_liveConnectionMetaData.getContractedFeedinCapacity_kW())) {
-					break;
-				}
-			}
-		}
-	}
-	
-    ////Store and reset states
-	public void storeStatesAndReset() {
-		//Nothing to store and reset
-	}
-	public void restoreStates() {
-		//Nothing to restore
-	}
-	
 	@Override
 	public String toString() {
-		return super.toString();
+		return
+			"J_EAConversionHob: \n" +
+			"capacityElectric_kW = " + this.inputCapacity_kW +", \n"+
+			"eta_r = " + this.eta_r+ ", \n" +
+			"energyUsed_kWh (losses) = " + this.energyUsed_kWh;
 	}
 } 

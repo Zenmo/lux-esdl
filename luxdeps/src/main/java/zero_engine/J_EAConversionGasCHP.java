@@ -97,6 +97,7 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import static com.anylogic.engine.Utilities.*;
 
@@ -110,10 +111,9 @@ public class J_EAConversionGasCHP extends zero_engine.J_EAConversion implements 
 	protected double outputElectricCapacity_kW;
 	protected List<OL_EnergyCarriers> energyCarriersProduced = new ArrayList<>();
     
-	/**
-     * Default constructor
+    /**
+     * Empty constructor for serialization
      */
-	
     public J_EAConversionGasCHP() {
     }
 

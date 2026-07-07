@@ -1731,7 +1731,7 @@ String ,
 J_scenario_Current > c_scenarioMap_Current = new LinkedHashMap<String, J_scenario_Current>();
   public 
 ArrayList <
-J_EA > c_orderedVehicles = new ArrayList<J_EA>();
+I_Vehicle > c_orderedVehicles = new ArrayList<I_Vehicle>();
   public 
 ArrayList <
 GCUtility > c_orderedHeatingSystemsCompanies = new ArrayList<GCUtility>();
@@ -2112,9 +2112,19 @@ f_setStartView();
    * @param p_gridConnection
    * @param p_maxSavingsSliders_default
    * @param p_minSavingsSliders_default
+   * @param matrix_vehicleTripsConfigurationButtons
+   * @param map_customTripTrackerToOriginal
+   * @param map_storedCustomTripButtonConfiguration
+   * @param matrix_defaultValuesCustomTripButtons
+   * @param map_dayToEnableDayButtons
+   * @param p_configureVehicleTripsOnColor
+   * @param p_configureVehicleTripsOffColor
+   * @param map_dayToDisableRectangles
+   * @param map_createdCustomTripWeeklyConfiguration
+   * @param p_defaultTravelDistance_km
    * @return newly created embedded object
    */
-  public UI_company add_pop_UI_Company( String p_companyName, int p_maxAddedVehicles, J_scenario_Current p_scenarioSettings_Current, J_scenario_Future p_scenarioSettings_Future, GridConnection p_gridConnection, double p_maxSavingsSliders_default, double p_minSavingsSliders_default ) {
+  public UI_company add_pop_UI_Company( String p_companyName, int p_maxAddedVehicles, J_scenario_Current p_scenarioSettings_Current, J_scenario_Future p_scenarioSettings_Future, GridConnection p_gridConnection, double p_maxSavingsSliders_default, double p_minSavingsSliders_default, ShapeRectangle[][] matrix_vehicleTripsConfigurationButtons, Map<String, Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips>> map_customTripTrackerToOriginal, Map<String, Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration>> map_storedCustomTripButtonConfiguration, boolean[][] matrix_defaultValuesCustomTripButtons, Map<OL_Days, ShapeCheckBox> map_dayToEnableDayButtons, Color p_configureVehicleTripsOnColor, Color p_configureVehicleTripsOffColor, Map<OL_Days, ShapeGroup> map_dayToDisableRectangles, Map<String, Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>>> map_createdCustomTripWeeklyConfiguration, double p_defaultTravelDistance_km ) {
     int index = pop_UI_Company.size();
     UI_company _result_xjal = instantiate_pop_UI_Company_xjal( index );
     // Setup parameters
@@ -2126,6 +2136,16 @@ f_setStartView();
     _result_xjal.p_gridConnection = p_gridConnection;
     _result_xjal.p_maxSavingsSliders_default = p_maxSavingsSliders_default;
     _result_xjal.p_minSavingsSliders_default = p_minSavingsSliders_default;
+    _result_xjal.matrix_vehicleTripsConfigurationButtons = matrix_vehicleTripsConfigurationButtons;
+    _result_xjal.map_customTripTrackerToOriginal = map_customTripTrackerToOriginal;
+    _result_xjal.map_storedCustomTripButtonConfiguration = map_storedCustomTripButtonConfiguration;
+    _result_xjal.matrix_defaultValuesCustomTripButtons = matrix_defaultValuesCustomTripButtons;
+    _result_xjal.map_dayToEnableDayButtons = map_dayToEnableDayButtons;
+    _result_xjal.p_configureVehicleTripsOnColor = p_configureVehicleTripsOnColor;
+    _result_xjal.p_configureVehicleTripsOffColor = p_configureVehicleTripsOffColor;
+    _result_xjal.map_dayToDisableRectangles = map_dayToDisableRectangles;
+    _result_xjal.map_createdCustomTripWeeklyConfiguration = map_createdCustomTripWeeklyConfiguration;
+    _result_xjal.p_defaultTravelDistance_km = p_defaultTravelDistance_km;
     // Finish embedded object creation
     pop_UI_Company.callCreate( _result_xjal, index );
     _result_xjal.start();
@@ -2235,6 +2255,16 @@ f_setStartView();
     self.p_gridConnection = self._p_gridConnection_DefaultValue_xjal();
     self.p_maxSavingsSliders_default = self._p_maxSavingsSliders_default_DefaultValue_xjal();
     self.p_minSavingsSliders_default = self._p_minSavingsSliders_default_DefaultValue_xjal();
+    self.matrix_vehicleTripsConfigurationButtons = self._matrix_vehicleTripsConfigurationButtons_DefaultValue_xjal();
+    self.map_customTripTrackerToOriginal = self._map_customTripTrackerToOriginal_DefaultValue_xjal();
+    self.map_storedCustomTripButtonConfiguration = self._map_storedCustomTripButtonConfiguration_DefaultValue_xjal();
+    self.matrix_defaultValuesCustomTripButtons = self._matrix_defaultValuesCustomTripButtons_DefaultValue_xjal();
+    self.map_dayToEnableDayButtons = self._map_dayToEnableDayButtons_DefaultValue_xjal();
+    self.p_configureVehicleTripsOnColor = self._p_configureVehicleTripsOnColor_DefaultValue_xjal();
+    self.p_configureVehicleTripsOffColor = self._p_configureVehicleTripsOffColor_DefaultValue_xjal();
+    self.map_dayToDisableRectangles = self._map_dayToDisableRectangles_DefaultValue_xjal();
+    self.map_createdCustomTripWeeklyConfiguration = self._map_createdCustomTripWeeklyConfiguration_DefaultValue_xjal();
+    self.p_defaultTravelDistance_km = self._p_defaultTravelDistance_km_DefaultValue_xjal();
   }
 
   /**
@@ -2790,6 +2820,11 @@ if(selectedChartTypes_Energy == null){ // Temporary backup till all models have 
 }
 List<OL_ChartTypes> selectedChartTypes_Economic = settings.resultsUISelectedChartTypes_Economic();
 
+//Disable export functionality in profiles if not full access.
+if(settings.isPublicModel() || user.GCAccessType != OL_UserGCAccessType.FULL){
+	uI_Results.f_enablePublicVersion(true);
+}
+
 //Disable summary button if summary is not selected
 if(settings.showKPISummary() == null || !settings.showKPISummary()){
 	uI_Results.getCheckbox_KPISummary().setVisible(false);
@@ -2864,7 +2899,11 @@ for(J_EA vehicle : EAs){
 	}
 }
 
-c_orderedVehicles = otherEAs; 
+ArrayList<I_Vehicle> orderedVehicleList = new ArrayList<>();
+for(J_EA vehicle : otherEAs){
+	orderedVehicleList.add((I_Vehicle)vehicle);
+}
+c_orderedVehicles = orderedVehicleList; 
   }
 
   void f_initialHeatingSystemsOrder(  ) { 
@@ -4064,11 +4103,11 @@ for (GCPublicCharger gc : energyModel.PublicChargers) {
 		collectionPointerV2GChargers.add(gc);
 	}
 	
-	if ( !gc.p_isChargingCentre ) { //Should maybe be a check for charger capabilities as well? 
-		c_orderedPublicChargers.add(gc);
-	}
+	//Add to total public charger collection
+	c_orderedPublicChargers.add(gc);
 }
 
+//Add all inactive chargers at the end of the list.
 c_orderedV1GChargers.addAll( c_inactiveV1GChargers );
 c_orderedV2GChargers.addAll( c_inactiveV2GChargers );
 
@@ -7437,7 +7476,7 @@ cb_showFilterInterface.isEnabled()
     shape.setVisible( _visible );
  	if ( _visible ) {
     shape.setEnabled(
-!settings.isPublicModel() && c_cbFilterOptions.size() > 0 
+!settings.isPublicModel() && user.GCAccessType == OL_UserGCAccessType.FULL && c_cbFilterOptions.size() > 0 
 );
  	}
   }
@@ -11386,6 +11425,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     level.initialize();
     level1.initialize();
     presentation = new ShapeTopLevelPresentationGroup( Zero_Interface.this, true, 0, 0, 0, 0 , level, level1 );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     // Creating embedded object instances
     instantiatePopulations_xjal();

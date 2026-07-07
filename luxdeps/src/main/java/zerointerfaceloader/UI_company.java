@@ -78,7 +78,7 @@ import java.awt.geom.Arc2D;
 
 //import kotlinx.serialization.internal.ArrayListClassDesc;
 import org.eclipse.jdt.internal.compiler.ast.ForeachStatement;
- 
+import java.math.BigDecimal; 
 
 public class UI_company extends Agent
 {
@@ -359,6 +359,619 @@ double  p_minSavingsSliders_default;
   }
 
 
+  public 
+ShapeRectangle[][]  matrix_vehicleTripsConfigurationButtons;
+
+  /**
+   * Returns default value for parameter <code>matrix_vehicleTripsConfigurationButtons</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public ShapeRectangle[][] _matrix_vehicleTripsConfigurationButtons_DefaultValue_xjal() {
+    final UI_company self = this;
+    return new ShapeRectangle[][]
+{
+    { // Monday (0)
+        rect_configureVehicleTrips_monday_0,
+        rect_configureVehicleTrips_monday_1,
+        rect_configureVehicleTrips_monday_2,
+        rect_configureVehicleTrips_monday_3,
+        rect_configureVehicleTrips_monday_4,
+        rect_configureVehicleTrips_monday_5,
+        rect_configureVehicleTrips_monday_6,
+        rect_configureVehicleTrips_monday_7,
+        rect_configureVehicleTrips_monday_8,
+        rect_configureVehicleTrips_monday_9,
+        rect_configureVehicleTrips_monday_10,
+        rect_configureVehicleTrips_monday_11,
+        rect_configureVehicleTrips_monday_12,
+        rect_configureVehicleTrips_monday_13,
+        rect_configureVehicleTrips_monday_14,
+        rect_configureVehicleTrips_monday_15,
+        rect_configureVehicleTrips_monday_16,
+        rect_configureVehicleTrips_monday_17,
+        rect_configureVehicleTrips_monday_18,
+        rect_configureVehicleTrips_monday_19,
+        rect_configureVehicleTrips_monday_20,
+        rect_configureVehicleTrips_monday_21,
+        rect_configureVehicleTrips_monday_22,
+        rect_configureVehicleTrips_monday_23
+    },
+    { // Tuesday (1)
+        rect_configureVehicleTrips_tuesday_0,
+        rect_configureVehicleTrips_tuesday_1,
+        rect_configureVehicleTrips_tuesday_2,
+        rect_configureVehicleTrips_tuesday_3,
+        rect_configureVehicleTrips_tuesday_4,
+        rect_configureVehicleTrips_tuesday_5,
+        rect_configureVehicleTrips_tuesday_6,
+        rect_configureVehicleTrips_tuesday_7,
+        rect_configureVehicleTrips_tuesday_8,
+        rect_configureVehicleTrips_tuesday_9,
+        rect_configureVehicleTrips_tuesday_10,
+        rect_configureVehicleTrips_tuesday_11,
+        rect_configureVehicleTrips_tuesday_12,
+        rect_configureVehicleTrips_tuesday_13,
+        rect_configureVehicleTrips_tuesday_14,
+        rect_configureVehicleTrips_tuesday_15,
+        rect_configureVehicleTrips_tuesday_16,
+        rect_configureVehicleTrips_tuesday_17,
+        rect_configureVehicleTrips_tuesday_18,
+        rect_configureVehicleTrips_tuesday_19,
+        rect_configureVehicleTrips_tuesday_20,
+        rect_configureVehicleTrips_tuesday_21,
+        rect_configureVehicleTrips_tuesday_22,
+        rect_configureVehicleTrips_tuesday_23
+    },
+    { // Wednesday (2)
+        rect_configureVehicleTrips_wednesday_0,
+        rect_configureVehicleTrips_wednesday_1,
+        rect_configureVehicleTrips_wednesday_2,
+        rect_configureVehicleTrips_wednesday_3,
+        rect_configureVehicleTrips_wednesday_4,
+        rect_configureVehicleTrips_wednesday_5,
+        rect_configureVehicleTrips_wednesday_6,
+        rect_configureVehicleTrips_wednesday_7,
+        rect_configureVehicleTrips_wednesday_8,
+        rect_configureVehicleTrips_wednesday_9,
+        rect_configureVehicleTrips_wednesday_10,
+        rect_configureVehicleTrips_wednesday_11,
+        rect_configureVehicleTrips_wednesday_12,
+        rect_configureVehicleTrips_wednesday_13,
+        rect_configureVehicleTrips_wednesday_14,
+        rect_configureVehicleTrips_wednesday_15,
+        rect_configureVehicleTrips_wednesday_16,
+        rect_configureVehicleTrips_wednesday_17,
+        rect_configureVehicleTrips_wednesday_18,
+        rect_configureVehicleTrips_wednesday_19,
+        rect_configureVehicleTrips_wednesday_20,
+        rect_configureVehicleTrips_wednesday_21,
+        rect_configureVehicleTrips_wednesday_22,
+        rect_configureVehicleTrips_wednesday_23
+    },
+    { // Thursday (3)
+        rect_configureVehicleTrips_thursday_0,
+        rect_configureVehicleTrips_thursday_1,
+        rect_configureVehicleTrips_thursday_2,
+        rect_configureVehicleTrips_thursday_3,
+        rect_configureVehicleTrips_thursday_4,
+        rect_configureVehicleTrips_thursday_5,
+        rect_configureVehicleTrips_thursday_6,
+        rect_configureVehicleTrips_thursday_7,
+        rect_configureVehicleTrips_thursday_8,
+        rect_configureVehicleTrips_thursday_9,
+        rect_configureVehicleTrips_thursday_10,
+        rect_configureVehicleTrips_thursday_11,
+        rect_configureVehicleTrips_thursday_12,
+        rect_configureVehicleTrips_thursday_13,
+        rect_configureVehicleTrips_thursday_14,
+        rect_configureVehicleTrips_thursday_15,
+        rect_configureVehicleTrips_thursday_16,
+        rect_configureVehicleTrips_thursday_17,
+        rect_configureVehicleTrips_thursday_18,
+        rect_configureVehicleTrips_thursday_19,
+        rect_configureVehicleTrips_thursday_20,
+        rect_configureVehicleTrips_thursday_21,
+        rect_configureVehicleTrips_thursday_22,
+        rect_configureVehicleTrips_thursday_23
+    },
+    { // Friday (4)
+        rect_configureVehicleTrips_friday_0,
+        rect_configureVehicleTrips_friday_1,
+        rect_configureVehicleTrips_friday_2,
+        rect_configureVehicleTrips_friday_3,
+        rect_configureVehicleTrips_friday_4,
+        rect_configureVehicleTrips_friday_5,
+        rect_configureVehicleTrips_friday_6,
+        rect_configureVehicleTrips_friday_7,
+        rect_configureVehicleTrips_friday_8,
+        rect_configureVehicleTrips_friday_9,
+        rect_configureVehicleTrips_friday_10,
+        rect_configureVehicleTrips_friday_11,
+        rect_configureVehicleTrips_friday_12,
+        rect_configureVehicleTrips_friday_13,
+        rect_configureVehicleTrips_friday_14,
+        rect_configureVehicleTrips_friday_15,
+        rect_configureVehicleTrips_friday_16,
+        rect_configureVehicleTrips_friday_17,
+        rect_configureVehicleTrips_friday_18,
+        rect_configureVehicleTrips_friday_19,
+        rect_configureVehicleTrips_friday_20,
+        rect_configureVehicleTrips_friday_21,
+        rect_configureVehicleTrips_friday_22,
+        rect_configureVehicleTrips_friday_23
+    },
+    { // Saturday (5)
+        rect_configureVehicleTrips_saturday_0,
+        rect_configureVehicleTrips_saturday_1,
+        rect_configureVehicleTrips_saturday_2,
+        rect_configureVehicleTrips_saturday_3,
+        rect_configureVehicleTrips_saturday_4,
+        rect_configureVehicleTrips_saturday_5,
+        rect_configureVehicleTrips_saturday_6,
+        rect_configureVehicleTrips_saturday_7,
+        rect_configureVehicleTrips_saturday_8,
+        rect_configureVehicleTrips_saturday_9,
+        rect_configureVehicleTrips_saturday_10,
+        rect_configureVehicleTrips_saturday_11,
+        rect_configureVehicleTrips_saturday_12,
+        rect_configureVehicleTrips_saturday_13,
+        rect_configureVehicleTrips_saturday_14,
+        rect_configureVehicleTrips_saturday_15,
+        rect_configureVehicleTrips_saturday_16,
+        rect_configureVehicleTrips_saturday_17,
+        rect_configureVehicleTrips_saturday_18,
+        rect_configureVehicleTrips_saturday_19,
+        rect_configureVehicleTrips_saturday_20,
+        rect_configureVehicleTrips_saturday_21,
+        rect_configureVehicleTrips_saturday_22,
+        rect_configureVehicleTrips_saturday_23
+    },
+    { // Sunday (6)
+        rect_configureVehicleTrips_sunday_0,
+        rect_configureVehicleTrips_sunday_1,
+        rect_configureVehicleTrips_sunday_2,
+        rect_configureVehicleTrips_sunday_3,
+        rect_configureVehicleTrips_sunday_4,
+        rect_configureVehicleTrips_sunday_5,
+        rect_configureVehicleTrips_sunday_6,
+        rect_configureVehicleTrips_sunday_7,
+        rect_configureVehicleTrips_sunday_8,
+        rect_configureVehicleTrips_sunday_9,
+        rect_configureVehicleTrips_sunday_10,
+        rect_configureVehicleTrips_sunday_11,
+        rect_configureVehicleTrips_sunday_12,
+        rect_configureVehicleTrips_sunday_13,
+        rect_configureVehicleTrips_sunday_14,
+        rect_configureVehicleTrips_sunday_15,
+        rect_configureVehicleTrips_sunday_16,
+        rect_configureVehicleTrips_sunday_17,
+        rect_configureVehicleTrips_sunday_18,
+        rect_configureVehicleTrips_sunday_19,
+        rect_configureVehicleTrips_sunday_20,
+        rect_configureVehicleTrips_sunday_21,
+        rect_configureVehicleTrips_sunday_22,
+        rect_configureVehicleTrips_sunday_23
+    }
+} 
+;
+  }
+
+  public void set_matrix_vehicleTripsConfigurationButtons( ShapeRectangle[][] value ) {
+    if (value == this.matrix_vehicleTripsConfigurationButtons) {
+      return;
+    }
+    ShapeRectangle[][] _oldValue_xjal = this.matrix_vehicleTripsConfigurationButtons;
+    this.matrix_vehicleTripsConfigurationButtons = value;
+    onChange_matrix_vehicleTripsConfigurationButtons_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter matrix_vehicleTripsConfigurationButtons.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_matrix_vehicleTripsConfigurationButtons()</code> method instead.
+   */
+  protected void onChange_matrix_vehicleTripsConfigurationButtons() {
+    onChange_matrix_vehicleTripsConfigurationButtons_xjal( matrix_vehicleTripsConfigurationButtons );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_matrix_vehicleTripsConfigurationButtons_xjal( ShapeRectangle[][] oldValue ) {  
+  }
+
+
+  /**
+   * Map of GC_UUID to<br>
+   * 	Map<J_TripTracker, Triptracker> New triptracker to original triptracker.<br>
+   * -> When new triptracker is replaced again, the newest triptracker should get the original triptracker as value again.
+   */
+  public 
+Map<String, Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips>>  map_customTripTrackerToOriginal;
+
+  /**
+   * Returns default value for parameter <code>map_customTripTrackerToOriginal</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public Map<String, Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips>> _map_customTripTrackerToOriginal_DefaultValue_xjal() {
+    final UI_company self = this;
+    return 
+new HashMap<>() 
+;
+  }
+
+  public void set_map_customTripTrackerToOriginal( Map<String, Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips>> value ) {
+    if (value == this.map_customTripTrackerToOriginal) {
+      return;
+    }
+    Map<String, Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips>> _oldValue_xjal = this.map_customTripTrackerToOriginal;
+    this.map_customTripTrackerToOriginal = value;
+    onChange_map_customTripTrackerToOriginal_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter map_customTripTrackerToOriginal.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_map_customTripTrackerToOriginal()</code> method instead.
+   */
+  protected void onChange_map_customTripTrackerToOriginal() {
+    onChange_map_customTripTrackerToOriginal_xjal( map_customTripTrackerToOriginal );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_map_customTripTrackerToOriginal_xjal( Map<String, Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips>> oldValue ) {  
+  }
+
+
+  /**
+   * Map of GC_UUID to<br>
+   * 	Map of vehicleType to<br>
+   * 		Boolean matrix of created weekly configuration
+   */
+  public 
+Map<String, Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration>>  map_storedCustomTripButtonConfiguration;
+
+  /**
+   * Returns default value for parameter <code>map_storedCustomTripButtonConfiguration</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public Map<String, Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration>> _map_storedCustomTripButtonConfiguration_DefaultValue_xjal() {
+    final UI_company self = this;
+    return 
+new HashMap<>() 
+;
+  }
+
+  public void set_map_storedCustomTripButtonConfiguration( Map<String, Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration>> value ) {
+    if (value == this.map_storedCustomTripButtonConfiguration) {
+      return;
+    }
+    Map<String, Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration>> _oldValue_xjal = this.map_storedCustomTripButtonConfiguration;
+    this.map_storedCustomTripButtonConfiguration = value;
+    onChange_map_storedCustomTripButtonConfiguration_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter map_storedCustomTripButtonConfiguration.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_map_storedCustomTripButtonConfiguration()</code> method instead.
+   */
+  protected void onChange_map_storedCustomTripButtonConfiguration() {
+    onChange_map_storedCustomTripButtonConfiguration_xjal( map_storedCustomTripButtonConfiguration );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_map_storedCustomTripButtonConfiguration_xjal( Map<String, Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration>> oldValue ) {  
+  }
+
+
+  public 
+boolean[][]  matrix_defaultValuesCustomTripButtons;
+
+  /**
+   * Returns default value for parameter <code>matrix_defaultValuesCustomTripButtons</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public boolean[][] _matrix_defaultValuesCustomTripButtons_DefaultValue_xjal() {
+    final UI_company self = this;
+    return new boolean[][]
+{
+	//  0      1      2      3      4      5      6      7      8      9      10     11     12     13     14     15     16     17     18     19     20     21     22     23
+	{ false, false, false, false, false, false, false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, false },
+	{ false, false, false, false, false, false, false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, false },
+	{ false, false, false, false, false, false, false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, false },
+	{ false, false, false, false, false, false, false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, false },
+	{ false, false, false, false, false, false, false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, false },
+	{ false, false, false, false, false, false, false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, false },
+	{ false, false, false, false, false, false, false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, false }
+} 
+;
+  }
+
+  public void set_matrix_defaultValuesCustomTripButtons( boolean[][] value ) {
+    if (value == this.matrix_defaultValuesCustomTripButtons) {
+      return;
+    }
+    boolean[][] _oldValue_xjal = this.matrix_defaultValuesCustomTripButtons;
+    this.matrix_defaultValuesCustomTripButtons = value;
+    onChange_matrix_defaultValuesCustomTripButtons_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter matrix_defaultValuesCustomTripButtons.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_matrix_defaultValuesCustomTripButtons()</code> method instead.
+   */
+  protected void onChange_matrix_defaultValuesCustomTripButtons() {
+    onChange_matrix_defaultValuesCustomTripButtons_xjal( matrix_defaultValuesCustomTripButtons );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_matrix_defaultValuesCustomTripButtons_xjal( boolean[][] oldValue ) {  
+  }
+
+
+  public 
+Map<OL_Days, ShapeCheckBox>  map_dayToEnableDayButtons;
+
+  /**
+   * Returns default value for parameter <code>map_dayToEnableDayButtons</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public Map<OL_Days, ShapeCheckBox> _map_dayToEnableDayButtons_DefaultValue_xjal() {
+    final UI_company self = this;
+    return 
+Map.ofEntries(
+	Map.entry(OL_Days.MONDAY, cb_configureVehicleTripsMonday),
+	Map.entry(OL_Days.TUESDAY,cb_configureVehicleTripsTuesday),
+	Map.entry(OL_Days.WEDNESDAY, cb_configureVehicleTripsWednesday),
+	Map.entry(OL_Days.THURSDAY, cb_configureVehicleTripsThursday),
+	Map.entry(OL_Days.FRIDAY, cb_configureVehicleTripsFriday),
+	Map.entry(OL_Days.SATURDAY, cb_configureVehicleTripsSaturday),
+	Map.entry(OL_Days.SUNDAY, cb_configureVehicleTripsSunday)
+) 
+;
+  }
+
+  public void set_map_dayToEnableDayButtons( Map<OL_Days, ShapeCheckBox> value ) {
+    if (value == this.map_dayToEnableDayButtons) {
+      return;
+    }
+    Map<OL_Days, ShapeCheckBox> _oldValue_xjal = this.map_dayToEnableDayButtons;
+    this.map_dayToEnableDayButtons = value;
+    onChange_map_dayToEnableDayButtons_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter map_dayToEnableDayButtons.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_map_dayToEnableDayButtons()</code> method instead.
+   */
+  protected void onChange_map_dayToEnableDayButtons() {
+    onChange_map_dayToEnableDayButtons_xjal( map_dayToEnableDayButtons );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_map_dayToEnableDayButtons_xjal( Map<OL_Days, ShapeCheckBox> oldValue ) {  
+  }
+
+
+  public 
+Color  p_configureVehicleTripsOnColor;
+
+  /**
+   * Returns default value for parameter <code>p_configureVehicleTripsOnColor</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public Color _p_configureVehicleTripsOnColor_DefaultValue_xjal() {
+    final UI_company self = this;
+    return 
+new Color(252, 194, 0) 
+;
+  }
+
+  public void set_p_configureVehicleTripsOnColor( Color value ) {
+    if (value == this.p_configureVehicleTripsOnColor) {
+      return;
+    }
+    Color _oldValue_xjal = this.p_configureVehicleTripsOnColor;
+    this.p_configureVehicleTripsOnColor = value;
+    onChange_p_configureVehicleTripsOnColor_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter p_configureVehicleTripsOnColor.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_p_configureVehicleTripsOnColor()</code> method instead.
+   */
+  protected void onChange_p_configureVehicleTripsOnColor() {
+    onChange_p_configureVehicleTripsOnColor_xjal( p_configureVehicleTripsOnColor );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_p_configureVehicleTripsOnColor_xjal( Color oldValue ) {  
+  }
+
+
+  public 
+Color  p_configureVehicleTripsOffColor;
+
+  /**
+   * Returns default value for parameter <code>p_configureVehicleTripsOffColor</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public Color _p_configureVehicleTripsOffColor_DefaultValue_xjal() {
+    final UI_company self = this;
+    return 
+white 
+;
+  }
+
+  public void set_p_configureVehicleTripsOffColor( Color value ) {
+    if (value == this.p_configureVehicleTripsOffColor) {
+      return;
+    }
+    Color _oldValue_xjal = this.p_configureVehicleTripsOffColor;
+    this.p_configureVehicleTripsOffColor = value;
+    onChange_p_configureVehicleTripsOffColor_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter p_configureVehicleTripsOffColor.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_p_configureVehicleTripsOffColor()</code> method instead.
+   */
+  protected void onChange_p_configureVehicleTripsOffColor() {
+    onChange_p_configureVehicleTripsOffColor_xjal( p_configureVehicleTripsOffColor );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_p_configureVehicleTripsOffColor_xjal( Color oldValue ) {  
+  }
+
+
+  public 
+Map<OL_Days, ShapeGroup>  map_dayToDisableRectangles;
+
+  /**
+   * Returns default value for parameter <code>map_dayToDisableRectangles</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public Map<OL_Days, ShapeGroup> _map_dayToDisableRectangles_DefaultValue_xjal() {
+    final UI_company self = this;
+    return null;
+  }
+
+  public void set_map_dayToDisableRectangles( Map<OL_Days, ShapeGroup> value ) {
+    if (value == this.map_dayToDisableRectangles) {
+      return;
+    }
+    Map<OL_Days, ShapeGroup> _oldValue_xjal = this.map_dayToDisableRectangles;
+    this.map_dayToDisableRectangles = value;
+    onChange_map_dayToDisableRectangles_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter map_dayToDisableRectangles.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_map_dayToDisableRectangles()</code> method instead.
+   */
+  protected void onChange_map_dayToDisableRectangles() {
+    onChange_map_dayToDisableRectangles_xjal( map_dayToDisableRectangles );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_map_dayToDisableRectangles_xjal( Map<OL_Days, ShapeGroup> oldValue ) {  
+  }
+
+
+  /**
+   * Map of GC_UUID to<br>
+   * 	Map of vehicleType to<br>
+   * 		Boolean matrix of created weekly configuration
+   */
+  public 
+Map<String, Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>>>  map_createdCustomTripWeeklyConfiguration;
+
+  /**
+   * Returns default value for parameter <code>map_createdCustomTripWeeklyConfiguration</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public Map<String, Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>>> _map_createdCustomTripWeeklyConfiguration_DefaultValue_xjal() {
+    final UI_company self = this;
+    return 
+new HashMap<>() 
+;
+  }
+
+  public void set_map_createdCustomTripWeeklyConfiguration( Map<String, Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>>> value ) {
+    if (value == this.map_createdCustomTripWeeklyConfiguration) {
+      return;
+    }
+    Map<String, Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>>> _oldValue_xjal = this.map_createdCustomTripWeeklyConfiguration;
+    this.map_createdCustomTripWeeklyConfiguration = value;
+    onChange_map_createdCustomTripWeeklyConfiguration_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter map_createdCustomTripWeeklyConfiguration.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_map_createdCustomTripWeeklyConfiguration()</code> method instead.
+   */
+  protected void onChange_map_createdCustomTripWeeklyConfiguration() {
+    onChange_map_createdCustomTripWeeklyConfiguration_xjal( map_createdCustomTripWeeklyConfiguration );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_map_createdCustomTripWeeklyConfiguration_xjal( Map<String, Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>>> oldValue ) {  
+  }
+
+
+  public 
+double  p_defaultTravelDistance_km;
+
+  /**
+   * Returns default value for parameter <code>p_defaultTravelDistance_km</code>.
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  public double _p_defaultTravelDistance_km_DefaultValue_xjal() {
+    final UI_company self = this;
+    return 
+200 
+;
+  }
+
+  public void set_p_defaultTravelDistance_km( double value ) {
+    if (value == this.p_defaultTravelDistance_km) {
+      return;
+    }
+    double _oldValue_xjal = this.p_defaultTravelDistance_km;
+    this.p_defaultTravelDistance_km = value;
+    onChange_p_defaultTravelDistance_km_xjal( _oldValue_xjal );
+    onChange();
+  }
+
+  /**
+   * Calls "On change" action for parameter p_defaultTravelDistance_km.<br>
+   * Note that 'oldValue' in that action will be unavailable if this method is called by user
+   * (current parameter value will be passed as 'oldValue').<br>
+   * Please call <code>set_p_defaultTravelDistance_km()</code> method instead.
+   */
+  protected void onChange_p_defaultTravelDistance_km() {
+    onChange_p_defaultTravelDistance_km_xjal( p_defaultTravelDistance_km );
+  }
+
+  @AnyLogicInternalCodegenAPI
+  protected void onChange_p_defaultTravelDistance_km_xjal( double oldValue ) {  
+  }
+
+
   @Override
   public void setParametersToDefaultValues() {
     super.setParametersToDefaultValues();
@@ -369,6 +982,16 @@ double  p_minSavingsSliders_default;
     p_gridConnection = _p_gridConnection_DefaultValue_xjal();
     p_maxSavingsSliders_default = _p_maxSavingsSliders_default_DefaultValue_xjal();
     p_minSavingsSliders_default = _p_minSavingsSliders_default_DefaultValue_xjal();
+    matrix_vehicleTripsConfigurationButtons = _matrix_vehicleTripsConfigurationButtons_DefaultValue_xjal();
+    map_customTripTrackerToOriginal = _map_customTripTrackerToOriginal_DefaultValue_xjal();
+    map_storedCustomTripButtonConfiguration = _map_storedCustomTripButtonConfiguration_DefaultValue_xjal();
+    matrix_defaultValuesCustomTripButtons = _matrix_defaultValuesCustomTripButtons_DefaultValue_xjal();
+    map_dayToEnableDayButtons = _map_dayToEnableDayButtons_DefaultValue_xjal();
+    p_configureVehicleTripsOnColor = _p_configureVehicleTripsOnColor_DefaultValue_xjal();
+    p_configureVehicleTripsOffColor = _p_configureVehicleTripsOffColor_DefaultValue_xjal();
+    map_dayToDisableRectangles = _map_dayToDisableRectangles_DefaultValue_xjal();
+    map_createdCustomTripWeeklyConfiguration = _map_createdCustomTripWeeklyConfiguration_DefaultValue_xjal();
+    p_defaultTravelDistance_km = _p_defaultTravelDistance_km_DefaultValue_xjal();
   }
 
   @Override
@@ -423,6 +1046,76 @@ double  p_minSavingsSliders_default;
         p_minSavingsSliders_default = ((Number) _value_xjal).doubleValue();
       }
       return true;
+    case "matrix_vehicleTripsConfigurationButtons":
+      if ( _callOnChange_xjal ) {
+        set_matrix_vehicleTripsConfigurationButtons( (ShapeRectangle[][]) _value_xjal );
+      } else {
+        matrix_vehicleTripsConfigurationButtons = (ShapeRectangle[][]) _value_xjal;
+      }
+      return true;
+    case "map_customTripTrackerToOriginal":
+      if ( _callOnChange_xjal ) {
+        set_map_customTripTrackerToOriginal( (Map<String, Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips>>) _value_xjal );
+      } else {
+        map_customTripTrackerToOriginal = (Map<String, Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips>>) _value_xjal;
+      }
+      return true;
+    case "map_storedCustomTripButtonConfiguration":
+      if ( _callOnChange_xjal ) {
+        set_map_storedCustomTripButtonConfiguration( (Map<String, Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration>>) _value_xjal );
+      } else {
+        map_storedCustomTripButtonConfiguration = (Map<String, Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration>>) _value_xjal;
+      }
+      return true;
+    case "matrix_defaultValuesCustomTripButtons":
+      if ( _callOnChange_xjal ) {
+        set_matrix_defaultValuesCustomTripButtons( (boolean[][]) _value_xjal );
+      } else {
+        matrix_defaultValuesCustomTripButtons = (boolean[][]) _value_xjal;
+      }
+      return true;
+    case "map_dayToEnableDayButtons":
+      if ( _callOnChange_xjal ) {
+        set_map_dayToEnableDayButtons( (Map<OL_Days, ShapeCheckBox>) _value_xjal );
+      } else {
+        map_dayToEnableDayButtons = (Map<OL_Days, ShapeCheckBox>) _value_xjal;
+      }
+      return true;
+    case "p_configureVehicleTripsOnColor":
+      if ( _callOnChange_xjal ) {
+        set_p_configureVehicleTripsOnColor( (Color) _value_xjal );
+      } else {
+        p_configureVehicleTripsOnColor = (Color) _value_xjal;
+      }
+      return true;
+    case "p_configureVehicleTripsOffColor":
+      if ( _callOnChange_xjal ) {
+        set_p_configureVehicleTripsOffColor( (Color) _value_xjal );
+      } else {
+        p_configureVehicleTripsOffColor = (Color) _value_xjal;
+      }
+      return true;
+    case "map_dayToDisableRectangles":
+      if ( _callOnChange_xjal ) {
+        set_map_dayToDisableRectangles( (Map<OL_Days, ShapeGroup>) _value_xjal );
+      } else {
+        map_dayToDisableRectangles = (Map<OL_Days, ShapeGroup>) _value_xjal;
+      }
+      return true;
+    case "map_createdCustomTripWeeklyConfiguration":
+      if ( _callOnChange_xjal ) {
+        set_map_createdCustomTripWeeklyConfiguration( (Map<String, Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>>>) _value_xjal );
+      } else {
+        map_createdCustomTripWeeklyConfiguration = (Map<String, Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>>>) _value_xjal;
+      }
+      return true;
+    case "p_defaultTravelDistance_km":
+      if ( _callOnChange_xjal ) {
+        set_p_defaultTravelDistance_km( ((Number) _value_xjal).doubleValue() );
+      } else {
+        p_defaultTravelDistance_km = ((Number) _value_xjal).doubleValue();
+      }
+      return true;
     default:
       return super.setParameter( _name_xjal, _value_xjal, _callOnChange_xjal );
     }
@@ -439,6 +1132,16 @@ double  p_minSavingsSliders_default;
     case "p_gridConnection": _result_xjal = p_gridConnection; break;
     case "p_maxSavingsSliders_default": _result_xjal = p_maxSavingsSliders_default; break;
     case "p_minSavingsSliders_default": _result_xjal = p_minSavingsSliders_default; break;
+    case "matrix_vehicleTripsConfigurationButtons": _result_xjal = matrix_vehicleTripsConfigurationButtons; break;
+    case "map_customTripTrackerToOriginal": _result_xjal = map_customTripTrackerToOriginal; break;
+    case "map_storedCustomTripButtonConfiguration": _result_xjal = map_storedCustomTripButtonConfiguration; break;
+    case "matrix_defaultValuesCustomTripButtons": _result_xjal = matrix_defaultValuesCustomTripButtons; break;
+    case "map_dayToEnableDayButtons": _result_xjal = map_dayToEnableDayButtons; break;
+    case "p_configureVehicleTripsOnColor": _result_xjal = p_configureVehicleTripsOnColor; break;
+    case "p_configureVehicleTripsOffColor": _result_xjal = p_configureVehicleTripsOffColor; break;
+    case "map_dayToDisableRectangles": _result_xjal = map_dayToDisableRectangles; break;
+    case "map_createdCustomTripWeeklyConfiguration": _result_xjal = map_createdCustomTripWeeklyConfiguration; break;
+    case "p_defaultTravelDistance_km": _result_xjal = p_defaultTravelDistance_km; break;
     default: _result_xjal = super.getParameter( _name_xjal ); break;
     }
     return (T) _result_xjal;
@@ -459,6 +1162,16 @@ double  p_minSavingsSliders_default;
       list.add( "p_gridConnection" );
       list.add( "p_maxSavingsSliders_default" );
       list.add( "p_minSavingsSliders_default" );
+      list.add( "matrix_vehicleTripsConfigurationButtons" );
+      list.add( "map_customTripTrackerToOriginal" );
+      list.add( "map_storedCustomTripButtonConfiguration" );
+      list.add( "matrix_defaultValuesCustomTripButtons" );
+      list.add( "map_dayToEnableDayButtons" );
+      list.add( "p_configureVehicleTripsOnColor" );
+      list.add( "p_configureVehicleTripsOffColor" );
+      list.add( "map_dayToDisableRectangles" );
+      list.add( "map_createdCustomTripWeeklyConfiguration" );
+      list.add( "p_defaultTravelDistance_km" );
       result = list.toArray( new String[ list.size() ] );
       _parameterNames_xjal = result;
     }
@@ -481,6 +1194,9 @@ double
   public 
 boolean 
  v_NFATO_active;
+  private 
+OL_VehicleType 
+ v_currentTripConfiguringVehicleType;
   public 
 Color 
  v_companyUIBackgroundColor;
@@ -631,6 +1347,11 @@ double
   public 
 double 
  v_maxSavingsSliders;
+
+  // Collection Variables
+  public 
+LinkedHashSet <
+OL_Days > c_activeVehicleConfigurationDays = new LinkedHashSet<OL_Days>();
 
   @AnyLogicInternalCodegenAPI
   private static Map<String, IElementDescriptor> elementDesciptors_xjal = createElementDescriptors( UI_company.class );
@@ -815,6 +1536,8 @@ sl_electricTrucksCompany.setValue(p_scenarioSettings_Future.getPlannedEVTrucks()
 //set active if active in future
 p_gridConnection.f_setActive(p_scenarioSettings_Future.getIsActiveInFuture(), zero_Interface.energyModel.p_timeVariables);
 
+//Reset triptrackers
+f_resetAllVehiclesToOriginalTripTracker();
 
 //Reset button to future, due to sliders putting it on custom
 rb_scenariosPrivateUI.setValue(1, false); 
@@ -949,8 +1672,12 @@ sl_electricTrucksCompany.setValue(p_scenarioSettings_Current.getCurrentEVTrucks(
 //set active if active in present
 p_gridConnection.f_setActive(p_scenarioSettings_Current.getIsCurrentlyActive(), zero_Interface.energyModel.p_timeVariables);
 
+//Reset triptrackers
+f_resetAllVehiclesToOriginalTripTracker();
+
 //Reset button to current, due to sliders putting it on custom
-rb_scenariosPrivateUI.setValue(0, false); 
+rb_scenariosPrivateUI.setValue(0, false);
+ 
   }
 
   void f_setHeatingType( GridConnection GC, OL_GridConnectionHeatingType selectedHeatingType ) { 
@@ -1209,6 +1936,7 @@ f_setBatSliderPresets();
 
 //Vehicles sliders
 f_setVehicleSliderPresets();
+f_closeVehicleTripsConfigurationMenu();
 
 //Demand Reduction sliders
 f_setDemandReductionSliderPresets(); 
@@ -1390,29 +2118,29 @@ sl_hydrogenTrucksCompany.setValue(v_nbHydrogenTrucks, false);
  
   }
 
-  void f_createVehicle( GridConnection parentGC, OL_EnergyAssetType vehicleType, J_ActivityTrackerTrips tripTracker, boolean available, boolean isAdditionalVehicle ) { 
+  void f_createVehicle( GridConnection parentGC, OL_VehicleType vehicleType, OL_EnergyCarriers fuelType, J_ActivityTrackerTrips tripTracker, boolean available, boolean isAdditionalVehicle ) { 
 
 double energyConsumption_kWhpkm = 0;
 double vehicleScaling 			= 1.0;
 J_TimeParameters timeParameters	= zero_Interface.energyModel.p_timeParameters;
 
-if (vehicleType == OL_EnergyAssetType.ELECTRIC_VEHICLE || vehicleType == OL_EnergyAssetType.ELECTRIC_VAN || vehicleType == OL_EnergyAssetType.ELECTRIC_TRUCK ){ // Create EVS
+if (fuelType == OL_EnergyCarriers.ELECTRICITY){ // Create EVS
 	double storageCapacity_kWh 		= 0;
 	double capacityElectricity_kW 	= 0;
 	double stateOfCharge_fr  		= 1; // Initial state of charge
 
 	switch(vehicleType){
-		case ELECTRIC_VEHICLE:
+		case CAR:
 			capacityElectricity_kW	= (p_scenarioSettings_Current.getCurrentEVCarChargePower_kW() > 0) ? p_scenarioSettings_Current.getCurrentEVCarChargePower_kW() : zero_Interface.energyModel.avgc_data.p_avgEVMaxChargePowerCar_kW;
 			storageCapacity_kWh		= zero_Interface.energyModel.avgc_data.p_avgEVStorageCar_kWh;
 			energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgEVEnergyConsumptionCar_kWhpkm;
 		break;
-		case ELECTRIC_VAN:
+		case VAN:
 			capacityElectricity_kW	= (p_scenarioSettings_Current.getCurrentEVVanChargePower_kW() > 0) ? p_scenarioSettings_Current.getCurrentEVVanChargePower_kW() : zero_Interface.energyModel.avgc_data.p_avgEVMaxChargePowerVan_kW;
 			storageCapacity_kWh		= zero_Interface.energyModel.avgc_data.p_avgEVStorageVan_kWh;
 			energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgEVEnergyConsumptionVan_kWhpkm;
 		break;
-		case ELECTRIC_TRUCK:
+		case TRUCK:
 			capacityElectricity_kW	= (p_scenarioSettings_Current.getCurrentEVTruckChargePower_kW() > 0) ? p_scenarioSettings_Current.getCurrentEVTruckChargePower_kW() : zero_Interface.energyModel.avgc_data.p_avgEVMaxChargePowerTruck_kW;
 			storageCapacity_kWh		= zero_Interface.energyModel.avgc_data.p_avgEVStorageTruck_kWh;
 			energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgEVEnergyConsumptionTruck_kWhpkm;
@@ -1423,9 +2151,12 @@ if (vehicleType == OL_EnergyAssetType.ELECTRIC_VEHICLE || vehicleType == OL_Ener
 	//Create EV and connect to GC and selected trip tracker
 	J_EAEV electricVehicle = new J_EAEV(parentGC, capacityElectricity_kW, storageCapacity_kWh, stateOfCharge_fr, timeParameters, energyConsumption_kWhpkm, vehicleScaling, vehicleType, tripTracker, available);	
 	
-	
 	if (isAdditionalVehicle){
+		electricVehicle.getTripTracker().setDistanceScaling_fr(1-sl_mobilityDemandCompanyReduction.getValue()/100.0);
 		zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).add(electricVehicle);
+		if(tripTracker == null){
+			f_addNewInstanceOfCustomTripTrackerToAdditionalVehicle(electricVehicle);
+		}
 	}
 	else{
 		zero_Interface.c_orderedVehicles.add(0, electricVehicle);
@@ -1436,131 +2167,89 @@ if (vehicleType == OL_EnergyAssetType.ELECTRIC_VEHICLE || vehicleType == OL_Ener
 		parentGC.f_addChargingManagement(OL_ChargingAttitude.SIMPLE);
 	}
 }
+else {
+    if (fuelType == OL_EnergyCarriers.PETROLEUM_FUEL) { // Create petroleumFuel vehicles
+        switch (vehicleType) {
+            case CAR:
+                energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgGasolineConsumptionCar_kWhpkm;
+                break;
+            case VAN:
+                energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgDieselConsumptionVan_kWhpkm;
+                break;
+            case TRUCK:
+                energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgDieselConsumptionTruck_kWhpkm;
+                break;
+        }
+    } else if (fuelType == OL_EnergyCarriers.HYDROGEN) { // Create hydrogen vehicles
+        switch (vehicleType) {
+            case CAR:
+                energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgHydrogenConsumptionCar_kWhpkm;
+                break;
+            case VAN:
+                energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgHydrogenConsumptionVan_kWhpkm;
+                break;
+            case TRUCK:
+                energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgHydrogenConsumptionTruck_kWhpkm;
+                break;
+        }
+    }
 
-else if (vehicleType == OL_EnergyAssetType.PETROLEUM_FUEL_VEHICLE || vehicleType == OL_EnergyAssetType.PETROLEUM_FUEL_VAN || vehicleType == OL_EnergyAssetType.PETROLEUM_FUEL_TRUCK ){ // Create petroleumFuel vehicles
-	switch (vehicleType){
-		
-		case PETROLEUM_FUEL_VEHICLE:
-			energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgGasolineConsumptionCar_kWhpkm;
-		break;
-		
-		case PETROLEUM_FUEL_VAN:
-			energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgDieselConsumptionVan_kWhpkm;
-		break;
-		
-		case PETROLEUM_FUEL_TRUCK:
-			energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgDieselConsumptionTruck_kWhpkm;
-		break;
-	}
-	
-	//Create PetroleumFuel vehicle and connect to GC and selected trip tracker
-	J_EAFuelVehicle petroleumFuelVehicle = new J_EAFuelVehicle(parentGC, energyConsumption_kWhpkm, timeParameters, vehicleScaling, vehicleType, tripTracker, OL_EnergyCarriers.PETROLEUM_FUEL, available);
-	
-	
-	
-	if (isAdditionalVehicle){
-		zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).add(petroleumFuelVehicle);
-	}
-	else{
-		zero_Interface.c_orderedVehicles.add(0, petroleumFuelVehicle);
-	}
-}
+    // Create fuel vehicle and connect to GC and selected trip tracker
+    J_EAFuelVehicle fuelVehicle = new J_EAFuelVehicle(parentGC, energyConsumption_kWhpkm, timeParameters, vehicleScaling, vehicleType, tripTracker, fuelType, available);
 
-else{ // (Hydrogen vehicles)
-	switch (vehicleType){
-		case HYDROGEN_VEHICLE:
-			energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgHydrogenConsumptionCar_kWhpkm;
-		break;
-		case HYDROGEN_VAN:
-			energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgHydrogenConsumptionVan_kWhpkm;
-		break;
-		case HYDROGEN_TRUCK:
-			energyConsumption_kWhpkm = zero_Interface.energyModel.avgc_data.p_avgHydrogenConsumptionTruck_kWhpkm;
-		break;
-		
-	}
-	
-	//Create Hydrogen vehicle and connect to GC and selected trip tracker
-	J_EAFuelVehicle hydrogenVehicle = new J_EAFuelVehicle(parentGC, energyConsumption_kWhpkm, timeParameters, vehicleScaling, vehicleType, tripTracker, OL_EnergyCarriers.HYDROGEN, available);
-	
-	
-	
-	if (isAdditionalVehicle){
-		zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).add(hydrogenVehicle);
-	}
-	else{
-		zero_Interface.c_orderedVehicles.add(0, hydrogenVehicle);
-	}
+    if (isAdditionalVehicle) {
+		fuelVehicle.getTripTracker().setDistanceScaling_fr(1-sl_mobilityDemandCompanyReduction.getValue()/100.0);
+        zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).add(fuelVehicle);
+        if(tripTracker == null){
+			f_addNewInstanceOfCustomTripTrackerToAdditionalVehicle(fuelVehicle);
+		}
+    } else {
+        zero_Interface.c_orderedVehicles.add(0, fuelVehicle);
+    }
 }
 
  
   }
 
-  void f_setElectricVehicleSliders( GridConnection GC, OL_EnergyAssetType vehicleType, int setAmountOfVehicles ) { 
+  void f_setElectricVehicleSliders( GridConnection GC, OL_VehicleType vehicleType, int setAmountOfVehicles ) { 
 
 int local_EV_nb;
 int local_PetroleumFuelV_nb;
 int local_HydrogenV_nb;
 int max_amount_petroleumFuel_vehicles;
 
-OL_EnergyAssetType vehicleType_petroleumFuel;
-OL_EnergyAssetType vehicleType_hydrogen;
-
 switch (vehicleType){
-	
-	case ELECTRIC_VEHICLE:
-
-	vehicleType_petroleumFuel = OL_EnergyAssetType.PETROLEUM_FUEL_VEHICLE;
-	vehicleType_hydrogen = OL_EnergyAssetType.HYDROGEN_VEHICLE;
-
-	local_EV_nb = v_nbEVCars;
-	local_PetroleumFuelV_nb = v_nbPetroleumFuelCars;
-	local_HydrogenV_nb = v_nbHydrogenCars;
-	
-	max_amount_petroleumFuel_vehicles = v_maxPetroleumFuelCarSlider;
-	
-	break;
-	
-	case ELECTRIC_VAN:
-	
-	vehicleType_petroleumFuel = OL_EnergyAssetType.PETROLEUM_FUEL_VAN;
-	vehicleType_hydrogen = OL_EnergyAssetType.HYDROGEN_VAN;
-	
-	local_EV_nb = v_nbEVVans;
-	local_PetroleumFuelV_nb = v_nbPetroleumFuelVans;
-	local_HydrogenV_nb = v_nbHydrogenVans;
-	
-	max_amount_petroleumFuel_vehicles = v_maxPetroleumFuelVanSlider;
-	
-	break;
-	
-	case ELECTRIC_TRUCK:
-
-	vehicleType_petroleumFuel = OL_EnergyAssetType.PETROLEUM_FUEL_TRUCK;
-	vehicleType_hydrogen = OL_EnergyAssetType.HYDROGEN_TRUCK;
-	
-	local_EV_nb = v_nbEVTrucks;
-	local_PetroleumFuelV_nb = v_nbPetroleumFuelTrucks;
-	local_HydrogenV_nb = v_nbHydrogenTrucks;
-	
-	max_amount_petroleumFuel_vehicles = v_maxPetroleumFuelTruckSlider;
-		
-	break;
-	
+	case CAR:
+		local_EV_nb = v_nbEVCars;
+		local_PetroleumFuelV_nb = v_nbPetroleumFuelCars;
+		local_HydrogenV_nb = v_nbHydrogenCars;
+		max_amount_petroleumFuel_vehicles = v_maxPetroleumFuelCarSlider;
+		break;
+	case VAN:
+		local_EV_nb = v_nbEVVans;
+		local_PetroleumFuelV_nb = v_nbPetroleumFuelVans;
+		local_HydrogenV_nb = v_nbHydrogenVans;
+		max_amount_petroleumFuel_vehicles = v_maxPetroleumFuelVanSlider;
+		break;
+	case TRUCK:
+		local_EV_nb = v_nbEVTrucks;
+		local_PetroleumFuelV_nb = v_nbPetroleumFuelTrucks;
+		local_HydrogenV_nb = v_nbHydrogenTrucks;
+		max_amount_petroleumFuel_vehicles = v_maxPetroleumFuelTruckSlider;
+		break;
 	default:
-	traceln("SLIDER SET TO WRONG VEHICLE TYPE, DO NOTHING");
-	return;
+		traceln("SLIDER SET TO WRONG VEHICLE TYPE, DO NOTHING");
+		return;
 }
 
 
 if (setAmountOfVehicles > local_EV_nb){ // Slider has increased the amount of selected vehicles
 	
 	//First convert all other existing additional vehicles
-	int nbOfOtherAdditionalVehiclesOfThisClass = findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), p -> p.getEAType() == vehicleType_petroleumFuel || p.getEAType() == vehicleType_hydrogen).size();
+	int nbOfOtherAdditionalVehiclesOfThisClass = findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && (vehicle.getFuelType() == OL_EnergyCarriers.PETROLEUM_FUEL || vehicle.getFuelType() == OL_EnergyCarriers.HYDROGEN)).size();
 	while(setAmountOfVehicles > local_EV_nb && nbOfOtherAdditionalVehiclesOfThisClass > 0 ){
-		
 		// Find an additional PetroleumFuel vehicle
-		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), p -> p.getEAType() == vehicleType_petroleumFuel);
+		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.PETROLEUM_FUEL);
 		
 		if(petroleumFuelVehicle != null){
 			J_ActivityTrackerTrips tripTracker = petroleumFuelVehicle.getTripTracker();
@@ -1572,7 +2261,7 @@ if (setAmountOfVehicles > local_EV_nb){ // Slider has increased the amount of se
 			zero_Interface.c_orderedVehicles.remove(petroleumFuelVehicle);
 			
 			//Create new additional EV
-			f_createVehicle(GC, vehicleType, tripTracker, available, true);			
+			f_createVehicle(GC, vehicleType, OL_EnergyCarriers.ELECTRICITY, tripTracker, available, true);			
 
 			//Update local variables
 			local_EV_nb++;
@@ -1581,7 +2270,7 @@ if (setAmountOfVehicles > local_EV_nb){ // Slider has increased the amount of se
 		}
 		else{
 			// Find an additional Hydrogen vehicle
-			J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), p -> p.getEAType() == vehicleType_hydrogen);
+			J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.HYDROGEN);
 			J_ActivityTrackerTrips tripTracker = hydrogenVehicle.getTripTracker();
 			
 			// Remove Hydrogen vehicle		
@@ -1591,7 +2280,7 @@ if (setAmountOfVehicles > local_EV_nb){ // Slider has increased the amount of se
 			zero_Interface.c_orderedVehicles.remove(hydrogenVehicle);
 			
 			//Create new additional EV
-			f_createVehicle(GC, vehicleType, tripTracker, available, true);
+			f_createVehicle(GC, vehicleType, OL_EnergyCarriers.ELECTRICITY, tripTracker, available, true);
 
 			//Update local variables
 			local_EV_nb++;
@@ -1601,9 +2290,8 @@ if (setAmountOfVehicles > local_EV_nb){ // Slider has increased the amount of se
 	}
 	
 	while ( setAmountOfVehicles > local_EV_nb && local_PetroleumFuelV_nb > 0) {
-		
 		// Find a PetroleumFuel vehicle
-		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, p -> p.getEAType() == vehicleType_petroleumFuel && ((GridConnection)p.getOwner()) == GC);
+		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.PETROLEUM_FUEL && vehicle.getOwner() == GC);
 		J_ActivityTrackerTrips tripTracker = petroleumFuelVehicle.getTripTracker(); 
 		
 		// Remove PetroleumFuel vehicle		
@@ -1612,16 +2300,15 @@ if (setAmountOfVehicles > local_EV_nb){ // Slider has increased the amount of se
 		petroleumFuelVehicle.removeEnergyAsset();
 
 		//Create new EV
-		f_createVehicle(GC, vehicleType, tripTracker, available, false);
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.ELECTRICITY, tripTracker, available, false);
 			
 		//Update variables
 		local_EV_nb++;
 		local_PetroleumFuelV_nb--;
 	}
 	while (setAmountOfVehicles > local_EV_nb && local_HydrogenV_nb > 0){
-	
 		// Find a Hydrogen vehicle
-		J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, p -> p.getEAType() == vehicleType_hydrogen  && ((GridConnection)p.getOwner()) == GC);
+		J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.HYDROGEN  && vehicle.getOwner() == GC);
 		J_ActivityTrackerTrips tripTracker = hydrogenVehicle.getTripTracker();
 		
 		// Remove Hydrogen vehicle		
@@ -1630,27 +2317,24 @@ if (setAmountOfVehicles > local_EV_nb){ // Slider has increased the amount of se
 		hydrogenVehicle.removeEnergyAsset();
 
 		//Create new EV
-		f_createVehicle(GC, vehicleType, tripTracker, available, false);
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.ELECTRICITY, tripTracker, available, false);
 	
 		//Update variables
 		local_EV_nb++;
 		local_HydrogenV_nb--;
 	}
 	while (setAmountOfVehicles > local_EV_nb){ //If still not enough EV:
-		
 		// Create additional vehicles
-		f_createVehicle(GC, vehicleType, null, true, true);
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.ELECTRICITY, null, true, true);
 		
 		//Update variables
 		local_EV_nb++;
 	}
-	
 }
 else if(setAmountOfVehicles < local_EV_nb){ // Slider has decreased the amount of selected vehicles
 	
-	ArrayList<I_Vehicle> additionalVehicles = new ArrayList<>(findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getEAType() == vehicleType ));
+	ArrayList<I_Vehicle> additionalVehicles = new ArrayList<>(findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.ELECTRICITY ));
 	while(setAmountOfVehicles < local_EV_nb && additionalVehicles.size() > 0){ //If there are additional EV, remove them first
-
 		//Find additional created vehicle
 		J_EAEV ev = (J_EAEV)additionalVehicles.get(additionalVehicles.size()-1); // Get latest added
 		
@@ -1664,9 +2348,8 @@ else if(setAmountOfVehicles < local_EV_nb){ // Slider has decreased the amount o
 		local_EV_nb--;
 	}
 	while ( setAmountOfVehicles < local_EV_nb && local_PetroleumFuelV_nb < max_amount_petroleumFuel_vehicles) {
-
 		//Find a to be removed EV
-		J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_orderedVehicles, p -> p.getEAType() == vehicleType && !zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).contains(p)  && ((GridConnection)p.getOwner()) == GC);
+		J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_orderedVehicles, vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.ELECTRICITY && !zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).contains(vehicle)  && vehicle.getOwner() == GC);
 		J_ActivityTrackerTrips tripTracker = ev.getTripTracker();
 
 		//Remove EV
@@ -1675,45 +2358,34 @@ else if(setAmountOfVehicles < local_EV_nb){ // Slider has decreased the amount o
 		ev.removeEnergyAsset();
 		
 		// Create petroleumFuel vehicle	
-		f_createVehicle(GC, vehicleType_petroleumFuel, tripTracker, available, false);				
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.PETROLEUM_FUEL, tripTracker, available, false);				
 		
 		local_EV_nb--;
 		local_PetroleumFuelV_nb++;
-		}
+	}
 }
-
-
 
 //Update variables
 switch (vehicleType){
-	
-	case ELECTRIC_VEHICLE:
-	
-	v_nbEVCars = local_EV_nb;
-	v_nbPetroleumFuelCars = local_PetroleumFuelV_nb;
-	v_nbHydrogenCars = local_HydrogenV_nb;
-	
-	break;
-	
-	case ELECTRIC_VAN:
-	
-	v_nbEVVans = local_EV_nb;
-	v_nbPetroleumFuelVans = local_PetroleumFuelV_nb;
-	v_nbHydrogenVans = local_HydrogenV_nb;
-	
-	break;
-	
-	case ELECTRIC_TRUCK:
-	
-	v_nbEVTrucks = local_EV_nb;
-	v_nbPetroleumFuelTrucks = local_PetroleumFuelV_nb;
-	v_nbHydrogenTrucks = local_HydrogenV_nb;
-		
-	break;
+	case CAR:
+		v_nbEVCars = local_EV_nb;
+		v_nbPetroleumFuelCars = local_PetroleumFuelV_nb;
+		v_nbHydrogenCars = local_HydrogenV_nb;
+		break;
+	case VAN:
+		v_nbEVVans = local_EV_nb;
+		v_nbPetroleumFuelVans = local_PetroleumFuelV_nb;
+		v_nbHydrogenVans = local_HydrogenV_nb;
+		break;
+	case TRUCK:
+		v_nbEVTrucks = local_EV_nb;
+		v_nbPetroleumFuelTrucks = local_PetroleumFuelV_nb;
+		v_nbHydrogenTrucks = local_HydrogenV_nb;
+		break;
 } 
   }
 
-  void f_setPetroleumFuelVehicleSliders( GridConnection GC, OL_EnergyAssetType vehicleType, int setAmountOfVehicles ) { 
+  void f_setPetroleumFuelVehicleSliders( GridConnection GC, OL_VehicleType vehicleType, int setAmountOfVehicles ) { 
 
 int local_EV_nb;
 int local_PetroleumFuelV_nb;
@@ -1722,66 +2394,40 @@ int local_HydrogenV_nb;
 int min_amount_EV;
 int	max_amount_EV;
 
-OL_EnergyAssetType vehicleType_electric;
-OL_EnergyAssetType vehicleType_hydrogen;
-	
 switch (vehicleType){
-	
-	case PETROLEUM_FUEL_VEHICLE:
-
-	vehicleType_electric = OL_EnergyAssetType.ELECTRIC_VEHICLE;
-	vehicleType_hydrogen = OL_EnergyAssetType.HYDROGEN_VEHICLE;
-
-	local_EV_nb = v_nbEVCars;
-	local_PetroleumFuelV_nb = v_nbPetroleumFuelCars;
-	local_HydrogenV_nb = v_nbHydrogenCars;
-	
-	min_amount_EV = v_minEVCarSlider;
-	max_amount_EV = v_maxEVCarSlider;
-	
-	break;
-	
-	case PETROLEUM_FUEL_VAN:
-	
-	vehicleType_electric = OL_EnergyAssetType.ELECTRIC_VAN;
-	vehicleType_hydrogen = OL_EnergyAssetType.HYDROGEN_VAN;
-	
-	local_EV_nb = v_nbEVVans;
-	local_PetroleumFuelV_nb = v_nbPetroleumFuelVans;
-	local_HydrogenV_nb = v_nbHydrogenVans;
-	
-	min_amount_EV = v_minEVVanSlider;
-	max_amount_EV = v_maxEVVanSlider;
-	
-	break;
-	
-	case PETROLEUM_FUEL_TRUCK:
-
-	vehicleType_electric = OL_EnergyAssetType.ELECTRIC_TRUCK;
-	vehicleType_hydrogen = OL_EnergyAssetType.HYDROGEN_TRUCK;
-	
-	local_EV_nb = v_nbEVTrucks;
-	local_PetroleumFuelV_nb = v_nbPetroleumFuelTrucks;
-	local_HydrogenV_nb = v_nbHydrogenTrucks;
-	
-	min_amount_EV = v_minEVTruckSlider;
-	max_amount_EV = v_maxEVTruckSlider;
-		
-	break;
-	
+	case CAR:
+		local_EV_nb = v_nbEVCars;
+		local_PetroleumFuelV_nb = v_nbPetroleumFuelCars;
+		local_HydrogenV_nb = v_nbHydrogenCars;
+		min_amount_EV = v_minEVCarSlider;
+		max_amount_EV = v_maxEVCarSlider;
+		break;
+	case VAN:
+		local_EV_nb = v_nbEVVans;
+		local_PetroleumFuelV_nb = v_nbPetroleumFuelVans;
+		local_HydrogenV_nb = v_nbHydrogenVans;
+		min_amount_EV = v_minEVVanSlider;
+		max_amount_EV = v_maxEVVanSlider;
+		break;
+	case TRUCK:
+		local_EV_nb = v_nbEVTrucks;
+		local_PetroleumFuelV_nb = v_nbPetroleumFuelTrucks;
+		local_HydrogenV_nb = v_nbHydrogenTrucks;
+		min_amount_EV = v_minEVTruckSlider;
+		max_amount_EV = v_maxEVTruckSlider;
+		break;
 	default:
-	traceln("SLIDER SET TO WRONG VEHICLE TYPE, DO NOTHING");
-	return;
+		traceln("SLIDER SET TO WRONG VEHICLE TYPE, DO NOTHING");
+		return;
 }
 
 
 if (setAmountOfVehicles > local_PetroleumFuelV_nb){ // Slider has increased the amount of selected vehicles
 	//First convert all other existing additional vehicles
-	int nbOfOtherAdditionalVehiclesOfThisClass = findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), p -> p.getEAType() == vehicleType_hydrogen || p.getEAType() == vehicleType_electric).size();
+	int nbOfOtherAdditionalVehiclesOfThisClass = findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && (vehicle.getFuelType() == OL_EnergyCarriers.HYDROGEN || vehicle.getFuelType() == OL_EnergyCarriers.ELECTRICITY)).size();
 	while(setAmountOfVehicles > local_PetroleumFuelV_nb && nbOfOtherAdditionalVehiclesOfThisClass > 0 ){
-
 		// Find an additional EV vehicle
-		J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), p -> p.getEAType() == vehicleType_electric);
+		J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.ELECTRICITY);
 			
 		if(ev != null){
 			J_ActivityTrackerTrips tripTracker = ev.getTripTracker();
@@ -1793,7 +2439,7 @@ if (setAmountOfVehicles > local_PetroleumFuelV_nb){ // Slider has increased the 
 			zero_Interface.c_orderedVehicles.remove(ev);
 			
 			//Create new additional PetroleumFuel vehicle
-			f_createVehicle(GC, vehicleType, tripTracker, available, true);
+			f_createVehicle(GC, vehicleType, OL_EnergyCarriers.PETROLEUM_FUEL, tripTracker, available, true);
 
 			//Update local variables
 			local_PetroleumFuelV_nb++;
@@ -1802,7 +2448,7 @@ if (setAmountOfVehicles > local_PetroleumFuelV_nb){ // Slider has increased the 
 		}
 		else{
 			// Find an additional Hydrogen vehicle
-			J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), p -> p.getEAType() == vehicleType_hydrogen);
+			J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.HYDROGEN);
 			J_ActivityTrackerTrips tripTracker = hydrogenVehicle.getTripTracker();
 			
 			// Remove Hydrogen vehicle		
@@ -1812,7 +2458,7 @@ if (setAmountOfVehicles > local_PetroleumFuelV_nb){ // Slider has increased the 
 			zero_Interface.c_orderedVehicles.remove(hydrogenVehicle);
 			
 			//Create new additional PetroleumFuel vehicle
-			f_createVehicle(GC, vehicleType, tripTracker, available, true);
+			f_createVehicle(GC, vehicleType, OL_EnergyCarriers.PETROLEUM_FUEL, tripTracker, available, true);
 
 			//Update local variables
 			local_PetroleumFuelV_nb++;
@@ -1821,9 +2467,8 @@ if (setAmountOfVehicles > local_PetroleumFuelV_nb){ // Slider has increased the 
 		}
 	}
 	while ( setAmountOfVehicles > local_PetroleumFuelV_nb && local_EV_nb > min_amount_EV) {
-
 		// Find an EV
-		J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_orderedVehicles, p -> p.getEAType() == vehicleType_electric  && ((GridConnection)p.getOwner()) == GC);
+		J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_orderedVehicles, vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.ELECTRICITY  && vehicle.getOwner() == GC);
 		J_ActivityTrackerTrips tripTracker = ev.getTripTracker();
 		
 		//Remove one EV
@@ -1832,16 +2477,15 @@ if (setAmountOfVehicles > local_PetroleumFuelV_nb){ // Slider has increased the 
 		ev.removeEnergyAsset();
 		
 		//Create new PetroleumFuel vehicle
-		f_createVehicle(GC, vehicleType, tripTracker, available, false);
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.PETROLEUM_FUEL, tripTracker, available, false);
 			
 		//Update variables
 		local_PetroleumFuelV_nb++;
 		local_EV_nb--;
 	}
 	while (setAmountOfVehicles > local_PetroleumFuelV_nb && local_HydrogenV_nb > 0){
-	
 		// Find a Hydrogen vehicle
-		J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, p -> p.getEAType() == vehicleType_hydrogen  && ((GridConnection)p.getOwner()) == GC);
+		J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.HYDROGEN  && vehicle.getOwner() == GC);
 		J_ActivityTrackerTrips tripTracker = hydrogenVehicle.getTripTracker();
 		
 		// Remove hydrogen vehicle			
@@ -1850,40 +2494,36 @@ if (setAmountOfVehicles > local_PetroleumFuelV_nb){ // Slider has increased the 
 		hydrogenVehicle.removeEnergyAsset();
 		
 		//Create new PetroleumFuel vehicle
-		f_createVehicle(GC, vehicleType, tripTracker, available, false);
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.PETROLEUM_FUEL, tripTracker, available, false);
 	
 		//Update variables
 		local_PetroleumFuelV_nb++;
 		local_HydrogenV_nb--;
 	}
 	while (setAmountOfVehicles > local_PetroleumFuelV_nb){ // Create additional vehicles
-	
-	f_createVehicle(GC, vehicleType, null, true, true);
-
-	local_PetroleumFuelV_nb++;
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.PETROLEUM_FUEL, null, true, true);
+		local_PetroleumFuelV_nb++;
 	}
 }
 else if(setAmountOfVehicles < local_PetroleumFuelV_nb){ // Slider has decreased the amount of selected vehicles
 	
-	ArrayList<I_Vehicle> additionalVehicles = new ArrayList<>(findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getEAType() == vehicleType ));
+	ArrayList<I_Vehicle> additionalVehicles = new ArrayList<>(findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.PETROLEUM_FUEL ));
 	while(setAmountOfVehicles < local_PetroleumFuelV_nb && additionalVehicles.size() > 0){ //Remove additional PetroleumFuel vehicles first
-	
-	//Find additional created vehicle
-	J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)additionalVehicles.get(additionalVehicles.size()-1); // Get latest added
-	
-	// Remove petroleumFuel vehicle
-	additionalVehicles.remove(petroleumFuelVehicle);
-	zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).remove(petroleumFuelVehicle);
-	petroleumFuelVehicle.removeEnergyAsset();
-	zero_Interface.c_orderedVehicles.remove(petroleumFuelVehicle);
-	
-	//Update variable
-	local_PetroleumFuelV_nb--;
+		//Find additional created vehicle
+		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)additionalVehicles.get(additionalVehicles.size()-1); // Get latest added
+		
+		// Remove petroleumFuel vehicle
+		additionalVehicles.remove(petroleumFuelVehicle);
+		zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).remove(petroleumFuelVehicle);
+		petroleumFuelVehicle.removeEnergyAsset();
+		zero_Interface.c_orderedVehicles.remove(petroleumFuelVehicle);
+		
+		//Update variable
+		local_PetroleumFuelV_nb--;
 	}
 	while ( setAmountOfVehicles < local_PetroleumFuelV_nb && local_EV_nb < max_amount_EV) {
-	
-	// Find a to be removed PetroleumFuel vehicle
-		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, p -> p.getEAType() == vehicleType && !zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).contains(p)  && ((GridConnection)p.getOwner()) == GC);
+		// Find a to be removed PetroleumFuel vehicle
+		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.PETROLEUM_FUEL && !zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).contains(vehicle)  && vehicle.getOwner() == GC);
 		J_ActivityTrackerTrips tripTracker = petroleumFuelVehicle.getTripTracker();
 		
 		// Remove petroleumFuel vehicle		
@@ -1892,7 +2532,7 @@ else if(setAmountOfVehicles < local_PetroleumFuelV_nb){ // Slider has decreased 
 		petroleumFuelVehicle.removeEnergyAsset();
 		
 		//Create new EV
-		f_createVehicle(GC, vehicleType_electric, tripTracker, available, false);
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.ELECTRICITY, tripTracker, available, false);
 			
 		//Update variables
 		local_PetroleumFuelV_nb--;
@@ -1900,32 +2540,27 @@ else if(setAmountOfVehicles < local_PetroleumFuelV_nb){ // Slider has decreased 
 	}
 }
 
-
-
 //Update variables
 switch (vehicleType){
-	
-	case PETROLEUM_FUEL_VEHICLE:
-	v_nbEVCars = local_EV_nb;
-	v_nbPetroleumFuelCars = local_PetroleumFuelV_nb;
-	v_nbHydrogenCars = local_HydrogenV_nb;
-	break;
-	
-	case PETROLEUM_FUEL_VAN:
-	v_nbEVVans = local_EV_nb;
-	v_nbPetroleumFuelVans = local_PetroleumFuelV_nb;
-	v_nbHydrogenVans = local_HydrogenV_nb;
-	break;
-	
-	case PETROLEUM_FUEL_TRUCK:
-	v_nbEVTrucks = local_EV_nb;
-	v_nbPetroleumFuelTrucks = local_PetroleumFuelV_nb;
-	v_nbHydrogenTrucks = local_HydrogenV_nb;
-	break;
+	case CAR:
+		v_nbEVCars = local_EV_nb;
+		v_nbPetroleumFuelCars = local_PetroleumFuelV_nb;
+		v_nbHydrogenCars = local_HydrogenV_nb;
+		break;
+	case VAN:
+		v_nbEVVans = local_EV_nb;
+		v_nbPetroleumFuelVans = local_PetroleumFuelV_nb;
+		v_nbHydrogenVans = local_HydrogenV_nb;
+		break;
+	case TRUCK:
+		v_nbEVTrucks = local_EV_nb;
+		v_nbPetroleumFuelTrucks = local_PetroleumFuelV_nb;
+		v_nbHydrogenTrucks = local_HydrogenV_nb;
+		break;
 } 
   }
 
-  public void f_setHydrogenVehicleSliders( GridConnection GC, OL_EnergyAssetType vehicleType, int setAmountOfVehicles ) { 
+  public void f_setHydrogenVehicleSliders( GridConnection GC, OL_VehicleType vehicleType, int setAmountOfVehicles ) { 
 
 int local_EV_nb;
 int local_PetroleumFuelV_nb;
@@ -1934,66 +2569,40 @@ int local_HydrogenV_nb;
 int min_amount_EV;
 int	max_amount_EV;
 
-OL_EnergyAssetType vehicleType_electric;
-OL_EnergyAssetType vehicleType_petroleumFuel;
-	
 switch (vehicleType){
-	
-	case HYDROGEN_VEHICLE:
-
-	vehicleType_electric = OL_EnergyAssetType.ELECTRIC_VEHICLE;
-	vehicleType_petroleumFuel = OL_EnergyAssetType.PETROLEUM_FUEL_VEHICLE;
-
-	local_EV_nb = v_nbEVCars;
-	local_PetroleumFuelV_nb = v_nbPetroleumFuelCars;
-	local_HydrogenV_nb = v_nbHydrogenCars;
-	
-	min_amount_EV = v_minEVCarSlider;
-	max_amount_EV = v_maxEVCarSlider;
-	
-	break;
-	
-	case HYDROGEN_VAN:
-	
-	vehicleType_electric = OL_EnergyAssetType.ELECTRIC_VAN;
-	vehicleType_petroleumFuel = OL_EnergyAssetType.PETROLEUM_FUEL_VAN;
-	
-	local_EV_nb = v_nbEVVans;
-	local_PetroleumFuelV_nb = v_nbPetroleumFuelVans;
-	local_HydrogenV_nb = v_nbHydrogenVans;
-	
-	min_amount_EV = v_minEVVanSlider;
-	max_amount_EV = v_maxEVVanSlider;
-	
-	break;
-	
-	case HYDROGEN_TRUCK:
-
-	vehicleType_electric = OL_EnergyAssetType.ELECTRIC_TRUCK;
-	vehicleType_petroleumFuel = OL_EnergyAssetType.PETROLEUM_FUEL_TRUCK;
-	
-	local_EV_nb = v_nbEVTrucks;
-	local_PetroleumFuelV_nb = v_nbPetroleumFuelTrucks;
-	local_HydrogenV_nb = v_nbHydrogenTrucks;
-	
-	min_amount_EV = v_minEVTruckSlider;
-	max_amount_EV = v_maxEVTruckSlider;
-		
-	break;
-	
+	case CAR:
+		local_EV_nb = v_nbEVCars;
+		local_PetroleumFuelV_nb = v_nbPetroleumFuelCars;
+		local_HydrogenV_nb = v_nbHydrogenCars;
+		min_amount_EV = v_minEVCarSlider;
+		max_amount_EV = v_maxEVCarSlider;
+		break;
+	case VAN:
+		local_EV_nb = v_nbEVVans;
+		local_PetroleumFuelV_nb = v_nbPetroleumFuelVans;
+		local_HydrogenV_nb = v_nbHydrogenVans;
+		min_amount_EV = v_minEVVanSlider;
+		max_amount_EV = v_maxEVVanSlider;
+		break;
+	case TRUCK:
+		local_EV_nb = v_nbEVTrucks;
+		local_PetroleumFuelV_nb = v_nbPetroleumFuelTrucks;
+		local_HydrogenV_nb = v_nbHydrogenTrucks;
+		min_amount_EV = v_minEVTruckSlider;
+		max_amount_EV = v_maxEVTruckSlider;
+		break;
 	default:
-	traceln("SLIDER SET TO WRONG VEHICLE TYPE, DO NOTHING");
-	return;
+		traceln("SLIDER SET TO WRONG VEHICLE TYPE, DO NOTHING");
+		return;
 }
 
 if (setAmountOfVehicles > local_HydrogenV_nb){ // Slider has increased the amount of selected vehicles
 	
 	//First convert all other existing additional vehicles
-	int nbOfOtherAdditionalVehiclesOfThisClass = findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), p -> p.getEAType() == vehicleType_petroleumFuel || p.getEAType() == vehicleType_electric).size();
+	int nbOfOtherAdditionalVehiclesOfThisClass = findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && (vehicle.getFuelType() == OL_EnergyCarriers.PETROLEUM_FUEL || vehicle.getFuelType() == OL_EnergyCarriers.ELECTRICITY)).size();
 	while(setAmountOfVehicles > local_HydrogenV_nb && nbOfOtherAdditionalVehiclesOfThisClass > 0 ){
-		
 		// Find an additional PetroleumFuel vehicle
-		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), p -> p.getEAType() == vehicleType_petroleumFuel);
+		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.PETROLEUM_FUEL);
 		
 		if(petroleumFuelVehicle != null){
 			J_ActivityTrackerTrips tripTracker = petroleumFuelVehicle.getTripTracker();
@@ -2005,7 +2614,7 @@ if (setAmountOfVehicles > local_HydrogenV_nb){ // Slider has increased the amoun
 			zero_Interface.c_orderedVehicles.remove(petroleumFuelVehicle);
 			
 			//Create new additional Hydrogen vehicle
-			f_createVehicle(GC, vehicleType, tripTracker, available, true);			
+			f_createVehicle(GC, vehicleType, OL_EnergyCarriers.HYDROGEN, tripTracker, available, true);			
 
 			//Update local variables
 			local_HydrogenV_nb++;
@@ -2014,7 +2623,7 @@ if (setAmountOfVehicles > local_HydrogenV_nb){ // Slider has increased the amoun
 		}
 		else{
 			// Find an additional EV vehicle
-			J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), p -> p.getEAType() == vehicleType_electric);
+			J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.ELECTRICITY);
 			J_ActivityTrackerTrips tripTracker = ev.getTripTracker();
 		
 			// Remove EV
@@ -2024,7 +2633,7 @@ if (setAmountOfVehicles > local_HydrogenV_nb){ // Slider has increased the amoun
 			zero_Interface.c_orderedVehicles.remove(ev);
 			
 			//Create new additional Hydrogen vehicle
-			f_createVehicle(GC, vehicleType, tripTracker, available, true);
+			f_createVehicle(GC, vehicleType, OL_EnergyCarriers.HYDROGEN, tripTracker, available, true);
 
 			//Update local variables
 			local_HydrogenV_nb++;
@@ -2033,9 +2642,8 @@ if (setAmountOfVehicles > local_HydrogenV_nb){ // Slider has increased the amoun
 		}
 	}
 	while ( setAmountOfVehicles > local_HydrogenV_nb && local_PetroleumFuelV_nb > 0) {
-
 		// Find a to be removed PetroleumFuel vehicle
-		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, p -> p.getEAType() == vehicleType_petroleumFuel  && ((GridConnection)p.getOwner()) == GC);
+		J_EAFuelVehicle petroleumFuelVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.PETROLEUM_FUEL  && vehicle.getOwner() == GC);
 		J_ActivityTrackerTrips tripTracker = petroleumFuelVehicle.getTripTracker();
 
 		//Remove petroleumFuel vehicle
@@ -2044,7 +2652,7 @@ if (setAmountOfVehicles > local_HydrogenV_nb){ // Slider has increased the amoun
 		petroleumFuelVehicle.removeEnergyAsset();
 		
 		//Create new Hydrogen vehicle
-		f_createVehicle(GC, vehicleType, tripTracker, available, false);
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.HYDROGEN, tripTracker, available, false);
 			
 		//Update variables
 		local_HydrogenV_nb++;
@@ -2052,9 +2660,8 @@ if (setAmountOfVehicles > local_HydrogenV_nb){ // Slider has increased the amoun
 		
 	}
 	while (setAmountOfVehicles > local_HydrogenV_nb && local_EV_nb > min_amount_EV){
-		
 		// Find a to be removed EV
-		J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_orderedVehicles, p -> p.getEAType() == vehicleType_electric  && ((GridConnection)p.getOwner()) == GC);
+		J_EAEV ev = (J_EAEV)findFirst(zero_Interface.c_orderedVehicles, vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.ELECTRICITY  && vehicle.getOwner() == GC);
 		J_ActivityTrackerTrips tripTracker = ev.getTripTracker();
 		
 		// Remove EV
@@ -2063,41 +2670,36 @@ if (setAmountOfVehicles > local_HydrogenV_nb){ // Slider has increased the amoun
 		ev.removeEnergyAsset();
 		
 		//Create new Hydrogen vehicle
-		f_createVehicle(GC, vehicleType, tripTracker, available, false);
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.HYDROGEN, tripTracker, available, false);
 			
 		//Update variables
 		local_HydrogenV_nb++;
 		local_EV_nb--;
 	}
 	while (setAmountOfVehicles > local_HydrogenV_nb){ // Create additional vehicles
-	
-	f_createVehicle(GC, vehicleType, null, true, true);
-	local_HydrogenV_nb++;	
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.HYDROGEN, null, true, true);
+		local_HydrogenV_nb++;	
 	}
-
-	
 }
 else if(setAmountOfVehicles < local_HydrogenV_nb){ // Slider has decreased the amount of selected vehicles
 	
-	ArrayList<I_Vehicle> additionalVehicles = new ArrayList<>(findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getEAType() == vehicleType ));
+	ArrayList<I_Vehicle> additionalVehicles = new ArrayList<>(findAll(zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid), vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.HYDROGEN ));
 	while(setAmountOfVehicles < local_HydrogenV_nb && additionalVehicles.size() > 0){//Remove additional Hydrogen vehicles first
-
-	//Find additional created vehicle
-	J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)additionalVehicles.get(additionalVehicles.size()-1); // Get latest added
-	
-	// Remove hydrogen vehicle
-	additionalVehicles.remove(hydrogenVehicle);
-	zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).remove(hydrogenVehicle);
-	hydrogenVehicle.removeEnergyAsset();
-	zero_Interface.c_orderedVehicles.remove(hydrogenVehicle);
-	
-	//Update variable
-	local_HydrogenV_nb--;
+		//Find additional created vehicle
+		J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)additionalVehicles.get(additionalVehicles.size()-1); // Get latest added
+		
+		// Remove hydrogen vehicle
+		additionalVehicles.remove(hydrogenVehicle);
+		zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).remove(hydrogenVehicle);
+		hydrogenVehicle.removeEnergyAsset();
+		zero_Interface.c_orderedVehicles.remove(hydrogenVehicle);
+		
+		//Update variable
+		local_HydrogenV_nb--;
 	}
 	while ( setAmountOfVehicles < local_HydrogenV_nb && local_EV_nb < max_amount_EV) {
-	
 		// Find a to be removed Hydrogen vehicle
-		J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, p -> p.getEAType() == vehicleType && !zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).contains(p)  && ((GridConnection)p.getOwner()) == GC);
+		J_EAFuelVehicle hydrogenVehicle = (J_EAFuelVehicle)findFirst(zero_Interface.c_orderedVehicles, vehicle -> vehicle.getVehicleType() == vehicleType && vehicle.getFuelType() == OL_EnergyCarriers.HYDROGEN && !zero_Interface.c_additionalVehicles.get(p_gridConnection.p_uid).contains(vehicle)  && vehicle.getOwner() == GC);
 		J_ActivityTrackerTrips tripTracker = hydrogenVehicle.getTripTracker();
 		
 		// Remove hydrogen vehicle			
@@ -2106,7 +2708,7 @@ else if(setAmountOfVehicles < local_HydrogenV_nb){ // Slider has decreased the a
 		hydrogenVehicle.removeEnergyAsset();
 		
 		//Create new EV vehicle
-		f_createVehicle(GC, vehicleType_electric, tripTracker, available, false);
+		f_createVehicle(GC, vehicleType, OL_EnergyCarriers.ELECTRICITY, tripTracker, available, false);
 	
 		//Update variables
 		local_HydrogenV_nb--;
@@ -2116,45 +2718,28 @@ else if(setAmountOfVehicles < local_HydrogenV_nb){ // Slider has decreased the a
 
 //Update variables
 switch (vehicleType){
-	
-	case HYDROGEN_VEHICLE:
-	
-	v_nbEVCars = local_EV_nb;
-	v_nbPetroleumFuelCars = local_PetroleumFuelV_nb;
-	v_nbHydrogenCars = local_HydrogenV_nb;
-	
-	break;
-	
-	case HYDROGEN_VAN:
-	
-	v_nbEVVans = local_EV_nb;
-	v_nbPetroleumFuelVans = local_PetroleumFuelV_nb;
-	v_nbHydrogenVans = local_HydrogenV_nb;
-	
-	break;
-	
-	case HYDROGEN_TRUCK:
-	
-	v_nbEVTrucks = local_EV_nb;
-	v_nbPetroleumFuelTrucks = local_PetroleumFuelV_nb;
-	v_nbHydrogenTrucks = local_HydrogenV_nb;
-	
-	break;
+	case CAR:
+		v_nbEVCars = local_EV_nb;
+		v_nbPetroleumFuelCars = local_PetroleumFuelV_nb;
+		v_nbHydrogenCars = local_HydrogenV_nb;
+		break;
+	case VAN:
+		v_nbEVVans = local_EV_nb;
+		v_nbPetroleumFuelVans = local_PetroleumFuelV_nb;
+		v_nbHydrogenVans = local_HydrogenV_nb;
+		break;
+	case TRUCK:
+		v_nbEVTrucks = local_EV_nb;
+		v_nbPetroleumFuelTrucks = local_PetroleumFuelV_nb;
+		v_nbHydrogenTrucks = local_HydrogenV_nb;
+		break;
 } 
   }
 
   void f_setResultsUIPresets(  ) { 
 
-//Set the order of the resultsUI to front but behind simulation screen group and load icon
-presentation.remove(uI_Results_presentation);
-presentation.insert(presentation.size()-1, uI_Results_presentation);
-presentation.remove(gr_loadIcon);
-presentation.insert(presentation.size()-1, gr_loadIcon);
-presentation.remove(gr_simulateYearScreen);
-presentation.insert(presentation.size()-1, gr_simulateYearScreen);
-presentation.remove(gr_GCisPausedScreen);
-presentation.insert(presentation.size()-1, gr_GCisPausedScreen);
-
+//Set the order of the presentation objects
+f_setPresentationOrder();
 
 
 //Set the locations and visibilities of the ResultsUI agents
@@ -2696,6 +3281,349 @@ new Thread( () -> {
 }).start();
  
   }
+
+  void f_activateDailyDifferenceButtons( boolean activate ) { 
+
+map_dayToEnableDayButtons.values().forEach(cb -> cb.setEnabled(activate));
+
+if(!activate){
+	map_dayToEnableDayButtons.values().forEach(cb -> cb.setSelected(true, true));
+}
+
+map_dayToDisableRectangles.entrySet().stream()
+    .filter(entry -> entry.getKey() != OL_Days.MONDAY)
+    .forEach(entry -> entry.getValue().setVisible(!activate));
+     
+  }
+
+  void f_confirmVehicleTripsConfiguration( OL_VehicleType vehicleType ) { 
+
+if(f_createCustomTripConfiguration(vehicleType)){
+	f_replaceAllCurrentTripTrackersWithCustom(vehicleType);
+} 
+  }
+
+  void f_openVehicleTripsConfigurationMenu( OL_VehicleType vehicleType ) { 
+
+String vehicleTypeString = "";
+String pluralAddition = "";
+switch(vehicleType){
+	case CAR:
+		vehicleTypeString = "Auto";
+		pluralAddition = "'s";
+		break;
+	case VAN:
+		vehicleTypeString = "Busje";
+		pluralAddition = "s";
+		break;
+	case TRUCK:
+		vehicleTypeString = "Truck";
+		pluralAddition = "s";
+		break;
+}
+
+t_tripConfiguratorExplanation.setText("Wanneer zijn je " + vehicleTypeString + pluralAddition + " onderweg?");
+t_configureVehicleTrips_km.setText("Weeklijks gereden afstand per " + vehicleTypeString + ":");
+v_currentTripConfiguringVehicleType = vehicleType;
+f_initializeVehicleTripsConfigurationMenuButtons(vehicleType);
+gr_configureVehicleTrips.setVisible(true); 
+  }
+
+  
+boolean 
+ f_createCustomTripConfiguration( OL_VehicleType vehicleType ) { 
+
+
+boolean[][] tripMatrix = f_getTripBooleanMatrix();
+double weeklyTravelDistance_km = eb_configureVehicleTrips_weeklyDistance_km.getDoubleValue();
+
+//Validate values and continue
+if(J_CustomTripTrackerGenerator.checkIfCustomTripInputsAreValid(tripMatrix, weeklyTravelDistance_km)){
+	//Store this setting, so buttons can be brought back to this when reopening the menu for this gc and vehicle type
+	Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration> storeGCVehicleCustomTripValuesMap = map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid);
+	if(storeGCVehicleCustomTripValuesMap == null){
+		map_storedCustomTripButtonConfiguration.put(p_gridConnection.p_uid, new HashMap<>());
+	}
+	
+	J_CustomTripTrackerGenerator.StoredTripConfiguration storedTripButtonConfiguration = new J_CustomTripTrackerGenerator.StoredTripConfiguration(tripMatrix, weeklyTravelDistance_km, cb_configureVehicleTrips_dailyDistinction.isSelected(), c_activeVehicleConfigurationDays);
+	map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid).put(vehicleType, storedTripButtonConfiguration);
+	
+	//Create customTripRecords
+	List<J_ActivityTrackerTrips.TripRecord> customTripRecords = J_CustomTripTrackerGenerator.getCustomTripTrackerRecords(f_getTripBooleanMatrix(), weeklyTravelDistance_km); 
+	
+	//Add it to stored custom trip values maps
+	Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>> GCCustomTripRecordsMap = map_createdCustomTripWeeklyConfiguration.get(p_gridConnection.p_uid);
+	if(GCCustomTripRecordsMap == null){
+		map_createdCustomTripWeeklyConfiguration.put(p_gridConnection.p_uid, new HashMap<>());
+	}
+	map_createdCustomTripWeeklyConfiguration.get(p_gridConnection.p_uid).put(vehicleType, customTripRecords);
+	
+	return true;
+}
+else{
+	f_setErrorScreen("De custom rijtijden configuratie is niet doorgevoerd, door een onbekende error.");
+	return false;
+} 
+  }
+
+  void f_replaceAllCurrentTripTrackersWithCustom( OL_VehicleType vehicleType ) { 
+
+List<J_ActivityTrackerTrips.TripRecord> customTripRecords = map_createdCustomTripWeeklyConfiguration.get(p_gridConnection.p_uid).get(vehicleType);
+
+J_TimeVariables timeVariables = zero_Interface.energyModel.p_timeVariables;
+J_TimeParameters timeParameters = zero_Interface.energyModel.p_timeParameters;
+
+for(I_Vehicle vehicle : findAll(p_gridConnection.c_vehicleAssets, veh -> veh.getVehicleType() == vehicleType)){
+	//First get the old trip tracker
+	J_ActivityTrackerTrips currentTripTracker = vehicle.getTripTracker();
+	
+	//Before creating new triptracker, that automatically connects EV again to chargepoint, remove it from chargepoint first.
+	if(vehicle instanceof J_EAEV ev && p_gridConnection.f_getChargePoint().isRegistered(ev)){
+		p_gridConnection.f_getChargePoint().deregisterChargingRequest(ev);
+	}
+	
+	//Create new triptracker and add to vehicle
+	J_ActivityTrackerTrips newCustomTripTracker = new J_ActivityTrackerTrips(customTripRecords, vehicle, p_gridConnection.f_getChargePoint(), timeParameters, timeVariables); 	
+	
+	//Replace current with new one
+	f_replaceTripTrackerWithOtherTripTracker(currentTripTracker, newCustomTripTracker);
+	
+	//Create/maintain link with original and new trip tracker
+	f_storeOriginalTripTracker(currentTripTracker, newCustomTripTracker);
+}
+ 
+  }
+
+  void f_storeOriginalTripTracker( J_ActivityTrackerTrips oldTripTracker, J_ActivityTrackerTrips newTripTracker ) { 
+
+Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips> thisGCCustomToOriginalTripTrackerMap = map_customTripTrackerToOriginal.get(p_gridConnection.p_uid);
+
+//Check if map already exists, if not: initialize new map for this GC
+if(thisGCCustomToOriginalTripTrackerMap == null){
+	thisGCCustomToOriginalTripTrackerMap = new HashMap();
+	map_customTripTrackerToOriginal.put(p_gridConnection.p_uid, thisGCCustomToOriginalTripTrackerMap);
+}
+
+//Update or add custom to original Triptracker link.
+if(thisGCCustomToOriginalTripTrackerMap.get(oldTripTracker) != null){
+	thisGCCustomToOriginalTripTrackerMap.put(newTripTracker, thisGCCustomToOriginalTripTrackerMap.get(oldTripTracker));
+	thisGCCustomToOriginalTripTrackerMap.remove(oldTripTracker);
+}
+else{
+	thisGCCustomToOriginalTripTrackerMap.put(newTripTracker, oldTripTracker);
+} 
+  }
+
+  void f_initializeVehicleTripsConfigurationMenuButtons( OL_VehicleType vehicleType ) { 
+
+if(map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid) != null &&
+	map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid).get(vehicleType) != null){
+	boolean[][] previousButtonConfigurationMatrix = map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid).get(vehicleType).buttonConfigurationMatrix();
+	double previousWeeklyTravelDistance_km = map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid).get(vehicleType).weeklyTravelDistance_km();
+	boolean dailyDistinctionEnabled = map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid).get(vehicleType).dailyDistinctionEnabled();
+    Set<OL_Days> activeDays = map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid).get(vehicleType).activeDays();
+
+	//Set dailyDifferenceEnabled button correctly
+	cb_configureVehicleTrips_dailyDistinction.setSelected(dailyDistinctionEnabled, true);
+
+	for(OL_Days day : J_TimeParameters.getOrderedDaysList()){
+		map_dayToEnableDayButtons.get(day).setSelected(activeDays.contains(day), true);
+	}
+	//Set all buttons to correct values
+	f_setAllVehicleTripsConfigurationButtonsToInputMatrix(previousButtonConfigurationMatrix);
+	
+	//Set weekly travel distance to correct value;
+	eb_configureVehicleTrips_weeklyDistance_km.setText(BigDecimal.valueOf(previousWeeklyTravelDistance_km).stripTrailingZeros().toPlainString(), false);
+}
+else{ // No previous configuration for this GC and/or vehicle type -> Everything at default values
+	f_setAllVehicleTripsConfigurationButtonsToDefault();
+}
+ 
+  }
+
+  void f_closeVehicleTripsConfigurationMenu(  ) { 
+
+gr_configureVehicleTrips.setVisible(false);
+v_currentTripConfiguringVehicleType = null; 
+  }
+
+  void f_addNewInstanceOfCustomTripTrackerToAdditionalVehicle( I_Vehicle vehicle ) { 
+
+//Check if this vehicle should get a custom triptracker
+if(map_createdCustomTripWeeklyConfiguration.get(p_gridConnection.p_uid) != null && map_createdCustomTripWeeklyConfiguration.get(p_gridConnection.p_uid).get(vehicle) != null){
+	//Get the records for the custom triptracker
+	List<J_ActivityTrackerTrips.TripRecord> customTripRecords = map_createdCustomTripWeeklyConfiguration.get(p_gridConnection.p_uid).get(vehicle);
+	
+	J_TimeVariables timeVariables = zero_Interface.energyModel.p_timeVariables;
+	J_TimeParameters timeParameters = zero_Interface.energyModel.p_timeParameters;
+	
+	//Get the old trip tracker
+	J_ActivityTrackerTrips currentTripTracker = vehicle.getTripTracker();
+	
+	//Before creating new triptracker, that automatically connects EV again to chargepoint, remove it from chargepoint first.
+	if(vehicle instanceof J_EAEV ev && p_gridConnection.f_getChargePoint().isRegistered(ev)){
+		p_gridConnection.f_getChargePoint().deregisterChargingRequest(ev);
+	}
+	
+	//Create new triptracker
+	J_ActivityTrackerTrips newCustomTripTracker = new J_ActivityTrackerTrips(customTripRecords, vehicle, p_gridConnection.f_getChargePoint(), timeParameters, timeVariables); 	
+	
+	//Replace current with new one
+	f_replaceTripTrackerWithOtherTripTracker(currentTripTracker, newCustomTripTracker);
+} 	 
+  }
+
+  void f_resetAllVehiclesToOriginalTripTracker(  ) { 
+
+Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips> GCcustomTripTrackerToOriginalMap = map_customTripTrackerToOriginal.get(p_gridConnection.p_uid);
+
+if(GCcustomTripTrackerToOriginalMap != null && !GCcustomTripTrackerToOriginalMap.isEmpty()){
+	for(I_Vehicle vehicle : p_gridConnection.c_vehicleAssets){
+		J_ActivityTrackerTrips originalTripTracker = GCcustomTripTrackerToOriginalMap.get(vehicle.getTripTracker());
+		if(originalTripTracker != null){
+			//Reverse custom triptracker to original
+			originalTripTracker.setVehicle(vehicle); //Needed, cause vehicleEA might have changed for this trip tracker
+			f_replaceTripTrackerWithOtherTripTracker(vehicle.getTripTracker(), originalTripTracker);
+		}
+	}
+	//Clear the links
+	GCcustomTripTrackerToOriginalMap.clear();
+}
+
+ 
+  }
+
+  void f_replaceTripTrackerWithOtherTripTracker( J_ActivityTrackerTrips currentTripTracker, J_ActivityTrackerTrips newTripTracker ) { 
+
+I_Vehicle vehicle = currentTripTracker.getVehicle();
+J_ChargePoint chargePoint = p_gridConnection.f_getChargePoint();
+
+//Remove current
+p_gridConnection.c_tripTrackers.remove(currentTripTracker);
+currentTripTracker.setVehicle(null);
+
+if(vehicle instanceof J_EAEV ev && chargePoint.isRegistered(ev)){
+	chargePoint.deregisterChargingRequest(ev);
+}
+
+//Add new one, and set scaling equally as old one.
+newTripTracker.setDistanceScaling_fr(currentTripTracker.getDistanceScaling_fr());
+p_gridConnection.c_tripTrackers.add(newTripTracker);
+vehicle.setTripTracker(newTripTracker);
+vehicle.setAvailability(true);
+newTripTracker.setStartIndex(zero_Interface.energyModel.p_timeVariables, chargePoint); 
+  }
+
+  void f_resetVehicleTypeToOriginalTripTracker( OL_VehicleType vehicleType ) { 
+
+Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips> GCcustomTripTrackerToOriginalMap = map_customTripTrackerToOriginal.get(p_gridConnection.p_uid);
+
+if(GCcustomTripTrackerToOriginalMap != null && !GCcustomTripTrackerToOriginalMap.isEmpty()){
+    for(I_Vehicle vehicle : p_gridConnection.c_vehicleAssets){
+    	if(vehicle.getVehicleType() == vehicleType){
+            J_ActivityTrackerTrips customTripTracker = vehicle.getTripTracker();
+	        J_ActivityTrackerTrips originalTripTracker = GCcustomTripTrackerToOriginalMap.get(customTripTracker);
+	        if(originalTripTracker != null){
+	            
+	            //Reverse custom triptracker to original
+	            originalTripTracker.setVehicle(vehicle); //Needed, cause vehicleEA might have changed for this trip tracker
+	            f_replaceTripTrackerWithOtherTripTracker(customTripTracker, originalTripTracker);
+				
+	            //Remove previous link
+	            GCcustomTripTrackerToOriginalMap.remove(customTripTracker);
+	        }
+        }
+    }
+} 
+  }
+
+  void f_setAllVehicleTripsConfigurationButtonsToDefault(  ) { 
+
+//Disable distinction button
+cb_configureVehicleTrips_dailyDistinction.setSelected(false, true);
+f_setAllVehicleTripsConfigurationButtonsToInputMatrix(matrix_defaultValuesCustomTripButtons);
+eb_configureVehicleTrips_weeklyDistance_km.setValueToDefault(); 
+  }
+
+  
+boolean[][] 
+ f_getTripBooleanMatrix(  ) { 
+
+int rows = matrix_vehicleTripsConfigurationButtons.length;
+int cols = rows > 0 ? matrix_vehicleTripsConfigurationButtons[0].length : 0;
+
+boolean[][] booleanMatrix = new boolean[rows][cols];
+
+for (int i = 0; i < rows; i++) {
+	for (int j = 0; j < cols; j++) {
+    
+        Color fillColor = matrix_vehicleTripsConfigurationButtons[i][j].getFillColor();
+        if (fillColor.equals(p_configureVehicleTripsOnColor)) {
+            booleanMatrix[i][j] = true;
+        } 
+        else { // default for unrecognized colors
+            booleanMatrix[i][j] = false;
+        }
+    }
+}
+
+return booleanMatrix; 
+  }
+
+  void f_setAllVehicleTripsConfigurationButtonsToInputMatrix( boolean[][] booleanMatrix ) { 
+
+for (int day = 0; day < matrix_vehicleTripsConfigurationButtons.length; day++) {
+    for (int hour = 0; hour < matrix_vehicleTripsConfigurationButtons[day].length; hour++) {
+        if (booleanMatrix[day][hour]) {
+            matrix_vehicleTripsConfigurationButtons[day][hour].setFillColor(p_configureVehicleTripsOnColor);
+        } else {
+            matrix_vehicleTripsConfigurationButtons[day][hour].setFillColor(p_configureVehicleTripsOffColor);
+        }
+    }
+} 
+  }
+
+  void f_initializeDayToDisableRectanglesMap(  ) { 
+
+//Needed, cause groups are created after map initialization, creating errors if done in default value
+map_dayToDisableRectangles = new LinkedHashMap<OL_Days, ShapeGroup>();
+map_dayToDisableRectangles.put(OL_Days.MONDAY,    gr_disableTripConfigurationButtons_monday);
+map_dayToDisableRectangles.put(OL_Days.TUESDAY,   gr_disableTripConfigurationButtons_tuesday);
+map_dayToDisableRectangles.put(OL_Days.WEDNESDAY, gr_disableTripConfigurationButtons_wednesday);
+map_dayToDisableRectangles.put(OL_Days.THURSDAY,  gr_disableTripConfigurationButtons_thursday);
+map_dayToDisableRectangles.put(OL_Days.FRIDAY,    gr_disableTripConfigurationButtons_friday);
+map_dayToDisableRectangles.put(OL_Days.SATURDAY,  gr_disableTripConfigurationButtons_saturday);
+map_dayToDisableRectangles.put(OL_Days.SUNDAY,    gr_disableTripConfigurationButtons_sunday); 
+  }
+
+  void f_setPresentationOrder(  ) { 
+
+presentation.remove(uI_Results_presentation);
+presentation.insert(presentation.size()-1, uI_Results_presentation);
+presentation.remove(gr_loadIcon);
+presentation.insert(presentation.size()-1, gr_loadIcon);
+presentation.remove(gr_simulateYearScreen);
+presentation.insert(presentation.size()-1, gr_simulateYearScreen);
+presentation.remove(gr_configureVehicleTrips);
+presentation.insert(presentation.size()-1, gr_configureVehicleTrips);
+presentation.remove(gr_GCisPausedScreen);
+presentation.insert(presentation.size()-1, gr_GCisPausedScreen); 
+  }
+
+  void f_enableSingleDay( boolean enable, OL_Days day ) { 
+
+if(enable){
+	c_activeVehicleConfigurationDays.add(day);
+}
+else{
+	c_activeVehicleConfigurationDays.remove(day);
+	//Set color of entire row to off, if turned off.
+	for(ShapeRectangle rectangle : matrix_vehicleTripsConfigurationButtons[J_TimeParameters.getDayIndexFromDay(day)]){
+		rectangle.setFillColor(p_configureVehicleTripsOffColor);
+	}
+}
+map_dayToDisableRectangles.get(day).setVisible(!enable); 
+  }
 private double _datasetUpdateTime_xjal() {
 	return time();
 }
@@ -2720,6 +3648,12 @@ private double _datasetUpdateTime_xjal() {
   @AnyLogicInternalCodegenAPI
   protected static final Font _button3_Font = _button1_Font;
   @AnyLogicInternalCodegenAPI
+  protected static final Font _button_openVehicleTripsConfigurationMenu_car_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _button_openVehicleTripsConfigurationMenu_van_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _button_openVehicleTripsConfigurationMenu_truck_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
   protected static final Font _cb_selectGC_Font = _button1_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _rb_heatingTypePrivateUI_Font = new Font("Dialog", 0, 12 );
@@ -2729,6 +3663,30 @@ private double _datasetUpdateTime_xjal() {
   protected static final Font _cb_curtailmentCompany_Font = _button1_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _cb_showGridloadPlot_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_configureVehicleTrips_dailyDistinction_Font = _rb_scenariosPrivateUI_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _button_confirm_configureVehicleTrips_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _button_cancel_configureVehicleTrips_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_configureVehicleTripsMonday_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_configureVehicleTripsTuesday_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_configureVehicleTripsWednesday_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_configureVehicleTripsThursday_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_configureVehicleTripsFriday_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_configureVehicleTripsSaturday_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _cb_configureVehicleTripsSunday_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _button_configureVehicleTrips_reset_Font = _button1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _eb_configureVehicleTrips_weeklyDistance_km_Font = _button1_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _text_Font = new Font("SansSerif", 0, 12 );
   @AnyLogicInternalCodegenAPI
@@ -2887,6 +3845,76 @@ private double _datasetUpdateTime_xjal() {
   protected static final Font _txt_setSimYearScreen_Font = _text_Font;
   @AnyLogicInternalCodegenAPI
   protected static final Font _txt_selectDifferentOwnedGC_Font = _text_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _t_configureVehicleTrips_km_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_1_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_2_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_3_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_4_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_5_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_6_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_7_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_8_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_9_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_10_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_11_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_12_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_13_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_14_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_15_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_16_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_17_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_18_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_19_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_20_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_21_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_22_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_23_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_24_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_0_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_weeklyDistance_unit_Font = _text1_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_monday_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_tuesday_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_wednesday_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_thursday_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_friday_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_saturday_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _txt_configureVehicleTrips_sunday_Font = _text274_Font;
+  @AnyLogicInternalCodegenAPI
+  protected static final Font _t_tripConfiguratorExplanation_Font = new Font("Dialog", 1, 18 );
   protected static final Color _ovalTransportButton1_Fill_Color = new Color( 0xFFD7EFF2, true );
   protected static final Color _rect_loadIcon_Fill_Color = new Color( 0xE9F5F5F5, true );
   protected static final Color _rect_loadIcon_Line_Color = new Color( 0xE9F5F5F5, true );
@@ -2896,6 +3924,21 @@ private double _datasetUpdateTime_xjal() {
   protected static final Color _rect_errorScreenGrayOut_Line_Color = new Color( 0x85D3D3D3, true );
   protected static final Color _rect_errorScreenClickBlocking_Fill_Color = new Color( 0x85D3D3D3, true );
   protected static final Color _rect_errorScreenClickBlocking_Line_Color = new Color( 0x85D3D3D3, true );
+  protected static final Color _rect_configureVehicleTripsBackground_Fill_Color = new Color( 0xFF289CA0, true );
+  protected static final Color _rect_disableTripConfigurationButtons_monday1_Fill_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_monday1_Line_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_tuesday1_Fill_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_tuesday1_Line_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_sunday1_Fill_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_sunday1_Line_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_saturday1_Fill_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_saturday1_Line_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_friday1_Fill_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_friday1_Line_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_thursday1_Fill_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_thursday1_Line_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_wednesday1_Fill_Color = new Color( 0x96FFFFFF, true );
+  protected static final Color _rect_disableTripConfigurationButtons_wednesday1_Line_Color = new Color( 0x96FFFFFF, true );
   @AnyLogicInternalCodegenAPI
   protected static final int _rect_canvas = 1;
   @AnyLogicInternalCodegenAPI
@@ -3171,59 +4214,549 @@ private double _datasetUpdateTime_xjal() {
   @AnyLogicInternalCodegenAPI
   protected static final int _txt_selectDifferentOwnedGC = 137;
   @AnyLogicInternalCodegenAPI
-  protected static final int _button1 = 138;
+  protected static final int _rect_configureVehicleTripsBackground = 138;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rb_scenariosPrivateUI = 139;
+  protected static final int _rect_configureVehicleTrips_monday_0 = 139;
   @AnyLogicInternalCodegenAPI
-  protected static final int _button2 = 140;
+  protected static final int _rect_configureVehicleTrips_monday_1 = 140;
   @AnyLogicInternalCodegenAPI
-  protected static final int _button3 = 141;
+  protected static final int _rect_configureVehicleTrips_monday_2 = 141;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_GCCapacityCompany = 142;
+  protected static final int _rect_configureVehicleTrips_monday_3 = 142;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_heatDemandCompanyReduction = 143;
+  protected static final int _rect_configureVehicleTrips_monday_4 = 143;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricityDemandCompanyReduction = 144;
+  protected static final int _rect_configureVehicleTrips_monday_5 = 144;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricVansCompany = 145;
+  protected static final int _rect_configureVehicleTrips_monday_6 = 145;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_hydrogenVansCompany = 146;
+  protected static final int _rect_configureVehicleTrips_monday_7 = 146;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_petroleumFuelVansCompany = 147;
+  protected static final int _rect_configureVehicleTrips_monday_8 = 147;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_hydrogenTrucksCompany = 148;
+  protected static final int _rect_configureVehicleTrips_monday_9 = 148;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricTrucksCompany = 149;
+  protected static final int _rect_configureVehicleTrips_monday_10 = 149;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_petroleumFuelTrucksCompany = 150;
+  protected static final int _rect_configureVehicleTrips_monday_11 = 150;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_electricCarsCompany = 151;
+  protected static final int _rect_configureVehicleTrips_monday_12 = 151;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_mobilityDemandCompanyReduction = 152;
+  protected static final int _rect_configureVehicleTrips_monday_13 = 152;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_hydrogenCarsCompany = 153;
+  protected static final int _rect_configureVehicleTrips_monday_14 = 153;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_petroleumFuelCarsCompany = 154;
+  protected static final int _rect_configureVehicleTrips_monday_15 = 154;
   @AnyLogicInternalCodegenAPI
-  protected static final int _cb_selectGC = 155;
+  protected static final int _rect_configureVehicleTrips_monday_16 = 155;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_batteryCompany = 156;
+  protected static final int _rect_configureVehicleTrips_monday_17 = 156;
   @AnyLogicInternalCodegenAPI
-  protected static final int _rb_heatingTypePrivateUI = 157;
+  protected static final int _rect_configureVehicleTrips_monday_18 = 157;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_rooftopPVCompany = 158;
+  protected static final int _rect_configureVehicleTrips_monday_19 = 158;
   @AnyLogicInternalCodegenAPI
-  protected static final int _sl_GCCapacityCompany_Feedin = 159;
+  protected static final int _rect_configureVehicleTrips_monday_20 = 159;
   @AnyLogicInternalCodegenAPI
-  protected static final int _button = 160;
+  protected static final int _rect_configureVehicleTrips_monday_21 = 160;
   @AnyLogicInternalCodegenAPI
-  protected static final int _cb_curtailmentCompany = 161;
+  protected static final int _rect_configureVehicleTrips_monday_22 = 161;
   @AnyLogicInternalCodegenAPI
-  protected static final int _cb_showGridloadPlot = 162;
+  protected static final int _rect_configureVehicleTrips_monday_23 = 162;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_0 = 163;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_0 = 164;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_0 = 165;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_0 = 166;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_0 = 167;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_0 = 168;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_1 = 169;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_1 = 170;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_1 = 171;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_1 = 172;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_1 = 173;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_1 = 174;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_2 = 175;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_2 = 176;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_2 = 177;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_2 = 178;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_2 = 179;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_2 = 180;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_3 = 181;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_3 = 182;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_3 = 183;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_3 = 184;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_3 = 185;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_3 = 186;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_4 = 187;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_4 = 188;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_4 = 189;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_4 = 190;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_4 = 191;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_4 = 192;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_5 = 193;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_5 = 194;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_5 = 195;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_5 = 196;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_5 = 197;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_5 = 198;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_6 = 199;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_6 = 200;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_6 = 201;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_6 = 202;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_6 = 203;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_6 = 204;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_7 = 205;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_7 = 206;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_7 = 207;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_7 = 208;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_7 = 209;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_7 = 210;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_8 = 211;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_8 = 212;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_8 = 213;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_8 = 214;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_8 = 215;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_8 = 216;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_9 = 217;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_9 = 218;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_9 = 219;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_9 = 220;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_9 = 221;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_9 = 222;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_10 = 223;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_10 = 224;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_10 = 225;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_10 = 226;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_10 = 227;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_10 = 228;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_11 = 229;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_11 = 230;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_11 = 231;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_11 = 232;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_11 = 233;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_11 = 234;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_12 = 235;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_12 = 236;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_12 = 237;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_12 = 238;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_12 = 239;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_12 = 240;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_13 = 241;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_13 = 242;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_13 = 243;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_13 = 244;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_13 = 245;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_13 = 246;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_14 = 247;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_14 = 248;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_14 = 249;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_14 = 250;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_14 = 251;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_14 = 252;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_15 = 253;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_15 = 254;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_15 = 255;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_15 = 256;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_15 = 257;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_15 = 258;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_16 = 259;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_16 = 260;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_16 = 261;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_16 = 262;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_16 = 263;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_16 = 264;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_17 = 265;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_17 = 266;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_17 = 267;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_17 = 268;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_17 = 269;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_17 = 270;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_18 = 271;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_18 = 272;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_18 = 273;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_18 = 274;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_18 = 275;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_18 = 276;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_19 = 277;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_19 = 278;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_19 = 279;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_19 = 280;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_19 = 281;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_19 = 282;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_20 = 283;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_20 = 284;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_20 = 285;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_20 = 286;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_20 = 287;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_20 = 288;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_21 = 289;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_21 = 290;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_21 = 291;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_21 = 292;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_21 = 293;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_21 = 294;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_22 = 295;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_22 = 296;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_22 = 297;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_22 = 298;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_22 = 299;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_22 = 300;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_friday_23 = 301;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_sunday_23 = 302;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_tuesday_23 = 303;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_saturday_23 = 304;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_thursday_23 = 305;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_configureVehicleTrips_wednesday_23 = 306;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_configureVehicleTrips_weekButtons = 307;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _t_configureVehicleTrips_km = 308;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_monday = 309;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_monday1 = 310;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_disableTripConfigurationButtons_monday = 311;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_tuesday = 312;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_tuesday1 = 313;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_disableTripConfigurationButtons_tuesday = 314;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_sunday = 315;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_sunday1 = 316;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_disableTripConfigurationButtons_sunday = 317;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_saturday = 318;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_saturday1 = 319;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_disableTripConfigurationButtons_saturday = 320;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_friday = 321;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_friday1 = 322;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_disableTripConfigurationButtons_friday = 323;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_thursday = 324;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_thursday1 = 325;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_disableTripConfigurationButtons_thursday = 326;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_wednesday = 327;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rect_disableTripConfigurationButtons_wednesday1 = 328;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_disableTripConfigurationButtons_wednesday = 329;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_tripConfigurationDisableRectangles = 330;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_1 = 331;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_2 = 332;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_3 = 333;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_4 = 334;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_5 = 335;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_6 = 336;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_7 = 337;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_8 = 338;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_9 = 339;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_10 = 340;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_11 = 341;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_12 = 342;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_13 = 343;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_14 = 344;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_15 = 345;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_16 = 346;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_17 = 347;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_18 = 348;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_19 = 349;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_20 = 350;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_21 = 351;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_22 = 352;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_23 = 353;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_24 = 354;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_0 = 355;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_configureVehicleTripsNumbers = 356;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_weeklyDistance_unit = 357;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_monday = 358;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_tuesday = 359;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_wednesday = 360;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_thursday = 361;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_friday = 362;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_saturday = 363;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _txt_configureVehicleTrips_sunday = 364;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_vehicleTripConfiguratorWeekdays = 365;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _t_tripConfiguratorExplanation = 366;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _gr_configureVehicleTrips = 367;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button1 = 368;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rb_scenariosPrivateUI = 369;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button2 = 370;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button3 = 371;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_GCCapacityCompany = 372;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_heatDemandCompanyReduction = 373;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_electricityDemandCompanyReduction = 374;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button_openVehicleTripsConfigurationMenu_car = 375;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button_openVehicleTripsConfigurationMenu_van = 376;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button_openVehicleTripsConfigurationMenu_truck = 377;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_electricVansCompany = 378;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_hydrogenVansCompany = 379;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_petroleumFuelVansCompany = 380;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_hydrogenTrucksCompany = 381;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_electricTrucksCompany = 382;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_petroleumFuelTrucksCompany = 383;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_electricCarsCompany = 384;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_mobilityDemandCompanyReduction = 385;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_hydrogenCarsCompany = 386;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_petroleumFuelCarsCompany = 387;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_selectGC = 388;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_batteryCompany = 389;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _rb_heatingTypePrivateUI = 390;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_rooftopPVCompany = 391;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _sl_GCCapacityCompany_Feedin = 392;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button = 393;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_curtailmentCompany = 394;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_showGridloadPlot = 395;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_configureVehicleTrips_dailyDistinction = 396;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button_confirm_configureVehicleTrips = 397;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button_cancel_configureVehicleTrips = 398;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_configureVehicleTripsMonday = 399;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_configureVehicleTripsTuesday = 400;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_configureVehicleTripsWednesday = 401;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_configureVehicleTripsThursday = 402;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_configureVehicleTripsFriday = 403;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_configureVehicleTripsSaturday = 404;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _cb_configureVehicleTripsSunday = 405;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _button_configureVehicleTrips_reset = 406;
+  @AnyLogicInternalCodegenAPI
+  protected static final int _eb_configureVehicleTrips_weeklyDistance_km = 407;
 
   /** Internal constant, shouldn't be accessed by user */
   @AnyLogicInternalCodegenAPI
-  protected static final int _SHAPE_NEXT_ID_xjal = 163;
+  protected static final int _SHAPE_NEXT_ID_xjal = 408;
 
   @AnyLogicInternalCodegenAPI
   public boolean isPublicPresentationDefined() {
@@ -3237,7 +4770,7 @@ private double _datasetUpdateTime_xjal() {
   }
   @AnyLogicInternalCodegenAPI
   private void _initialize_level_xjal() {
-	  level.addAll(rect_canvas, rect_background, rect_sliders, rect_scenarios, text, text4, txt_storedScenarios, button1, gr_scenarioRB, txt_scenarioSettings, txt_sliderPresetsAndLimits, txt_sliderFunctions, button2, button3, txt_initialization, txt_uiResult, gr_companyUISliders, button, gr_companyDetails, uI_Results_presentation, mask_resultsUI1, mask_resultsUI2, gr_chartNameLeft, gr_chartNameMiddle, gr_chartNameRight, gr_simulateYearScreen, gr_loadIcon, txt_curtailmentDescriptionCompany, cb_curtailmentCompany, txt_nfatoValues, gr_TableConnectionCapacity, gr_GCisPausedScreen, cb_showGridloadPlot, gr_errorScreen, txt_setSimYearScreen, txt_selectDifferentOwnedGC);
+	  level.addAll(rect_canvas, rect_background, rect_sliders, rect_scenarios, text, text4, txt_storedScenarios, button1, gr_scenarioRB, txt_scenarioSettings, txt_sliderPresetsAndLimits, txt_sliderFunctions, button2, button3, txt_initialization, txt_uiResult, gr_companyUISliders, button, gr_companyDetails, uI_Results_presentation, mask_resultsUI1, mask_resultsUI2, gr_chartNameLeft, gr_chartNameMiddle, gr_chartNameRight, gr_simulateYearScreen, gr_loadIcon, txt_curtailmentDescriptionCompany, cb_curtailmentCompany, txt_nfatoValues, gr_TableConnectionCapacity, gr_GCisPausedScreen, cb_showGridloadPlot, gr_errorScreen, txt_setSimYearScreen, txt_selectDifferentOwnedGC, gr_configureVehicleTrips);
   }
 
   @Override
@@ -3307,6 +4840,2311 @@ double click_block = 0;
 gr_errorScreen.setVisible(false); 
         }
         break;
+      case _rect_configureVehicleTrips_monday_0:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_0;
+          
+if(rect_configureVehicleTrips_monday_0.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_0.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][0].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_0.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][0].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_1:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_1;
+          
+if(rect_configureVehicleTrips_monday_1.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_1.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][1].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_1.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][1].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_2:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_2;
+          
+if(rect_configureVehicleTrips_monday_2.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_2.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][2].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_2.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][2].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_3:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_3;
+          
+if(rect_configureVehicleTrips_monday_3.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_3.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][3].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_3.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][3].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_4:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_4;
+          
+if(rect_configureVehicleTrips_monday_4.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_4.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][4].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_4.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][4].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_5:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_5;
+          
+if(rect_configureVehicleTrips_monday_5.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_5.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][5].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_5.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][5].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_6:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_6;
+          
+if(rect_configureVehicleTrips_monday_6.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_6.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][6].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_6.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][6].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_7:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_7;
+          
+if(rect_configureVehicleTrips_monday_7.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_7.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][7].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_7.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][7].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_8:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_8;
+          
+if(rect_configureVehicleTrips_monday_8.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_8.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][8].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_8.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][8].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_9:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_9;
+          
+if(rect_configureVehicleTrips_monday_9.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_9.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][9].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_9.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][9].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_10:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_10;
+          
+if(rect_configureVehicleTrips_monday_10.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_10.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][10].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_10.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][10].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_11:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_11;
+          
+if(rect_configureVehicleTrips_monday_11.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_11.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][11].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_11.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][11].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_12:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_12;
+          
+if(rect_configureVehicleTrips_monday_12.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_12.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][12].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_12.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][12].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_13:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_13;
+          
+if(rect_configureVehicleTrips_monday_13.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_13.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][13].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_13.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][13].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_14:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_14;
+          
+if(rect_configureVehicleTrips_monday_14.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_14.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][14].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_14.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][14].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_15:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_15;
+          
+if(rect_configureVehicleTrips_monday_15.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_15.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][15].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_15.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][15].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_16:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_16;
+          
+if(rect_configureVehicleTrips_monday_16.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_16.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][16].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_16.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][16].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_17:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_17;
+          
+if(rect_configureVehicleTrips_monday_17.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_17.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][17].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_17.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][17].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_18:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_18;
+          
+if(rect_configureVehicleTrips_monday_18.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_18.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][18].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_18.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][18].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_19:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_19;
+          
+if(rect_configureVehicleTrips_monday_19.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_19.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][19].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_19.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][19].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_20:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_20;
+          
+if(rect_configureVehicleTrips_monday_20.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_20.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][20].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_20.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][20].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_21:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_21;
+          
+if(rect_configureVehicleTrips_monday_21.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_21.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][21].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_21.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][21].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_22:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_22;
+          
+if(rect_configureVehicleTrips_monday_22.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_22.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][22].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_22.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][22].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_monday_23:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_monday_23;
+          
+if(rect_configureVehicleTrips_monday_23.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_monday_23.setFillColor(p_configureVehicleTripsOnColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][23].setFillColor(p_configureVehicleTripsOnColor);
+		}
+	}
+}
+else{
+	rect_configureVehicleTrips_monday_23.setFillColor(p_configureVehicleTripsOffColor);
+	if(!cb_configureVehicleTrips_dailyDistinction.isSelected()){
+		for (int row = 1; row < matrix_vehicleTripsConfigurationButtons.length; row++) {
+		    matrix_vehicleTripsConfigurationButtons[row][23].setFillColor(p_configureVehicleTripsOffColor);
+		}
+	}
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_0:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_0;
+          
+if(rect_configureVehicleTrips_tuesday_0.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_0.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_0.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_0:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_0;
+          
+if(rect_configureVehicleTrips_wednesday_0.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_0.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_0.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_0:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_0;
+          
+if(rect_configureVehicleTrips_thursday_0.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_0.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_0.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_0:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_0;
+          
+if(rect_configureVehicleTrips_friday_0.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_0.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_0.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_0:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_0;
+          
+if(rect_configureVehicleTrips_saturday_0.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_0.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_0.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_0:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_0;
+          
+if(rect_configureVehicleTrips_sunday_0.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_0.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_0.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_1:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_1;
+          
+if(rect_configureVehicleTrips_wednesday_1.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_1.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_1.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_1:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_1;
+          
+if(rect_configureVehicleTrips_thursday_1.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_1.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_1.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_1:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_1;
+          
+if(rect_configureVehicleTrips_tuesday_1.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_1.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_1.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_1:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_1;
+          
+if(rect_configureVehicleTrips_sunday_1.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_1.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_1.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_1:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_1;
+          
+if(rect_configureVehicleTrips_friday_1.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_1.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_1.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_1:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_1;
+          
+if(rect_configureVehicleTrips_saturday_1.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_1.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_1.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_2:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_2;
+          
+if(rect_configureVehicleTrips_wednesday_2.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_2.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_2.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_2:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_2;
+          
+if(rect_configureVehicleTrips_thursday_2.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_2.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_2.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_2:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_2;
+          
+if(rect_configureVehicleTrips_tuesday_2.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_2.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_2.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_2:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_2;
+          
+if(rect_configureVehicleTrips_sunday_2.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_2.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_2.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_2:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_2;
+          
+if(rect_configureVehicleTrips_friday_2.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_2.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_2.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_2:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_2;
+          
+if(rect_configureVehicleTrips_saturday_2.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_2.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_2.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_3:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_3;
+          
+if(rect_configureVehicleTrips_wednesday_3.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_3.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_3.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_3:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_3;
+          
+if(rect_configureVehicleTrips_thursday_3.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_3.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_3.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_3:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_3;
+          
+if(rect_configureVehicleTrips_tuesday_3.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_3.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_3.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_3:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_3;
+          
+if(rect_configureVehicleTrips_sunday_3.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_3.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_3.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_3:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_3;
+          
+if(rect_configureVehicleTrips_friday_3.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_3.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_3.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_3:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_3;
+          
+if(rect_configureVehicleTrips_saturday_3.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_3.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_3.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_4:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_4;
+          
+if(rect_configureVehicleTrips_friday_4.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_4.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_4.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_4:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_4;
+          
+if(rect_configureVehicleTrips_sunday_4.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_4.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_4.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_4:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_4;
+          
+if(rect_configureVehicleTrips_tuesday_4.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_4.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_4.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_4:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_4;
+          
+if(rect_configureVehicleTrips_saturday_4.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_4.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_4.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_4:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_4;
+          
+if(rect_configureVehicleTrips_thursday_4.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_4.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_4.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_4:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_4;
+          
+if(rect_configureVehicleTrips_wednesday_4.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_4.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_4.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_5:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_5;
+          
+if(rect_configureVehicleTrips_friday_5.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_5.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_5.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_5:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_5;
+          
+if(rect_configureVehicleTrips_sunday_5.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_5.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_5.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_5:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_5;
+          
+if(rect_configureVehicleTrips_tuesday_5.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_5.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_5.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_5:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_5;
+          
+if(rect_configureVehicleTrips_saturday_5.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_5.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_5.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_5:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_5;
+          
+if(rect_configureVehicleTrips_thursday_5.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_5.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_5.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_5:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_5;
+          
+if(rect_configureVehicleTrips_wednesday_5.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_5.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_5.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_6:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_6;
+          
+if(rect_configureVehicleTrips_friday_6.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_6.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_6.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_6:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_6;
+          
+if(rect_configureVehicleTrips_sunday_6.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_6.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_6.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_6:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_6;
+          
+if(rect_configureVehicleTrips_tuesday_6.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_6.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_6.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_6:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_6;
+          
+if(rect_configureVehicleTrips_saturday_6.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_6.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_6.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_6:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_6;
+          
+if(rect_configureVehicleTrips_thursday_6.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_6.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_6.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_6:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_6;
+          
+if(rect_configureVehicleTrips_wednesday_6.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_6.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_6.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_7:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_7;
+          
+if(rect_configureVehicleTrips_friday_7.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_7.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_7.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_7:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_7;
+          
+if(rect_configureVehicleTrips_sunday_7.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_7.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_7.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_7:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_7;
+          
+if(rect_configureVehicleTrips_tuesday_7.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_7.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_7.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_7:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_7;
+          
+if(rect_configureVehicleTrips_saturday_7.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_7.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_7.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_7:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_7;
+          
+if(rect_configureVehicleTrips_thursday_7.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_7.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_7.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_7:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_7;
+          
+if(rect_configureVehicleTrips_wednesday_7.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_7.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_7.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_8:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_8;
+          
+if(rect_configureVehicleTrips_friday_8.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_8.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_8.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_8:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_8;
+          
+if(rect_configureVehicleTrips_sunday_8.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_8.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_8.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_8:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_8;
+          
+if(rect_configureVehicleTrips_tuesday_8.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_8.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_8.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_8:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_8;
+          
+if(rect_configureVehicleTrips_saturday_8.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_8.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_8.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_8:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_8;
+          
+if(rect_configureVehicleTrips_thursday_8.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_8.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_8.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_8:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_8;
+          
+if(rect_configureVehicleTrips_wednesday_8.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_8.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_8.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_9:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_9;
+          
+if(rect_configureVehicleTrips_friday_9.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_9.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_9.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_9:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_9;
+          
+if(rect_configureVehicleTrips_sunday_9.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_9.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_9.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_9:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_9;
+          
+if(rect_configureVehicleTrips_tuesday_9.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_9.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_9.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_9:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_9;
+          
+if(rect_configureVehicleTrips_saturday_9.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_9.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_9.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_9:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_9;
+          
+if(rect_configureVehicleTrips_thursday_9.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_9.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_9.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_9:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_9;
+          
+if(rect_configureVehicleTrips_wednesday_9.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_9.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_9.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_10:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_10;
+          
+if(rect_configureVehicleTrips_friday_10.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_10.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_10.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_10:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_10;
+          
+if(rect_configureVehicleTrips_sunday_10.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_10.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_10.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_10:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_10;
+          
+if(rect_configureVehicleTrips_tuesday_10.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_10.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_10.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_10:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_10;
+          
+if(rect_configureVehicleTrips_saturday_10.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_10.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_10.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_10:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_10;
+          
+if(rect_configureVehicleTrips_thursday_10.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_10.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_10.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_10:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_10;
+          
+if(rect_configureVehicleTrips_wednesday_10.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_10.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_10.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_11:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_11;
+          
+if(rect_configureVehicleTrips_friday_11.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_11.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_11.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_11:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_11;
+          
+if(rect_configureVehicleTrips_sunday_11.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_11.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_11.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_11:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_11;
+          
+if(rect_configureVehicleTrips_tuesday_11.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_11.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_11.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_11:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_11;
+          
+if(rect_configureVehicleTrips_saturday_11.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_11.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_11.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_11:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_11;
+          
+if(rect_configureVehicleTrips_thursday_11.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_11.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_11.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_11:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_11;
+          
+if(rect_configureVehicleTrips_wednesday_11.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_11.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_11.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_12:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_12;
+          
+if(rect_configureVehicleTrips_friday_12.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_12.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_12.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_12:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_12;
+          
+if(rect_configureVehicleTrips_sunday_12.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_12.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_12.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_12:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_12;
+          
+if(rect_configureVehicleTrips_tuesday_12.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_12.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_12.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_12:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_12;
+          
+if(rect_configureVehicleTrips_saturday_12.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_12.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_12.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_12:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_12;
+          
+if(rect_configureVehicleTrips_thursday_12.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_12.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_12.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_12:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_12;
+          
+if(rect_configureVehicleTrips_wednesday_12.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_12.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_12.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_13:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_13;
+          
+if(rect_configureVehicleTrips_friday_13.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_13.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_13.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_13:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_13;
+          
+if(rect_configureVehicleTrips_sunday_13.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_13.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_13.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_13:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_13;
+          
+if(rect_configureVehicleTrips_tuesday_13.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_13.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_13.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_13:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_13;
+          
+if(rect_configureVehicleTrips_saturday_13.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_13.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_13.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_13:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_13;
+          
+if(rect_configureVehicleTrips_thursday_13.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_13.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_13.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_13:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_13;
+          
+if(rect_configureVehicleTrips_wednesday_13.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_13.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_13.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_14:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_14;
+          
+if(rect_configureVehicleTrips_friday_14.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_14.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_14.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_14:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_14;
+          
+if(rect_configureVehicleTrips_sunday_14.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_14.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_14.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_14:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_14;
+          
+if(rect_configureVehicleTrips_tuesday_14.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_14.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_14.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_14:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_14;
+          
+if(rect_configureVehicleTrips_saturday_14.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_14.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_14.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_14:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_14;
+          
+if(rect_configureVehicleTrips_thursday_14.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_14.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_14.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_14:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_14;
+          
+if(rect_configureVehicleTrips_wednesday_14.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_14.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_14.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_15:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_15;
+          
+if(rect_configureVehicleTrips_friday_15.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_15.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_15.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_15:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_15;
+          
+if(rect_configureVehicleTrips_sunday_15.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_15.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_15.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_15:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_15;
+          
+if(rect_configureVehicleTrips_tuesday_15.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_15.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_15.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_15:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_15;
+          
+if(rect_configureVehicleTrips_saturday_15.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_15.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_15.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_15:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_15;
+          
+if(rect_configureVehicleTrips_thursday_15.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_15.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_15.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_15:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_15;
+          
+if(rect_configureVehicleTrips_wednesday_15.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_15.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_15.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_16:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_16;
+          
+if(rect_configureVehicleTrips_friday_16.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_16.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_16.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_16:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_16;
+          
+if(rect_configureVehicleTrips_sunday_16.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_16.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_16.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_16:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_16;
+          
+if(rect_configureVehicleTrips_tuesday_16.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_16.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_16.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_16:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_16;
+          
+if(rect_configureVehicleTrips_saturday_16.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_16.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_16.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_16:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_16;
+          
+if(rect_configureVehicleTrips_thursday_16.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_16.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_16.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_16:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_16;
+          
+if(rect_configureVehicleTrips_wednesday_16.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_16.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_16.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_17:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_17;
+          
+if(rect_configureVehicleTrips_friday_17.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_17.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_17.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_17:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_17;
+          
+if(rect_configureVehicleTrips_sunday_17.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_17.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_17.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_17:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_17;
+          
+if(rect_configureVehicleTrips_tuesday_17.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_17.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_17.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_17:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_17;
+          
+if(rect_configureVehicleTrips_saturday_17.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_17.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_17.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_17:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_17;
+          
+if(rect_configureVehicleTrips_thursday_17.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_17.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_17.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_17:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_17;
+          
+if(rect_configureVehicleTrips_wednesday_17.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_17.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_17.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_18:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_18;
+          
+if(rect_configureVehicleTrips_friday_18.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_18.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_18.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_18:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_18;
+          
+if(rect_configureVehicleTrips_sunday_18.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_18.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_18.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_18:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_18;
+          
+if(rect_configureVehicleTrips_tuesday_18.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_18.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_18.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_18:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_18;
+          
+if(rect_configureVehicleTrips_saturday_18.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_18.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_18.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_18:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_18;
+          
+if(rect_configureVehicleTrips_thursday_18.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_18.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_18.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_18:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_18;
+          
+if(rect_configureVehicleTrips_wednesday_18.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_18.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_18.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_19:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_19;
+          
+if(rect_configureVehicleTrips_friday_19.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_19.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_19.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_19:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_19;
+          
+if(rect_configureVehicleTrips_sunday_19.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_19.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_19.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_19:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_19;
+          
+if(rect_configureVehicleTrips_tuesday_19.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_19.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_19.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_19:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_19;
+          
+if(rect_configureVehicleTrips_saturday_19.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_19.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_19.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_19:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_19;
+          
+if(rect_configureVehicleTrips_thursday_19.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_19.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_19.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_19:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_19;
+          
+if(rect_configureVehicleTrips_wednesday_19.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_19.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_19.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_20:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_20;
+          
+if(rect_configureVehicleTrips_friday_20.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_20.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_20.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_20:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_20;
+          
+if(rect_configureVehicleTrips_sunday_20.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_20.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_20.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_20:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_20;
+          
+if(rect_configureVehicleTrips_tuesday_20.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_20.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_20.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_20:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_20;
+          
+if(rect_configureVehicleTrips_saturday_20.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_20.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_20.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_20:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_20;
+          
+if(rect_configureVehicleTrips_thursday_20.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_20.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_20.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_20:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_20;
+          
+if(rect_configureVehicleTrips_wednesday_20.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_20.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_20.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_21:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_21;
+          
+if(rect_configureVehicleTrips_friday_21.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_21.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_21.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_21:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_21;
+          
+if(rect_configureVehicleTrips_sunday_21.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_21.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_21.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_21:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_21;
+          
+if(rect_configureVehicleTrips_tuesday_21.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_21.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_21.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_21:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_21;
+          
+if(rect_configureVehicleTrips_saturday_21.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_21.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_21.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_21:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_21;
+          
+if(rect_configureVehicleTrips_thursday_21.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_21.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_21.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_21:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_21;
+          
+if(rect_configureVehicleTrips_wednesday_21.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_21.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_21.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_22:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_22;
+          
+if(rect_configureVehicleTrips_friday_22.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_22.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_22.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_22:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_22;
+          
+if(rect_configureVehicleTrips_sunday_22.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_22.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_22.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_22:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_22;
+          
+if(rect_configureVehicleTrips_tuesday_22.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_22.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_22.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_22:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_22;
+          
+if(rect_configureVehicleTrips_saturday_22.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_22.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_22.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_22:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_22;
+          
+if(rect_configureVehicleTrips_thursday_22.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_22.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_22.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_22:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_22;
+          
+if(rect_configureVehicleTrips_wednesday_22.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_22.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_22.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_friday_23:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_friday_23;
+          
+if(rect_configureVehicleTrips_friday_23.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_friday_23.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_friday_23.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_sunday_23:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_sunday_23;
+          
+if(rect_configureVehicleTrips_sunday_23.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_sunday_23.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_sunday_23.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_tuesday_23:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_tuesday_23;
+          
+if(rect_configureVehicleTrips_tuesday_23.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_tuesday_23.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_tuesday_23.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_saturday_23:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_saturday_23;
+          
+if(rect_configureVehicleTrips_saturday_23.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_saturday_23.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_saturday_23.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_thursday_23:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_thursday_23;
+          
+if(rect_configureVehicleTrips_thursday_23.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_thursday_23.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_thursday_23.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_configureVehicleTrips_wednesday_23:
+        if (true) {
+          ShapeRectangle self = this.rect_configureVehicleTrips_wednesday_23;
+          
+if(rect_configureVehicleTrips_wednesday_23.getFillColor().equals(p_configureVehicleTripsOffColor)){
+	rect_configureVehicleTrips_wednesday_23.setFillColor(p_configureVehicleTripsOnColor);
+}
+else{
+	rect_configureVehicleTrips_wednesday_23.setFillColor(p_configureVehicleTripsOffColor);
+} 
+        }
+        break;
+      case _rect_disableTripConfigurationButtons_monday:
+        if (true) {
+          ShapeRectangle self = this.rect_disableTripConfigurationButtons_monday;
+          
+; 
+        }
+        break;
+      case _rect_disableTripConfigurationButtons_tuesday:
+        if (true) {
+          ShapeRectangle self = this.rect_disableTripConfigurationButtons_tuesday;
+          
+; 
+        }
+        break;
+      case _rect_disableTripConfigurationButtons_sunday:
+        if (true) {
+          ShapeRectangle self = this.rect_disableTripConfigurationButtons_sunday;
+          
+; 
+        }
+        break;
+      case _rect_disableTripConfigurationButtons_saturday:
+        if (true) {
+          ShapeRectangle self = this.rect_disableTripConfigurationButtons_saturday;
+          
+; 
+        }
+        break;
+      case _rect_disableTripConfigurationButtons_friday:
+        if (true) {
+          ShapeRectangle self = this.rect_disableTripConfigurationButtons_friday;
+          
+; 
+        }
+        break;
+      case _rect_disableTripConfigurationButtons_thursday:
+        if (true) {
+          ShapeRectangle self = this.rect_disableTripConfigurationButtons_thursday;
+          
+; 
+        }
+        break;
+      case _rect_disableTripConfigurationButtons_wednesday:
+        if (true) {
+          ShapeRectangle self = this.rect_disableTripConfigurationButtons_wednesday;
+          
+; 
+        }
+        break;
       default: return super.onShapeClick( _shape, index, clickx, clicky );
  	}
  	return false;
@@ -3331,6 +7169,37 @@ p_gridConnection.va_gridConnection.navigateTo();
 p_gridConnection.p_owner.va_ConnectionOwner.navigateTo(); 
 ;}
         break;
+      case _button_openVehicleTripsConfigurationMenu_car: {
+          ShapeButton self = this.button_openVehicleTripsConfigurationMenu_car;
+if(v_currentTripConfiguringVehicleType != OL_VehicleType.CAR){
+	f_openVehicleTripsConfigurationMenu(OL_VehicleType.CAR);
+}
+else{
+	f_closeVehicleTripsConfigurationMenu();
+}
+ 
+;}
+        break;
+      case _button_openVehicleTripsConfigurationMenu_van: {
+          ShapeButton self = this.button_openVehicleTripsConfigurationMenu_van;
+if(v_currentTripConfiguringVehicleType != OL_VehicleType.VAN){
+	f_openVehicleTripsConfigurationMenu(OL_VehicleType.VAN);
+}
+else{
+	f_closeVehicleTripsConfigurationMenu();
+} 
+;}
+        break;
+      case _button_openVehicleTripsConfigurationMenu_truck: {
+          ShapeButton self = this.button_openVehicleTripsConfigurationMenu_truck;
+if(v_currentTripConfiguringVehicleType != OL_VehicleType.TRUCK){
+	f_openVehicleTripsConfigurationMenu(OL_VehicleType.TRUCK);
+}
+else{
+	f_closeVehicleTripsConfigurationMenu();
+} 
+;}
+        break;
       case _button: {
           ShapeButton self = this.button;
 zero_Interface.uI_Results.getCheckbox_KPISummary().setSelected(false, true);
@@ -3338,6 +7207,36 @@ zero_Interface.uI_Results.getCheckbox_KPISummary().setSelected(false, true);
 zero_Interface.va_Interface.navigateTo();
 zero_Interface.v_currentViewArea = zero_Interface.va_Interface;
  
+;}
+        break;
+      case _button_confirm_configureVehicleTrips: {
+          ShapeButton self = this.button_confirm_configureVehicleTrips;
+f_confirmVehicleTripsConfiguration(v_currentTripConfiguringVehicleType);
+f_closeVehicleTripsConfigurationMenu();
+
+//Set scenario to custom
+f_setScenario(2);
+
+// Simulate Year screen
+f_setSimulateYearScreen(); 
+;}
+        break;
+      case _button_cancel_configureVehicleTrips: {
+          ShapeButton self = this.button_cancel_configureVehicleTrips;
+f_closeVehicleTripsConfigurationMenu(); 
+;}
+        break;
+      case _button_configureVehicleTrips_reset: {
+          ShapeButton self = this.button_configureVehicleTrips_reset;
+if(map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid) != null &&
+	map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid).get(v_currentTripConfiguringVehicleType) != null){
+	map_storedCustomTripButtonConfiguration.get(p_gridConnection.p_uid).remove(v_currentTripConfiguringVehicleType);
+	f_initializeVehicleTripsConfigurationMenuButtons(v_currentTripConfiguringVehicleType);
+	f_resetVehicleTypeToOriginalTripTracker(v_currentTripConfiguringVehicleType);
+}
+else{
+	f_setAllVehicleTripsConfigurationButtonsToDefault();
+} 
 ;}
         break;
       default:
@@ -3377,6 +7276,46 @@ if(cb_showGridloadPlot.isSelected()){
 else{
 	txt_chartNameRight.setText("Energiestromen");
 } 
+;}
+        break;
+      case _cb_configureVehicleTrips_dailyDistinction: {
+          ShapeCheckBox self = this.cb_configureVehicleTrips_dailyDistinction;
+f_activateDailyDifferenceButtons(cb_configureVehicleTrips_dailyDistinction.isSelected()); 
+;}
+        break;
+      case _cb_configureVehicleTripsMonday: {
+          ShapeCheckBox self = this.cb_configureVehicleTripsMonday;
+f_enableSingleDay(cb_configureVehicleTripsMonday.isSelected(), OL_Days.MONDAY); 
+;}
+        break;
+      case _cb_configureVehicleTripsTuesday: {
+          ShapeCheckBox self = this.cb_configureVehicleTripsTuesday;
+f_enableSingleDay(cb_configureVehicleTripsTuesday.isSelected(), OL_Days.TUESDAY); 
+;}
+        break;
+      case _cb_configureVehicleTripsWednesday: {
+          ShapeCheckBox self = this.cb_configureVehicleTripsWednesday;
+f_enableSingleDay(cb_configureVehicleTripsWednesday.isSelected(), OL_Days.WEDNESDAY); 
+;}
+        break;
+      case _cb_configureVehicleTripsThursday: {
+          ShapeCheckBox self = this.cb_configureVehicleTripsThursday;
+f_enableSingleDay(cb_configureVehicleTripsThursday.isSelected(), OL_Days.THURSDAY); 
+;}
+        break;
+      case _cb_configureVehicleTripsFriday: {
+          ShapeCheckBox self = this.cb_configureVehicleTripsFriday;
+f_enableSingleDay(cb_configureVehicleTripsFriday.isSelected(), OL_Days.FRIDAY); 
+;}
+        break;
+      case _cb_configureVehicleTripsSaturday: {
+          ShapeCheckBox self = this.cb_configureVehicleTripsSaturday;
+f_enableSingleDay(cb_configureVehicleTripsSaturday.isSelected(), OL_Days.SATURDAY); 
+;}
+        break;
+      case _cb_configureVehicleTripsSunday: {
+          ShapeCheckBox self = this.cb_configureVehicleTripsSunday;
+f_enableSingleDay(cb_configureVehicleTripsSunday.isSelected(), OL_Days.SUNDAY); 
 ;}
         break;
       default:
@@ -3502,7 +7441,7 @@ f_setSimulateYearScreen();
       case _sl_electricVansCompany: {
           ShapeSlider self = this.sl_electricVansCompany;
 //Slider function
-f_setElectricVehicleSliders(p_gridConnection, OL_EnergyAssetType.ELECTRIC_VAN, (int)sl_electricVansCompany.getValue());
+f_setElectricVehicleSliders(p_gridConnection, OL_VehicleType.VAN, (int)sl_electricVansCompany.getValue());
 
 //Update the other two sliders aswell
 sl_hydrogenVansCompany.setValue(v_nbHydrogenVans, false);
@@ -3518,7 +7457,7 @@ f_setSimulateYearScreen();
       case _sl_hydrogenVansCompany: {
           ShapeSlider self = this.sl_hydrogenVansCompany;
 //Slider function
-f_setHydrogenVehicleSliders(p_gridConnection, OL_EnergyAssetType.HYDROGEN_VAN, (int)sl_hydrogenVansCompany.getValue());
+f_setHydrogenVehicleSliders(p_gridConnection, OL_VehicleType.VAN, (int)sl_hydrogenVansCompany.getValue());
 
 //Update the other two sliders aswell
 sl_electricVansCompany.setValue(v_nbEVVans, false);
@@ -3534,7 +7473,7 @@ f_setSimulateYearScreen();
       case _sl_petroleumFuelVansCompany: {
           ShapeSlider self = this.sl_petroleumFuelVansCompany;
 //Slider function
-f_setPetroleumFuelVehicleSliders(p_gridConnection, OL_EnergyAssetType.PETROLEUM_FUEL_VAN, (int)sl_petroleumFuelVansCompany.getValue());
+f_setPetroleumFuelVehicleSliders(p_gridConnection, OL_VehicleType.VAN, (int)sl_petroleumFuelVansCompany.getValue());
 
 //Update the other two sliders aswell
 sl_electricVansCompany.setValue(v_nbEVVans, false);
@@ -3550,7 +7489,7 @@ f_setSimulateYearScreen();
       case _sl_hydrogenTrucksCompany: {
           ShapeSlider self = this.sl_hydrogenTrucksCompany;
 //Slider function
-f_setHydrogenVehicleSliders(p_gridConnection, OL_EnergyAssetType.HYDROGEN_TRUCK, (int)sl_hydrogenTrucksCompany.getValue());
+f_setHydrogenVehicleSliders(p_gridConnection, OL_VehicleType.TRUCK, (int)sl_hydrogenTrucksCompany.getValue());
 
 //Update the other two sliders aswell
 sl_electricTrucksCompany.setValue(v_nbEVTrucks, false);
@@ -3566,7 +7505,7 @@ f_setSimulateYearScreen();
       case _sl_electricTrucksCompany: {
           ShapeSlider self = this.sl_electricTrucksCompany;
 //Slider function
-f_setElectricVehicleSliders(p_gridConnection, OL_EnergyAssetType.ELECTRIC_TRUCK, (int)sl_electricTrucksCompany.getValue());
+f_setElectricVehicleSliders(p_gridConnection, OL_VehicleType.TRUCK, (int)sl_electricTrucksCompany.getValue());
 
 //Update the other two sliders aswell
 sl_hydrogenTrucksCompany.setValue(v_nbHydrogenTrucks, false);
@@ -3582,7 +7521,7 @@ f_setSimulateYearScreen();
       case _sl_petroleumFuelTrucksCompany: {
           ShapeSlider self = this.sl_petroleumFuelTrucksCompany;
 //Slider function
-f_setPetroleumFuelVehicleSliders(p_gridConnection, OL_EnergyAssetType.PETROLEUM_FUEL_TRUCK, (int)sl_petroleumFuelTrucksCompany.getValue());
+f_setPetroleumFuelVehicleSliders(p_gridConnection, OL_VehicleType.TRUCK, (int)sl_petroleumFuelTrucksCompany.getValue());
 
 //Update the other two sliders aswell
 sl_electricTrucksCompany.setValue(v_nbEVTrucks, false);
@@ -3598,7 +7537,7 @@ f_setSimulateYearScreen();
       case _sl_electricCarsCompany: {
           ShapeSlider self = this.sl_electricCarsCompany;
 //Slider function
-f_setElectricVehicleSliders(p_gridConnection, OL_EnergyAssetType.ELECTRIC_VEHICLE, (int)sl_electricCarsCompany.getValue());
+f_setElectricVehicleSliders(p_gridConnection, OL_VehicleType.CAR, (int)sl_electricCarsCompany.getValue());
 
 //Update the other two sliders aswell
 sl_hydrogenCarsCompany.setValue(v_nbHydrogenCars, false);
@@ -3613,7 +7552,7 @@ f_setSimulateYearScreen();
         break;
       case _sl_mobilityDemandCompanyReduction: {
           ShapeSlider self = this.sl_mobilityDemandCompanyReduction;
-p_gridConnection.c_tripTrackers.forEach(tt -> tt.distanceScaling_fr = 1-sl_mobilityDemandCompanyReduction.getValue()/100);
+p_gridConnection.c_tripTrackers.forEach(tt -> tt.setDistanceScaling_fr(1-sl_mobilityDemandCompanyReduction.getValue()/100));
 
 //Set scenario to custom
 f_setScenario(2);
@@ -3625,7 +7564,7 @@ f_setSimulateYearScreen();
       case _sl_hydrogenCarsCompany: {
           ShapeSlider self = this.sl_hydrogenCarsCompany;
 //Slider function
-f_setHydrogenVehicleSliders(p_gridConnection, OL_EnergyAssetType.HYDROGEN_VEHICLE, (int)sl_hydrogenCarsCompany.getValue());
+f_setHydrogenVehicleSliders(p_gridConnection, OL_VehicleType.CAR, (int)sl_hydrogenCarsCompany.getValue());
 
 //Update the other two sliders aswell
 sl_electricCarsCompany.setValue(v_nbEVCars, false);
@@ -3641,7 +7580,7 @@ f_setSimulateYearScreen();
       case _sl_petroleumFuelCarsCompany: {
           ShapeSlider self = this.sl_petroleumFuelCarsCompany;
 //Slider function
-f_setPetroleumFuelVehicleSliders(p_gridConnection, OL_EnergyAssetType.PETROLEUM_FUEL_VEHICLE, (int)sl_petroleumFuelCarsCompany.getValue());
+f_setPetroleumFuelVehicleSliders(p_gridConnection, OL_VehicleType.CAR, (int)sl_petroleumFuelCarsCompany.getValue());
 
 //Update the other two sliders aswell
 sl_electricCarsCompany.setValue(v_nbEVCars, false);
@@ -3704,12 +7643,60 @@ f_setSimulateYearScreen();
 f_selectDifferentOwnedGC(cb_selectGC.getValueIndex()); 
 ;}
         break;
+      case _eb_configureVehicleTrips_weeklyDistance_km: {
+          ShapeTextField self = this.eb_configureVehicleTrips_weeklyDistance_km;
+try {
+    double d = eb_configureVehicleTrips_weeklyDistance_km.getDoubleValue(); // Throws error if not a double
+    if (d > 0) {
+        // valid input
+    } else {
+        eb_configureVehicleTrips_weeklyDistance_km.setValueToDefault();
+        f_setErrorScreen("De wekelijkse afstand moet groter zijn dan 0 km.");
+    }
+} catch (Exception e) {
+    eb_configureVehicleTrips_weeklyDistance_km.setValueToDefault();
+    f_setErrorScreen("De wekelijkse afstand moet een getal zijn die groter is dan 0 km.");
+} 
+;}
+        break;
       default:
         super.executeShapeControlAction( _shape, index, value );
         break;
     }
   }
-        
+         
+  @Override
+  @AnyLogicInternalCodegenAPI
+  public boolean getShapeControlDefaultValueBoolean( int _shape, int index ) {
+    switch(_shape) {
+      case _cb_configureVehicleTrips_dailyDistinction: return 
+false 
+;
+      case _cb_configureVehicleTripsMonday: return 
+true 
+;
+      case _cb_configureVehicleTripsTuesday: return 
+true 
+;
+      case _cb_configureVehicleTripsWednesday: return 
+true 
+;
+      case _cb_configureVehicleTripsThursday: return 
+true 
+;
+      case _cb_configureVehicleTripsFriday: return 
+true 
+;
+      case _cb_configureVehicleTripsSaturday: return 
+true 
+;
+      case _cb_configureVehicleTripsSunday: return 
+true 
+;
+      default: return super.getShapeControlDefaultValueBoolean( _shape, index );
+    }
+  }
+
   @Override
   @AnyLogicInternalCodegenAPI
   public int getShapeControlDefaultValueInt( int _shape, int index ) {
@@ -3780,6 +7767,17 @@ v_defaultContractFeedinCapacity_kW
     }
   }
 
+  @Override
+  @AnyLogicInternalCodegenAPI
+  public String getShapeControlDefaultValueString( int _shape, int index ) {
+    switch(_shape) {
+      case _eb_configureVehicleTrips_weeklyDistance_km: return 
+"200" 
+;
+      default: return super.getShapeControlDefaultValueString( _shape, index );
+    }
+  }
+
   protected ShapeButton button1;
   protected ShapeRadioButtonGroup rb_scenariosPrivateUI;
   protected ShapeButton button2;
@@ -3838,6 +7836,9 @@ v_maxSavingsSliders ;
   }
   
   protected ShapeSlider sl_electricityDemandCompanyReduction;
+  protected ShapeButton button_openVehicleTripsConfigurationMenu_car;
+  protected ShapeButton button_openVehicleTripsConfigurationMenu_van;
+  protected ShapeButton button_openVehicleTripsConfigurationMenu_truck;
   
   /**
    * <i>This method should not be called by user</i>
@@ -4077,6 +8078,29 @@ v_maxContractFeedinCapacity_kW ;
   protected ShapeButton button;
   protected ShapeCheckBox cb_curtailmentCompany;
   protected ShapeCheckBox cb_showGridloadPlot;
+  protected ShapeCheckBox cb_configureVehicleTrips_dailyDistinction;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _button_confirm_configureVehicleTrips_SetDynamicParams_xjal( ShapeButton shape ) {
+    shape.setEnabled(
+c_activeVehicleConfigurationDays.size()>0 
+);
+  }
+  
+  protected ShapeButton button_confirm_configureVehicleTrips;
+  protected ShapeButton button_cancel_configureVehicleTrips;
+  protected ShapeCheckBox cb_configureVehicleTripsMonday;
+  protected ShapeCheckBox cb_configureVehicleTripsTuesday;
+  protected ShapeCheckBox cb_configureVehicleTripsWednesday;
+  protected ShapeCheckBox cb_configureVehicleTripsThursday;
+  protected ShapeCheckBox cb_configureVehicleTripsFriday;
+  protected ShapeCheckBox cb_configureVehicleTripsSaturday;
+  protected ShapeCheckBox cb_configureVehicleTripsSunday;
+  protected ShapeButton button_configureVehicleTrips_reset;
+  protected ShapeTextField eb_configureVehicleTrips_weeklyDistance_km;
   protected ShapeRectangle rect_canvas;
   
   /**
@@ -4855,6 +8879,250 @@ null
   protected ShapeGroup gr_errorScreen;
   protected ShapeText txt_setSimYearScreen;
   protected ShapeText txt_selectDifferentOwnedGC;
+  protected ShapeRectangle rect_configureVehicleTripsBackground;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_0;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_1;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_2;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_3;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_4;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_5;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_6;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_7;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_8;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_9;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_10;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_11;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_12;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_13;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_14;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_15;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_16;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_17;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_18;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_19;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_20;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_21;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_22;
+  protected ShapeRectangle rect_configureVehicleTrips_monday_23;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_0;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_0;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_0;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_0;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_0;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_0;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_1;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_1;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_1;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_1;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_1;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_1;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_2;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_2;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_2;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_2;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_2;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_2;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_3;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_3;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_3;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_3;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_3;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_3;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_4;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_4;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_4;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_4;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_4;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_4;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_5;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_5;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_5;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_5;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_5;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_5;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_6;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_6;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_6;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_6;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_6;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_6;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_7;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_7;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_7;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_7;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_7;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_7;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_8;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_8;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_8;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_8;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_8;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_8;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_9;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_9;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_9;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_9;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_9;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_9;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_10;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_10;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_10;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_10;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_10;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_10;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_11;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_11;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_11;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_11;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_11;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_11;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_12;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_12;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_12;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_12;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_12;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_12;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_13;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_13;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_13;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_13;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_13;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_13;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_14;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_14;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_14;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_14;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_14;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_14;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_15;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_15;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_15;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_15;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_15;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_15;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_16;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_16;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_16;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_16;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_16;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_16;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_17;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_17;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_17;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_17;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_17;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_17;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_18;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_18;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_18;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_18;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_18;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_18;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_19;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_19;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_19;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_19;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_19;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_19;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_20;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_20;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_20;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_20;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_20;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_20;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_21;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_21;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_21;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_21;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_21;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_21;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_22;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_22;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_22;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_22;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_22;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_22;
+  protected ShapeRectangle rect_configureVehicleTrips_friday_23;
+  protected ShapeRectangle rect_configureVehicleTrips_sunday_23;
+  protected ShapeRectangle rect_configureVehicleTrips_tuesday_23;
+  protected ShapeRectangle rect_configureVehicleTrips_saturday_23;
+  protected ShapeRectangle rect_configureVehicleTrips_thursday_23;
+  protected ShapeRectangle rect_configureVehicleTrips_wednesday_23;
+  protected ShapeGroup gr_configureVehicleTrips_weekButtons;
+  protected ShapeText t_configureVehicleTrips_km;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_monday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_monday1;
+  protected ShapeGroup gr_disableTripConfigurationButtons_monday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_tuesday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_tuesday1;
+  protected ShapeGroup gr_disableTripConfigurationButtons_tuesday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_sunday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_sunday1;
+  protected ShapeGroup gr_disableTripConfigurationButtons_sunday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_saturday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_saturday1;
+  protected ShapeGroup gr_disableTripConfigurationButtons_saturday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_friday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_friday1;
+  protected ShapeGroup gr_disableTripConfigurationButtons_friday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_thursday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_thursday1;
+  protected ShapeGroup gr_disableTripConfigurationButtons_thursday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_wednesday;
+  protected ShapeRectangle rect_disableTripConfigurationButtons_wednesday1;
+  protected ShapeGroup gr_disableTripConfigurationButtons_wednesday;
+  protected ShapeGroup gr_tripConfigurationDisableRectangles;
+  protected ShapeText txt_configureVehicleTrips_1;
+  protected ShapeText txt_configureVehicleTrips_2;
+  protected ShapeText txt_configureVehicleTrips_3;
+  protected ShapeText txt_configureVehicleTrips_4;
+  protected ShapeText txt_configureVehicleTrips_5;
+  protected ShapeText txt_configureVehicleTrips_6;
+  protected ShapeText txt_configureVehicleTrips_7;
+  protected ShapeText txt_configureVehicleTrips_8;
+  protected ShapeText txt_configureVehicleTrips_9;
+  protected ShapeText txt_configureVehicleTrips_10;
+  protected ShapeText txt_configureVehicleTrips_11;
+  protected ShapeText txt_configureVehicleTrips_12;
+  protected ShapeText txt_configureVehicleTrips_13;
+  protected ShapeText txt_configureVehicleTrips_14;
+  protected ShapeText txt_configureVehicleTrips_15;
+  protected ShapeText txt_configureVehicleTrips_16;
+  protected ShapeText txt_configureVehicleTrips_17;
+  protected ShapeText txt_configureVehicleTrips_18;
+  protected ShapeText txt_configureVehicleTrips_19;
+  protected ShapeText txt_configureVehicleTrips_20;
+  protected ShapeText txt_configureVehicleTrips_21;
+  protected ShapeText txt_configureVehicleTrips_22;
+  protected ShapeText txt_configureVehicleTrips_23;
+  protected ShapeText txt_configureVehicleTrips_24;
+  protected ShapeText txt_configureVehicleTrips_0;
+  protected ShapeGroup gr_configureVehicleTripsNumbers;
+  protected ShapeText txt_configureVehicleTrips_weeklyDistance_unit;
+  protected ShapeText txt_configureVehicleTrips_monday;
+  protected ShapeText txt_configureVehicleTrips_tuesday;
+  protected ShapeText txt_configureVehicleTrips_wednesday;
+  protected ShapeText txt_configureVehicleTrips_thursday;
+  protected ShapeText txt_configureVehicleTrips_friday;
+  protected ShapeText txt_configureVehicleTrips_saturday;
+  protected ShapeText txt_configureVehicleTrips_sunday;
+  protected ShapeGroup gr_vehicleTripConfiguratorWeekdays;
+  protected ShapeText t_tripConfiguratorExplanation;
+  
+  /**
+   * <i>This method should not be called by user</i>
+   */
+  @AnyLogicInternalCodegenAPI
+  private void _gr_configureVehicleTrips_SetDynamicParams_xjal( ShapeGroup shape ) {
+    shape.setX(
+360 
+);
+    shape.setY(
+580 
+);
+  }
+  
+  protected ShapeGroup gr_configureVehicleTrips;
   protected com.anylogic.engine.markup.Level level;
 
   private com.anylogic.engine.markup.Level[] _getLevels_xjal;
@@ -5011,6 +9279,45 @@ UI_company.this, true, -58.0, -29.0,
       @Override
       public void setValueToDefault() {
 		setValue( limit( getMin(), getShapeControlDefaultValueDouble( _sl_electricityDemandCompanyReduction, 0 ), getMax() ) );
+      }
+    };
+    button_openVehicleTripsConfigurationMenu_car = new ShapeButton(
+UI_company.this, true, 35.0, -125.0,
+			125.0, 20.0,
+            black, true,
+_button_openVehicleTripsConfigurationMenu_car_Font,
+			"Configureer rijtijden" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _button_openVehicleTripsConfigurationMenu_car, 0 );
+      }
+    };
+    button_openVehicleTripsConfigurationMenu_van = new ShapeButton(
+UI_company.this, true, 35.0, -25.0,
+			125.0, 20.0,
+            black, true,
+_button_openVehicleTripsConfigurationMenu_van_Font,
+			"Configureer rijtijden" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _button_openVehicleTripsConfigurationMenu_van, 0 );
+      }
+    };
+    button_openVehicleTripsConfigurationMenu_truck = new ShapeButton(
+UI_company.this, true, 35.0, 75.0,
+			125.0, 20.0,
+            black, true,
+_button_openVehicleTripsConfigurationMenu_truck_Font,
+			"Configureer rijtijden" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _button_openVehicleTripsConfigurationMenu_truck, 0 );
       }
     };
     sl_electricVansCompany = new ShapeSlider(
@@ -5473,6 +9780,215 @@ UI_company.this,true,1450.0, 130.0,
         executeShapeControlAction( _cb_showGridloadPlot, 0, value );
       }
     };
+    cb_configureVehicleTrips_dailyDistinction = new ShapeCheckBox(
+UI_company.this,true,20.0, 90.0,
+		135.0, 30.0,
+            black, true,
+            _cb_configureVehicleTrips_dailyDistinction_Font,
+			"Verschil per dag" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_configureVehicleTrips_dailyDistinction, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_configureVehicleTrips_dailyDistinction, 0 ) );
+      }
+    };
+    button_confirm_configureVehicleTrips = new ShapeButton(
+UI_company.this, true, 20.0, 360.0,
+			215.0, 30.0,
+            black, true,
+_button_confirm_configureVehicleTrips_Font,
+			"Voltooi voertuig rijtijden configuratie" ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _button_confirm_configureVehicleTrips_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _button_confirm_configureVehicleTrips, 0 );
+      }
+    };
+    button_cancel_configureVehicleTrips = new ShapeButton(
+UI_company.this, true, 615.0, 360.0,
+			115.0, 30.0,
+            black, true,
+_button_cancel_configureVehicleTrips_Font,
+			"Annuleren" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _button_cancel_configureVehicleTrips, 0 );
+      }
+    };
+    cb_configureVehicleTripsMonday = new ShapeCheckBox(
+UI_company.this,true,100.0, 140.0,
+		20.0, 30.0,
+            black, true,
+            _cb_configureVehicleTripsMonday_Font,
+			"" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_configureVehicleTripsMonday, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_configureVehicleTripsMonday, 0 ) );
+      }
+    };
+    cb_configureVehicleTripsTuesday = new ShapeCheckBox(
+UI_company.this,true,100.0, 170.0,
+		20.0, 30.0,
+            black, false,
+            _cb_configureVehicleTripsTuesday_Font,
+			"" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_configureVehicleTripsTuesday, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_configureVehicleTripsTuesday, 0 ) );
+      }
+    };
+    cb_configureVehicleTripsWednesday = new ShapeCheckBox(
+UI_company.this,true,100.0, 200.0,
+		20.0, 30.0,
+            black, false,
+            _cb_configureVehicleTripsWednesday_Font,
+			"" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_configureVehicleTripsWednesday, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_configureVehicleTripsWednesday, 0 ) );
+      }
+    };
+    cb_configureVehicleTripsThursday = new ShapeCheckBox(
+UI_company.this,true,100.0, 230.0,
+		20.0, 30.0,
+            black, false,
+            _cb_configureVehicleTripsThursday_Font,
+			"" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_configureVehicleTripsThursday, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_configureVehicleTripsThursday, 0 ) );
+      }
+    };
+    cb_configureVehicleTripsFriday = new ShapeCheckBox(
+UI_company.this,true,100.0, 260.0,
+		20.0, 30.0,
+            black, false,
+            _cb_configureVehicleTripsFriday_Font,
+			"" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_configureVehicleTripsFriday, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_configureVehicleTripsFriday, 0 ) );
+      }
+    };
+    cb_configureVehicleTripsSaturday = new ShapeCheckBox(
+UI_company.this,true,100.0, 290.0,
+		20.0, 30.0,
+            black, false,
+            _cb_configureVehicleTripsSaturday_Font,
+			"" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_configureVehicleTripsSaturday, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_configureVehicleTripsSaturday, 0 ) );
+      }
+    };
+    cb_configureVehicleTripsSunday = new ShapeCheckBox(
+UI_company.this,true,100.0, 320.0,
+		20.0, 30.0,
+            black, false,
+            _cb_configureVehicleTripsSunday_Font,
+			"" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _cb_configureVehicleTripsSunday, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setSelected( getShapeControlDefaultValueBoolean( _cb_configureVehicleTripsSunday, 0 ) );
+      }
+    };
+    button_configureVehicleTrips_reset = new ShapeButton(
+UI_company.this, true, 500.0, 360.0,
+			100.0, 30.0,
+            black, true,
+_button_configureVehicleTrips_reset_Font,
+			"reset values" ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _button_configureVehicleTrips_reset, 0 );
+      }
+    };
+    eb_configureVehicleTrips_weeklyDistance_km = new ShapeTextField(
+UI_company.this, true,545.0, 70.0,
+			100.0, 30.0,
+            white, black, true, _eb_configureVehicleTrips_weeklyDistance_km_Font ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public void action() {
+        executeShapeControlAction( _eb_configureVehicleTrips_weeklyDistance_km, 0, value );
+      }
+
+      @Override
+      public void setValueToDefault() {
+		setText( getShapeControlDefaultValueString( _eb_configureVehicleTrips_weeklyDistance_km, 0 ) );
+      }
+    };
     rect_canvas = new ShapeRectangle(
        SHAPE_DRAW_2D3D, true,-1160.0, -400.0, 0.0, 0.0,
             black, white,
@@ -5827,7 +10343,7 @@ UI_company.this,true,1450.0, 130.0,
     };
     text273 = new ShapeText(
         SHAPE_DRAW_2D, true,-170.0, -125.0, 0.0, 0.0,
-        black,"Autos",
+        black,"Auto's",
         _text273_Font, ALIGNMENT_LEFT );
     text9 = new ShapeText(
         SHAPE_DRAW_2D, true,-240.0, -10.0, 0.0, 0.0,
@@ -5930,6 +10446,10 @@ true,-298.0, -59.512, 0.0,
 	
       }
     };
+  }
+  
+  @AnyLogicInternalCodegenAPI
+  private void _createPersistentElementsBP1_xjal() {
     t_companyName = new ShapeText(
         SHAPE_DRAW_2D, true,0.0, -46.34, 0.0, 0.0,
         black,"Company Name",
@@ -6081,10 +10601,6 @@ true,-298.0, -59.512, 0.0,
       }
     };
     rect_GCisPausedScreen3.setVisible( false );
-  }
-  
-  @AnyLogicInternalCodegenAPI
-  private void _createPersistentElementsBP1_xjal() {
     image_loadIconSmall = new ShapeImage(
 		UI_company.this, SHAPE_DRAW_2D3D, true, -27.610999999999876, -5.4780000000000655, 0.0, 0.0,
 61.016, 60.969, "/zerointerfaceloader/",
@@ -6431,6 +10947,2111 @@ true,-270.0, -120.0, 0.0,
         SHAPE_DRAW_2D, true,-440.0, 250.0, 0.0, 0.0,
         black,"Select different owned GC",
         _txt_selectDifferentOwnedGC_Font, ALIGNMENT_LEFT );
+    rect_configureVehicleTripsBackground = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,0.0, 20.0, 0.0, 0.0,
+            null, _rect_configureVehicleTripsBackground_Fill_Color,
+			750.0, 380.0, 10.0, 3.0, LINE_STYLE_SOLID );
+    rect_configureVehicleTrips_monday_0 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_0, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-275.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_1, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_2 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-250.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_2, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_3 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-225.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_3, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_4 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-200.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_4, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_5 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-175.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_5, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_6 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-150.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_6, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_7 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-125.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_7, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_8 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-100.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_8, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_9 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-75.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_9, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_10 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-50.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_10, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_11 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-25.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_11, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_12 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,0.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_12, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_13 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,25.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_13, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_14 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,50.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_14, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_15 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,75.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_15, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_16 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,100.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_16, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_17 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,125.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_17, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_18 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,150.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_18, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_19 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,175.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_19, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_20 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,200.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_20, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_21 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,225.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_21, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_22 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,250.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_22, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_monday_23 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,275.0, -107.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_monday_23, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_0 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_0, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_0 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_0, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_0 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_0, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_0 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_0, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_0 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_0, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_0 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_0, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-275.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_1, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-275.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_1, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-275.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_1, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-275.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_1, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-275.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_1, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-275.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_1, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_2 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-250.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_2, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_2 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-250.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_2, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_2 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-250.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_2, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_2 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-250.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_2, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_2 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-250.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_2, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_2 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-250.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_2, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_3 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-225.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_3, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_3 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-225.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_3, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_3 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-225.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_3, 0, clickx, clicky );
+      }
+    };
+  }
+  
+  @AnyLogicInternalCodegenAPI
+  private void _createPersistentElementsBP2_xjal() {
+    rect_configureVehicleTrips_sunday_3 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-225.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_3, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_3 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-225.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_3, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_3 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-225.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_3, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_4 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-200.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_4, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_4 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-200.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_4, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_4 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-200.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_4, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_4 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-200.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_4, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_4 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-200.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_4, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_4 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-200.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_4, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_5 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-175.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_5, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_5 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-175.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_5, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_5 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-175.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_5, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_5 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-175.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_5, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_5 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-175.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_5, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_5 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-175.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_5, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_6 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-150.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_6, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_6 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-150.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_6, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_6 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-150.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_6, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_6 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-150.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_6, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_6 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-150.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_6, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_6 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-150.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_6, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_7 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-125.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_7, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_7 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-125.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_7, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_7 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-125.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_7, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_7 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-125.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_7, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_7 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-125.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_7, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_7 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-125.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_7, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_8 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-100.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_8, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_8 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-100.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_8, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_8 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-100.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_8, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_8 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-100.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_8, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_8 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-100.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_8, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_8 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-100.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_8, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_9 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-75.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_9, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_9 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-75.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_9, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_9 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-75.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_9, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_9 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-75.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_9, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_9 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-75.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_9, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_9 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-75.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_9, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_10 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-50.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_10, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_10 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-50.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_10, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_10 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-50.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_10, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_10 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-50.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_10, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_10 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-50.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_10, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_10 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-50.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_10, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_11 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-25.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_11, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_11 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-25.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_11, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_11 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-25.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_11, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_11 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-25.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_11, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_11 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-25.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_11, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_11 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-25.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_11, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_12 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,0.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_12, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_12 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,0.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_12, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_12 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,0.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_12, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_12 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,0.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_12, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_12 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,0.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_12, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_12 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,0.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_12, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_13 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,25.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_13, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_13 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,25.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_13, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_13 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,25.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_13, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_13 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,25.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_13, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_13 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,25.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_13, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_13 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,25.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_13, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_14 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,50.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_14, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_14 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,50.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_14, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_14 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,50.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_14, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_14 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,50.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_14, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_14 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,50.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_14, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_14 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,50.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_14, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_15 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,75.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_15, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_15 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,75.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_15, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_15 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,75.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_15, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_15 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,75.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_15, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_15 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,75.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_15, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_15 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,75.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_15, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_16 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,100.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_16, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_16 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,100.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_16, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_16 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,100.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_16, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_16 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,100.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_16, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_16 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,100.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_16, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_16 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,100.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_16, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_17 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,125.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_17, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_17 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,125.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_17, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_17 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,125.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_17, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_17 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,125.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_17, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_17 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,125.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_17, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_17 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,125.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_17, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_18 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,150.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_18, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_18 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,150.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_18, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_18 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,150.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_18, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_18 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,150.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_18, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_18 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,150.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_18, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_18 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,150.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_18, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_19 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,175.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_19, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_19 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,175.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_19, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_19 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,175.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_19, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_19 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,175.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_19, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_19 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,175.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_19, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_19 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,175.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_19, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_20 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,200.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_20, 0, clickx, clicky );
+      }
+    };
+  }
+  
+  @AnyLogicInternalCodegenAPI
+  private void _createPersistentElementsBP3_xjal() {
+    rect_configureVehicleTrips_sunday_20 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,200.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_20, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_20 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,200.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_20, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_20 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,200.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_20, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_20 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,200.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_20, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_20 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,200.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_20, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_21 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,225.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_21, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_21 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,225.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_21, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_21 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,225.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_21, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_21 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,225.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_21, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_21 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,225.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_21, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_21 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,225.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_21, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_22 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,250.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_22, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_22 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,250.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_22, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_22 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,250.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_22, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_22 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,250.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_22, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_22 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,250.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_22, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_22 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,250.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_22, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_friday_23 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,275.0, 13.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_friday_23, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_sunday_23 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,275.0, 73.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_sunday_23, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_tuesday_23 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,275.0, -77.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_tuesday_23, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_saturday_23 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,275.0, 43.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_saturday_23, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_thursday_23 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,275.0, -17.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_thursday_23, 0, clickx, clicky );
+      }
+    };
+    rect_configureVehicleTrips_wednesday_23 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,275.0, -47.0, 0.0, 0.0,
+            black, white,
+			25.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_configureVehicleTrips_wednesday_23, 0, clickx, clicky );
+      }
+    };
+    t_configureVehicleTrips_km = new ShapeText(
+        SHAPE_DRAW_2D, true,595.0, 45.0, 0.0, 0.0,
+        black,"Weeklijks gereden afstand per voertuig",
+        _t_configureVehicleTrips_km_Font, ALIGNMENT_CENTER );
+    rect_disableTripConfigurationButtons_monday = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            null, null,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_disableTripConfigurationButtons_monday, 0, clickx, clicky );
+      }
+    };
+    rect_disableTripConfigurationButtons_monday1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            _rect_disableTripConfigurationButtons_monday1_Line_Color, _rect_disableTripConfigurationButtons_monday1_Fill_Color,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID );
+    rect_disableTripConfigurationButtons_tuesday = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            null, null,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_disableTripConfigurationButtons_tuesday, 0, clickx, clicky );
+      }
+    };
+    rect_disableTripConfigurationButtons_tuesday1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            _rect_disableTripConfigurationButtons_tuesday1_Line_Color, _rect_disableTripConfigurationButtons_tuesday1_Fill_Color,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID );
+    rect_disableTripConfigurationButtons_sunday = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            null, null,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_disableTripConfigurationButtons_sunday, 0, clickx, clicky );
+      }
+    };
+    rect_disableTripConfigurationButtons_sunday1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            _rect_disableTripConfigurationButtons_sunday1_Line_Color, _rect_disableTripConfigurationButtons_sunday1_Fill_Color,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID );
+    rect_disableTripConfigurationButtons_saturday = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            null, null,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_disableTripConfigurationButtons_saturday, 0, clickx, clicky );
+      }
+    };
+    rect_disableTripConfigurationButtons_saturday1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            _rect_disableTripConfigurationButtons_saturday1_Line_Color, _rect_disableTripConfigurationButtons_saturday1_Fill_Color,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID );
+    rect_disableTripConfigurationButtons_friday = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            null, null,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_disableTripConfigurationButtons_friday, 0, clickx, clicky );
+      }
+    };
+    rect_disableTripConfigurationButtons_friday1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            _rect_disableTripConfigurationButtons_friday1_Line_Color, _rect_disableTripConfigurationButtons_friday1_Fill_Color,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID );
+    rect_disableTripConfigurationButtons_thursday = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            null, null,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_disableTripConfigurationButtons_thursday, 0, clickx, clicky );
+      }
+    };
+    rect_disableTripConfigurationButtons_thursday1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            _rect_disableTripConfigurationButtons_thursday1_Line_Color, _rect_disableTripConfigurationButtons_thursday1_Fill_Color,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID );
+    rect_disableTripConfigurationButtons_wednesday = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            null, null,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID ) {
+
+      @Override
+      @AnyLogicInternalCodegenAPI
+      public boolean onClick( double clickx, double clicky ) {
+        return onShapeClick( _rect_disableTripConfigurationButtons_wednesday, 0, clickx, clicky );
+      }
+    };
+    rect_disableTripConfigurationButtons_wednesday1 = new ShapeRectangle(
+       SHAPE_DRAW_2D3D, true,-300.0, -12.0, 0.0, 0.0,
+            _rect_disableTripConfigurationButtons_wednesday1_Line_Color, _rect_disableTripConfigurationButtons_wednesday1_Fill_Color,
+			600.0, 25.0, 10.0, 1.0, LINE_STYLE_SOLID );
+    txt_configureVehicleTrips_1 = new ShapeText(
+        SHAPE_DRAW_2D, true,-275.0, -15.0, 0.0, 0.0,
+        black,"1",
+        _txt_configureVehicleTrips_1_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_2 = new ShapeText(
+        SHAPE_DRAW_2D, true,-250.0, -15.0, 0.0, 0.0,
+        black,"2",
+        _txt_configureVehicleTrips_2_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_3 = new ShapeText(
+        SHAPE_DRAW_2D, true,-225.0, -15.0, 0.0, 0.0,
+        black,"3",
+        _txt_configureVehicleTrips_3_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_4 = new ShapeText(
+        SHAPE_DRAW_2D, true,-200.0, -15.0, 0.0, 0.0,
+        black,"4",
+        _txt_configureVehicleTrips_4_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_5 = new ShapeText(
+        SHAPE_DRAW_2D, true,-175.0, -15.0, 0.0, 0.0,
+        black,"5",
+        _txt_configureVehicleTrips_5_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_6 = new ShapeText(
+        SHAPE_DRAW_2D, true,-150.0, -15.0, 0.0, 0.0,
+        black,"6",
+        _txt_configureVehicleTrips_6_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_7 = new ShapeText(
+        SHAPE_DRAW_2D, true,-125.0, -15.0, 0.0, 0.0,
+        black,"7",
+        _txt_configureVehicleTrips_7_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_8 = new ShapeText(
+        SHAPE_DRAW_2D, true,-100.0, -15.0, 0.0, 0.0,
+        black,"8",
+        _txt_configureVehicleTrips_8_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_9 = new ShapeText(
+        SHAPE_DRAW_2D, true,-75.0, -15.0, 0.0, 0.0,
+        black,"9",
+        _txt_configureVehicleTrips_9_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_10 = new ShapeText(
+        SHAPE_DRAW_2D, true,-50.0, -15.0, 0.0, 0.0,
+        black,"10",
+        _txt_configureVehicleTrips_10_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_11 = new ShapeText(
+        SHAPE_DRAW_2D, true,-25.0, -15.0, 0.0, 0.0,
+        black,"11",
+        _txt_configureVehicleTrips_11_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_12 = new ShapeText(
+        SHAPE_DRAW_2D, true,0.0, -15.0, 0.0, 0.0,
+        black,"12",
+        _txt_configureVehicleTrips_12_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_13 = new ShapeText(
+        SHAPE_DRAW_2D, true,25.0, -15.0, 0.0, 0.0,
+        black,"13",
+        _txt_configureVehicleTrips_13_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_14 = new ShapeText(
+        SHAPE_DRAW_2D, true,50.0, -15.0, 0.0, 0.0,
+        black,"14",
+        _txt_configureVehicleTrips_14_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_15 = new ShapeText(
+        SHAPE_DRAW_2D, true,75.0, -15.0, 0.0, 0.0,
+        black,"15",
+        _txt_configureVehicleTrips_15_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_16 = new ShapeText(
+        SHAPE_DRAW_2D, true,100.0, -15.0, 0.0, 0.0,
+        black,"16",
+        _txt_configureVehicleTrips_16_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_17 = new ShapeText(
+        SHAPE_DRAW_2D, true,125.0, -15.0, 0.0, 0.0,
+        black,"17",
+        _txt_configureVehicleTrips_17_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_18 = new ShapeText(
+        SHAPE_DRAW_2D, true,150.0, -15.0, 0.0, 0.0,
+        black,"18",
+        _txt_configureVehicleTrips_18_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_19 = new ShapeText(
+        SHAPE_DRAW_2D, true,175.0, -15.0, 0.0, 0.0,
+        black,"19",
+        _txt_configureVehicleTrips_19_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_20 = new ShapeText(
+        SHAPE_DRAW_2D, true,200.0, -15.0, 0.0, 0.0,
+        black,"20",
+        _txt_configureVehicleTrips_20_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_21 = new ShapeText(
+        SHAPE_DRAW_2D, true,225.0, -15.0, 0.0, 0.0,
+        black,"21",
+        _txt_configureVehicleTrips_21_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_22 = new ShapeText(
+        SHAPE_DRAW_2D, true,250.0, -15.0, 0.0, 0.0,
+        black,"22",
+        _txt_configureVehicleTrips_22_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_23 = new ShapeText(
+        SHAPE_DRAW_2D, true,275.0, -15.0, 0.0, 0.0,
+        black,"23",
+        _txt_configureVehicleTrips_23_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_24 = new ShapeText(
+        SHAPE_DRAW_2D, true,300.0, -15.0, 0.0, 0.0,
+        black,"24",
+        _txt_configureVehicleTrips_24_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_0 = new ShapeText(
+        SHAPE_DRAW_2D, true,-300.0, -15.0, 0.0, 0.0,
+        black,"0",
+        _txt_configureVehicleTrips_0_Font, ALIGNMENT_CENTER );
+    txt_configureVehicleTrips_weeklyDistance_unit = new ShapeText(
+        SHAPE_DRAW_2D, true,660.0, 75.0, 0.0, 0.0,
+        black,"km",
+        _txt_configureVehicleTrips_weeklyDistance_unit_Font, ALIGNMENT_LEFT );
+    txt_configureVehicleTrips_monday = new ShapeText(
+        SHAPE_DRAW_2D, true,-40.0, -105.0, 0.0, 0.0,
+        black,"Maandag",
+        _txt_configureVehicleTrips_monday_Font, ALIGNMENT_LEFT );
+    txt_configureVehicleTrips_tuesday = new ShapeText(
+        SHAPE_DRAW_2D, true,-40.0, -75.0, 0.0, 0.0,
+        black,"Dinsdag",
+        _txt_configureVehicleTrips_tuesday_Font, ALIGNMENT_LEFT );
+    txt_configureVehicleTrips_wednesday = new ShapeText(
+        SHAPE_DRAW_2D, true,-40.0, -45.0, 0.0, 0.0,
+        black,"Woensdag",
+        _txt_configureVehicleTrips_wednesday_Font, ALIGNMENT_LEFT );
+    txt_configureVehicleTrips_thursday = new ShapeText(
+        SHAPE_DRAW_2D, true,-40.0, -15.0, 0.0, 0.0,
+        black,"Donderdag",
+        _txt_configureVehicleTrips_thursday_Font, ALIGNMENT_LEFT );
+    txt_configureVehicleTrips_friday = new ShapeText(
+        SHAPE_DRAW_2D, true,-40.0, 15.0, 0.0, 0.0,
+        black,"Vrijdag",
+        _txt_configureVehicleTrips_friday_Font, ALIGNMENT_LEFT );
+    txt_configureVehicleTrips_saturday = new ShapeText(
+        SHAPE_DRAW_2D, true,-40.0, 45.0, 0.0, 0.0,
+        black,"Zaterdag",
+        _txt_configureVehicleTrips_saturday_Font, ALIGNMENT_LEFT );
+    txt_configureVehicleTrips_sunday = new ShapeText(
+        SHAPE_DRAW_2D, true,-40.0, 75.0, 0.0, 0.0,
+        black,"Zondag",
+        _txt_configureVehicleTrips_sunday_Font, ALIGNMENT_LEFT );
+    t_tripConfiguratorExplanation = new ShapeText(
+        SHAPE_DRAW_2D, true,190.0, 45.0, 0.0, 0.0,
+        black,"Wanneer zijn je voertuigen onderweg?",
+        _t_tripConfiguratorExplanation_Font, ALIGNMENT_CENTER );
   }
 
   @AnyLogicInternalCodegenAPI
@@ -6451,6 +13072,9 @@ true,-270.0, -120.0, 0.0,
     {
     gr_companyMobilitySliders = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, -120.0, 360.0, 0.0, 0.0
 	
+	     , button_openVehicleTripsConfigurationMenu_car
+	     , button_openVehicleTripsConfigurationMenu_van
+	     , button_openVehicleTripsConfigurationMenu_truck
 	     , sl_electricVansCompany
 	     , text266
 	     , t_numberOfElectricVansCompany
@@ -6715,6 +13339,307 @@ true,-270.0, -120.0, 0.0,
     };
     }
     gr_errorScreen.setVisible( false );
+    {
+    gr_configureVehicleTrips_weekButtons = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, 430.0, 250.0, 0.0, 0.0
+	
+	     , rect_configureVehicleTrips_monday_0
+	     , rect_configureVehicleTrips_monday_1
+	     , rect_configureVehicleTrips_monday_2
+	     , rect_configureVehicleTrips_monday_3
+	     , rect_configureVehicleTrips_monday_4
+	     , rect_configureVehicleTrips_monday_5
+	     , rect_configureVehicleTrips_monday_6
+	     , rect_configureVehicleTrips_monday_7
+	     , rect_configureVehicleTrips_monday_8
+	     , rect_configureVehicleTrips_monday_9
+	     , rect_configureVehicleTrips_monday_10
+	     , rect_configureVehicleTrips_monday_11
+	     , rect_configureVehicleTrips_monday_12
+	     , rect_configureVehicleTrips_monday_13
+	     , rect_configureVehicleTrips_monday_14
+	     , rect_configureVehicleTrips_monday_15
+	     , rect_configureVehicleTrips_monday_16
+	     , rect_configureVehicleTrips_monday_17
+	     , rect_configureVehicleTrips_monday_18
+	     , rect_configureVehicleTrips_monday_19
+	     , rect_configureVehicleTrips_monday_20
+	     , rect_configureVehicleTrips_monday_21
+	     , rect_configureVehicleTrips_monday_22
+	     , rect_configureVehicleTrips_monday_23
+	     , rect_configureVehicleTrips_tuesday_0
+	     , rect_configureVehicleTrips_wednesday_0
+	     , rect_configureVehicleTrips_thursday_0
+	     , rect_configureVehicleTrips_friday_0
+	     , rect_configureVehicleTrips_saturday_0
+	     , rect_configureVehicleTrips_sunday_0
+	     , rect_configureVehicleTrips_wednesday_1
+	     , rect_configureVehicleTrips_thursday_1
+	     , rect_configureVehicleTrips_tuesday_1
+	     , rect_configureVehicleTrips_sunday_1
+	     , rect_configureVehicleTrips_friday_1
+	     , rect_configureVehicleTrips_saturday_1
+	     , rect_configureVehicleTrips_wednesday_2
+	     , rect_configureVehicleTrips_thursday_2
+	     , rect_configureVehicleTrips_tuesday_2
+	     , rect_configureVehicleTrips_sunday_2
+	     , rect_configureVehicleTrips_friday_2
+	     , rect_configureVehicleTrips_saturday_2
+	     , rect_configureVehicleTrips_wednesday_3
+	     , rect_configureVehicleTrips_thursday_3
+	     , rect_configureVehicleTrips_tuesday_3
+	     , rect_configureVehicleTrips_sunday_3
+	     , rect_configureVehicleTrips_friday_3
+	     , rect_configureVehicleTrips_saturday_3
+	     , rect_configureVehicleTrips_friday_4
+	     , rect_configureVehicleTrips_sunday_4
+	     , rect_configureVehicleTrips_tuesday_4
+	     , rect_configureVehicleTrips_saturday_4
+	     , rect_configureVehicleTrips_thursday_4
+	     , rect_configureVehicleTrips_wednesday_4
+	     , rect_configureVehicleTrips_friday_5
+	     , rect_configureVehicleTrips_sunday_5
+	     , rect_configureVehicleTrips_tuesday_5
+	     , rect_configureVehicleTrips_saturday_5
+	     , rect_configureVehicleTrips_thursday_5
+	     , rect_configureVehicleTrips_wednesday_5
+	     , rect_configureVehicleTrips_friday_6
+	     , rect_configureVehicleTrips_sunday_6
+	     , rect_configureVehicleTrips_tuesday_6
+	     , rect_configureVehicleTrips_saturday_6
+	     , rect_configureVehicleTrips_thursday_6
+	     , rect_configureVehicleTrips_wednesday_6
+	     , rect_configureVehicleTrips_friday_7
+	     , rect_configureVehicleTrips_sunday_7
+	     , rect_configureVehicleTrips_tuesday_7
+	     , rect_configureVehicleTrips_saturday_7
+	     , rect_configureVehicleTrips_thursday_7
+	     , rect_configureVehicleTrips_wednesday_7
+	     , rect_configureVehicleTrips_friday_8
+	     , rect_configureVehicleTrips_sunday_8
+	     , rect_configureVehicleTrips_tuesday_8
+	     , rect_configureVehicleTrips_saturday_8
+	     , rect_configureVehicleTrips_thursday_8
+	     , rect_configureVehicleTrips_wednesday_8
+	     , rect_configureVehicleTrips_friday_9
+	     , rect_configureVehicleTrips_sunday_9
+	     , rect_configureVehicleTrips_tuesday_9
+	     , rect_configureVehicleTrips_saturday_9
+	     , rect_configureVehicleTrips_thursday_9
+	     , rect_configureVehicleTrips_wednesday_9
+	     , rect_configureVehicleTrips_friday_10
+	     , rect_configureVehicleTrips_sunday_10
+	     , rect_configureVehicleTrips_tuesday_10
+	     , rect_configureVehicleTrips_saturday_10
+	     , rect_configureVehicleTrips_thursday_10
+	     , rect_configureVehicleTrips_wednesday_10
+	     , rect_configureVehicleTrips_friday_11
+	     , rect_configureVehicleTrips_sunday_11
+	     , rect_configureVehicleTrips_tuesday_11
+	     , rect_configureVehicleTrips_saturday_11
+	     , rect_configureVehicleTrips_thursday_11
+	     , rect_configureVehicleTrips_wednesday_11
+	     , rect_configureVehicleTrips_friday_12
+	     , rect_configureVehicleTrips_sunday_12
+	     , rect_configureVehicleTrips_tuesday_12
+	     , rect_configureVehicleTrips_saturday_12
+	     , rect_configureVehicleTrips_thursday_12
+	     , rect_configureVehicleTrips_wednesday_12
+	     , rect_configureVehicleTrips_friday_13
+	     , rect_configureVehicleTrips_sunday_13
+	     , rect_configureVehicleTrips_tuesday_13
+	     , rect_configureVehicleTrips_saturday_13
+	     , rect_configureVehicleTrips_thursday_13
+	     , rect_configureVehicleTrips_wednesday_13
+	     , rect_configureVehicleTrips_friday_14
+	     , rect_configureVehicleTrips_sunday_14
+	     , rect_configureVehicleTrips_tuesday_14
+	     , rect_configureVehicleTrips_saturday_14
+	     , rect_configureVehicleTrips_thursday_14
+	     , rect_configureVehicleTrips_wednesday_14
+	     , rect_configureVehicleTrips_friday_15
+	     , rect_configureVehicleTrips_sunday_15
+	     , rect_configureVehicleTrips_tuesday_15
+	     , rect_configureVehicleTrips_saturday_15
+	     , rect_configureVehicleTrips_thursday_15
+	     , rect_configureVehicleTrips_wednesday_15
+	     , rect_configureVehicleTrips_friday_16
+	     , rect_configureVehicleTrips_sunday_16
+	     , rect_configureVehicleTrips_tuesday_16
+	     , rect_configureVehicleTrips_saturday_16
+	     , rect_configureVehicleTrips_thursday_16
+	     , rect_configureVehicleTrips_wednesday_16
+	     , rect_configureVehicleTrips_friday_17
+	     , rect_configureVehicleTrips_sunday_17
+	     , rect_configureVehicleTrips_tuesday_17
+	     , rect_configureVehicleTrips_saturday_17
+	     , rect_configureVehicleTrips_thursday_17
+	     , rect_configureVehicleTrips_wednesday_17
+	     , rect_configureVehicleTrips_friday_18
+	     , rect_configureVehicleTrips_sunday_18
+	     , rect_configureVehicleTrips_tuesday_18
+	     , rect_configureVehicleTrips_saturday_18
+	     , rect_configureVehicleTrips_thursday_18
+	     , rect_configureVehicleTrips_wednesday_18
+	     , rect_configureVehicleTrips_friday_19
+	     , rect_configureVehicleTrips_sunday_19
+	     , rect_configureVehicleTrips_tuesday_19
+	     , rect_configureVehicleTrips_saturday_19
+	     , rect_configureVehicleTrips_thursday_19
+	     , rect_configureVehicleTrips_wednesday_19
+	     , rect_configureVehicleTrips_friday_20
+	     , rect_configureVehicleTrips_sunday_20
+	     , rect_configureVehicleTrips_tuesday_20
+	     , rect_configureVehicleTrips_saturday_20
+	     , rect_configureVehicleTrips_thursday_20
+	     , rect_configureVehicleTrips_wednesday_20
+	     , rect_configureVehicleTrips_friday_21
+	     , rect_configureVehicleTrips_sunday_21
+	     , rect_configureVehicleTrips_tuesday_21
+	     , rect_configureVehicleTrips_saturday_21
+	     , rect_configureVehicleTrips_thursday_21
+	     , rect_configureVehicleTrips_wednesday_21
+	     , rect_configureVehicleTrips_friday_22
+	     , rect_configureVehicleTrips_sunday_22
+	     , rect_configureVehicleTrips_tuesday_22
+	     , rect_configureVehicleTrips_saturday_22
+	     , rect_configureVehicleTrips_thursday_22
+	     , rect_configureVehicleTrips_wednesday_22
+	     , rect_configureVehicleTrips_friday_23
+	     , rect_configureVehicleTrips_sunday_23
+	     , rect_configureVehicleTrips_tuesday_23
+	     , rect_configureVehicleTrips_saturday_23
+	     , rect_configureVehicleTrips_thursday_23
+	     , rect_configureVehicleTrips_wednesday_23 );
+    }
+    {
+    gr_disableTripConfigurationButtons_monday = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, 0.0, -95.0, 0.0, 0.0
+	
+	     , rect_disableTripConfigurationButtons_monday
+	     , rect_disableTripConfigurationButtons_monday1 );
+    }
+    {
+    gr_disableTripConfigurationButtons_tuesday = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, 0.0, -65.0, 0.0, 0.0
+	
+	     , rect_disableTripConfigurationButtons_tuesday
+	     , rect_disableTripConfigurationButtons_tuesday1 );
+    }
+    {
+    gr_disableTripConfigurationButtons_sunday = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, 0.0, 85.0, 0.0, 0.0
+	
+	     , rect_disableTripConfigurationButtons_sunday
+	     , rect_disableTripConfigurationButtons_sunday1 );
+    }
+    {
+    gr_disableTripConfigurationButtons_saturday = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, 0.0, 55.0, 0.0, 0.0
+	
+	     , rect_disableTripConfigurationButtons_saturday
+	     , rect_disableTripConfigurationButtons_saturday1 );
+    }
+    {
+    gr_disableTripConfigurationButtons_friday = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, 0.0, 25.0, 0.0, 0.0
+	
+	     , rect_disableTripConfigurationButtons_friday
+	     , rect_disableTripConfigurationButtons_friday1 );
+    }
+    {
+    gr_disableTripConfigurationButtons_thursday = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, 0.0, -5.0, 0.0, 0.0
+	
+	     , rect_disableTripConfigurationButtons_thursday
+	     , rect_disableTripConfigurationButtons_thursday1 );
+    }
+    {
+    gr_disableTripConfigurationButtons_wednesday = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, 0.0, -35.0, 0.0, 0.0
+	
+	     , rect_disableTripConfigurationButtons_wednesday
+	     , rect_disableTripConfigurationButtons_wednesday1 );
+    }
+    {
+    gr_tripConfigurationDisableRectangles = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, 430.0, 250.0, 0.0, 0.0
+	
+	     , gr_disableTripConfigurationButtons_monday
+	     , gr_disableTripConfigurationButtons_tuesday
+	     , gr_disableTripConfigurationButtons_sunday
+	     , gr_disableTripConfigurationButtons_saturday
+	     , gr_disableTripConfigurationButtons_friday
+	     , gr_disableTripConfigurationButtons_thursday
+	     , gr_disableTripConfigurationButtons_wednesday );
+    }
+    {
+    gr_configureVehicleTripsNumbers = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D, true, 430.0, 140.0, 0.0, 0.0
+	
+	     , txt_configureVehicleTrips_1
+	     , txt_configureVehicleTrips_2
+	     , txt_configureVehicleTrips_3
+	     , txt_configureVehicleTrips_4
+	     , txt_configureVehicleTrips_5
+	     , txt_configureVehicleTrips_6
+	     , txt_configureVehicleTrips_7
+	     , txt_configureVehicleTrips_8
+	     , txt_configureVehicleTrips_9
+	     , txt_configureVehicleTrips_10
+	     , txt_configureVehicleTrips_11
+	     , txt_configureVehicleTrips_12
+	     , txt_configureVehicleTrips_13
+	     , txt_configureVehicleTrips_14
+	     , txt_configureVehicleTrips_15
+	     , txt_configureVehicleTrips_16
+	     , txt_configureVehicleTrips_17
+	     , txt_configureVehicleTrips_18
+	     , txt_configureVehicleTrips_19
+	     , txt_configureVehicleTrips_20
+	     , txt_configureVehicleTrips_21
+	     , txt_configureVehicleTrips_22
+	     , txt_configureVehicleTrips_23
+	     , txt_configureVehicleTrips_24
+	     , txt_configureVehicleTrips_0 );
+    }
+    {
+    gr_vehicleTripConfiguratorWeekdays = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D, true, 60.0, 250.0, 0.0, 0.0
+	
+	     , txt_configureVehicleTrips_monday
+	     , txt_configureVehicleTrips_tuesday
+	     , txt_configureVehicleTrips_wednesday
+	     , txt_configureVehicleTrips_thursday
+	     , txt_configureVehicleTrips_friday
+	     , txt_configureVehicleTrips_saturday
+	     , txt_configureVehicleTrips_sunday );
+    }
+    {
+    gr_configureVehicleTrips = new ShapeGroup( UI_company.this, SHAPE_DRAW_2D3D, true, -550.0, 1500.0, 0.0, 0.0
+	
+	     , rect_configureVehicleTripsBackground
+	     , gr_configureVehicleTrips_weekButtons
+	     , cb_configureVehicleTrips_dailyDistinction
+	     , button_confirm_configureVehicleTrips
+	     , button_cancel_configureVehicleTrips
+	     , t_configureVehicleTrips_km
+	     , cb_configureVehicleTripsMonday
+	     , cb_configureVehicleTripsTuesday
+	     , cb_configureVehicleTripsWednesday
+	     , cb_configureVehicleTripsThursday
+	     , cb_configureVehicleTripsFriday
+	     , cb_configureVehicleTripsSaturday
+	     , cb_configureVehicleTripsSunday
+	     , button_configureVehicleTrips_reset
+	     , gr_tripConfigurationDisableRectangles
+	     , gr_configureVehicleTripsNumbers
+	     , eb_configureVehicleTrips_weeklyDistance_km
+	     , txt_configureVehicleTrips_weeklyDistance_unit
+	     , gr_vehicleTripConfiguratorWeekdays
+	     , t_tripConfiguratorExplanation ) {
+	
+      @Override
+	
+      public void updateDynamicProperties() {
+	
+      _gr_configureVehicleTrips_SetDynamicParams_xjal( this );
+	
+      super.updateDynamicProperties();
+	
+      }
+    };
+    }
+    gr_configureVehicleTrips.setVisible( false );
   }
 
   @AnyLogicInternalCodegenAPI
@@ -6732,6 +13657,8 @@ true,-270.0, -120.0, 0.0,
       level };
     _createPersistentElementsBP0_xjal();
     _createPersistentElementsBP1_xjal();
+    _createPersistentElementsBP2_xjal();
+    _createPersistentElementsBP3_xjal();
   }
   protected ShapeTopLevelPresentationGroup presentation;
   protected ShapeModelElementsGroup icon; 
@@ -6792,7 +13719,7 @@ true,-270.0, -120.0, 0.0,
   /**
    * Simple constructor. Please add created agent to some population by calling goToPopulation() function.
    */
-  public UI_company( String p_companyName, int p_maxAddedVehicles, J_scenario_Current p_scenarioSettings_Current, J_scenario_Future p_scenarioSettings_Future, GridConnection p_gridConnection, double p_maxSavingsSliders_default, double p_minSavingsSliders_default ) {
+  public UI_company( String p_companyName, int p_maxAddedVehicles, J_scenario_Current p_scenarioSettings_Current, J_scenario_Future p_scenarioSettings_Future, GridConnection p_gridConnection, double p_maxSavingsSliders_default, double p_minSavingsSliders_default, ShapeRectangle[][] matrix_vehicleTripsConfigurationButtons, Map<String, Map<J_ActivityTrackerTrips, J_ActivityTrackerTrips>> map_customTripTrackerToOriginal, Map<String, Map<OL_VehicleType, J_CustomTripTrackerGenerator.StoredTripConfiguration>> map_storedCustomTripButtonConfiguration, boolean[][] matrix_defaultValuesCustomTripButtons, Map<OL_Days, ShapeCheckBox> map_dayToEnableDayButtons, Color p_configureVehicleTripsOnColor, Color p_configureVehicleTripsOffColor, Map<OL_Days, ShapeGroup> map_dayToDisableRectangles, Map<String, Map<OL_VehicleType, List<J_ActivityTrackerTrips.TripRecord>>> map_createdCustomTripWeeklyConfiguration, double p_defaultTravelDistance_km ) {
     markParametersAreSet();
     this.p_companyName = p_companyName;
     this.p_maxAddedVehicles = p_maxAddedVehicles;
@@ -6801,6 +13728,16 @@ true,-270.0, -120.0, 0.0,
     this.p_gridConnection = p_gridConnection;
     this.p_maxSavingsSliders_default = p_maxSavingsSliders_default;
     this.p_minSavingsSliders_default = p_minSavingsSliders_default;
+    this.matrix_vehicleTripsConfigurationButtons = matrix_vehicleTripsConfigurationButtons;
+    this.map_customTripTrackerToOriginal = map_customTripTrackerToOriginal;
+    this.map_storedCustomTripButtonConfiguration = map_storedCustomTripButtonConfiguration;
+    this.matrix_defaultValuesCustomTripButtons = matrix_defaultValuesCustomTripButtons;
+    this.map_dayToEnableDayButtons = map_dayToEnableDayButtons;
+    this.p_configureVehicleTripsOnColor = p_configureVehicleTripsOnColor;
+    this.p_configureVehicleTripsOffColor = p_configureVehicleTripsOffColor;
+    this.map_dayToDisableRectangles = map_dayToDisableRectangles;
+    this.map_createdCustomTripWeeklyConfiguration = map_createdCustomTripWeeklyConfiguration;
+    this.p_defaultTravelDistance_km = p_defaultTravelDistance_km;
   }
 
   /**
@@ -6825,7 +13762,25 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 	_initialize_level_xjal();
     level.initialize();
     presentation = new ShapeTopLevelPresentationGroup( UI_company.this, true, 0, 0, 0, 0 , level );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
+    addAll( c_activeVehicleConfigurationDays, new OL_Days[] 
+{
+	OL_Days.MONDAY,
+	OL_Days.TUESDAY,
+	OL_Days.WEDNESDAY,
+	OL_Days.THURSDAY,
+	OL_Days.FRIDAY,
+	OL_Days.SATURDAY,
+	OL_Days.SUNDAY
+} 
+    );
     // Creating embedded object instances
     instantiatePopulations_xjal();
     icon = new ShapeModelElementsGroup( UI_company.this, getElementProperty( "zerointerfaceloader.UI_company.icon", IElementDescriptor.MODEL_ELEMENT_DESCRIPTORS )  );
@@ -6875,6 +13830,15 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
     rb_heatingTypePrivateUI.setValueToDefault();
     sl_rooftopPVCompany.setValueToDefault();
     sl_GCCapacityCompany_Feedin.setValueToDefault();
+    cb_configureVehicleTrips_dailyDistinction.setValueToDefault();
+    cb_configureVehicleTripsMonday.setValueToDefault();
+    cb_configureVehicleTripsTuesday.setValueToDefault();
+    cb_configureVehicleTripsWednesday.setValueToDefault();
+    cb_configureVehicleTripsThursday.setValueToDefault();
+    cb_configureVehicleTripsFriday.setValueToDefault();
+    cb_configureVehicleTripsSaturday.setValueToDefault();
+    cb_configureVehicleTripsSunday.setValueToDefault();
+    eb_configureVehicleTrips_weeklyDistance_km.setValueToDefault();
   }
 
   @Override
@@ -6891,7 +13855,9 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 //Initialize graph locations and visibility
 f_setResultsUIPresets();
 
-zero_Interface.c_UIResultsInstances.add(uI_Results); 
+zero_Interface.c_UIResultsInstances.add(uI_Results);
+
+f_initializeDayToDisableRectanglesMap(); 
  }
 
   /**
@@ -6910,10 +13876,10 @@ zero_Interface.c_UIResultsInstances.add(uI_Results);
   @AnyLogicInternalCodegenAPI
   private void setupPlainVariables_UI_company_xjal() {
     v_companyUIBackgroundColor = 
-new Color( 204, 72, 118);  
+new Color(95, 188, 191); 
 ;
     v_companyUILineColor = 
-black 
+new Color(0, 126, 132) 
 ;
     v_minPVSlider = 
 0 

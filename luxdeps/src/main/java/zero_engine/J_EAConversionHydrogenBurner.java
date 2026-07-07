@@ -97,17 +97,19 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import static com.anylogic.engine.Utilities.*;
 
 /**
 * J_EAConversionGasBurner
 */
-public class J_EAConversionHydrogenBurner extends zero_engine.J_EAConversion implements Serializable, I_HeatingAsset {
+public class J_EAConversionHydrogenBurner extends zero_engine.J_EAConversion implements I_HeatingAsset {
  
 	protected double outputTemperature_degC;
-    /**
-     * Default constructor
+    
+	/**
+     * Empty constructor for serialization
      */
     public J_EAConversionHydrogenBurner() {
     }
@@ -132,11 +134,4 @@ public class J_EAConversionHydrogenBurner extends zero_engine.J_EAConversion imp
 		this.activeConsumptionEnergyCarriers.add(this.energyCarrierConsumed);
 		registerEnergyAsset(timeParameters);
 	}
- 
-	/**
-	 * This number is here for model snapshot storing purpose<br>
-	 * It needs to be changed when this class gets changed
-	 */
-	private static final long serialVersionUID = 1L;
- 
 } 

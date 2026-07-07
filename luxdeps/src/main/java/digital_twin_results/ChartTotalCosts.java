@@ -291,7 +291,7 @@ if(data.getPreviousRapidRunData() != null){
 	t_previousTotalEnergyCosts.setText("€ " + df.format(roundToInt(previousTotalEnergyCosts_eurpyr)) + " /yr");
 	
 	double previousNetLoad_kW[] = data.getPreviousRapidRunData().am_totalBalanceAccumulators_kW.get(OL_EnergyCarriers.ELECTRICITY).getTimeSeries_kW();
-	double previousTotalConnectionCosts_eurpyr = uI_Results.chartConnectionCosts.f_calculateTotalConnectionCosts_eurpyr(data.getPreviousRapidRunData().connectionMetaData, netLoad_kW);
+	double previousTotalConnectionCosts_eurpyr = uI_Results.chartConnectionCosts.f_calculateTotalConnectionCosts_eurpyr(data.getPreviousRapidRunData().connectionMetaData, previousNetLoad_kW);
 	t_previousTotalConnectionCosts.setText("€ " + df.format(roundToInt(previousTotalConnectionCosts_eurpyr)) + " /yr");
 	
 	double previousTotalCAPEXAndOPEXCosts_eurpyr = uI_Results.chartCAPEXAndOPEX.f_getTotalCAPEXAndOPEXCosts_eurpyr(data.getPreviousRapidRunData());
@@ -744,6 +744,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 	_initialize_level_xjal();
     level.initialize();
     presentation.initialize_xjal( false, false , level );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     icon.initialize_xjal( this.<ModelElementDescriptorUtils[]>getElementProperty( "digital_twin_results.ChartTotalCosts.icon", IElementDescriptor.MODEL_ELEMENT_DESCRIPTORS ), false, true  );
     icon.setIconOffsets( 0.0, 0.0 );

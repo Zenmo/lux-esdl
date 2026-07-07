@@ -97,50 +97,13 @@ import static zero_engine.OL_GridNodeProfileLoaderType.*;
 import static zero_engine.OL_GridOperator.*;
 import static zero_engine.OL_ConnectionSizeType.*;
 import static zero_engine.OL_PVOrientation.*;
+import static zero_engine.OL_HeatpumpType.*;
 
 import java.awt.geom.Arc2D;
 
 public class GCPublicCharger extends zero_engine.GridConnection
 {
   // Parameters
-
-  public 
-boolean  p_isChargingCentre;
-
-  /**
-   * Returns default value for parameter <code>p_isChargingCentre</code>.
-   * <i>This method should not be called by user</i>
-   */
-  @AnyLogicInternalCodegenAPI
-  public boolean _p_isChargingCentre_DefaultValue_xjal() {
-    final GCPublicCharger self = this;
-    return false;
-  }
-
-  public void set_p_isChargingCentre( boolean value ) {
-    if (value == this.p_isChargingCentre) {
-      return;
-    }
-    boolean _oldValue_xjal = this.p_isChargingCentre;
-    this.p_isChargingCentre = value;
-    onChange_p_isChargingCentre_xjal( _oldValue_xjal );
-    onChange();
-  }
-
-  /**
-   * Calls "On change" action for parameter p_isChargingCentre.<br>
-   * Note that 'oldValue' in that action will be unavailable if this method is called by user
-   * (current parameter value will be passed as 'oldValue').<br>
-   * Please call <code>set_p_isChargingCentre()</code> method instead.
-   */
-  protected void onChange_p_isChargingCentre() {
-    onChange_p_isChargingCentre_xjal( p_isChargingCentre );
-  }
-
-  @AnyLogicInternalCodegenAPI
-  protected void onChange_p_isChargingCentre_xjal( boolean oldValue ) {  
-  }
-
 
 
 
@@ -167,52 +130,6 @@ boolean  p_isChargingCentre;
 
 
 
-
-  @Override
-  public void setParametersToDefaultValues() {
-    super.setParametersToDefaultValues();
-    p_isChargingCentre = _p_isChargingCentre_DefaultValue_xjal();
-  }
-
-  @Override
-  public boolean setParameter(String _name_xjal, Object _value_xjal, boolean _callOnChange_xjal) {
-    switch ( _name_xjal ) {
-    case "p_isChargingCentre":
-      if ( _callOnChange_xjal ) {
-        set_p_isChargingCentre( (Boolean) _value_xjal );
-      } else {
-        p_isChargingCentre = (Boolean) _value_xjal;
-      }
-      return true;
-    default:
-      return super.setParameter( _name_xjal, _value_xjal, _callOnChange_xjal );
-    }
-  }
-
-  @Override
-  public <T> T getParameter(String _name_xjal) {
-    Object _result_xjal;
-    switch ( _name_xjal ) {
-    case "p_isChargingCentre": _result_xjal = p_isChargingCentre; break;
-    default: _result_xjal = super.getParameter( _name_xjal ); break;
-    }
-    return (T) _result_xjal;
-  }
-
-  @AnyLogicInternalCodegenAPI
-  private static String[] _parameterNames_xjal;
-
-  @Override
-  public String[] getParameterNames() {
-    String[] result = _parameterNames_xjal;
-    if (result == null) {
-      List<String> list = new ArrayList<>( Arrays.asList( super.getParameterNames() ) );
-      list.add( "p_isChargingCentre" );
-      result = list.toArray( new String[ list.size() ] );
-      _parameterNames_xjal = result;
-    }
-    return result;
-  }
 
   @AnyLogicInternalCodegenAPI
   private static Map<String, IElementDescriptor> elementDesciptors_xjal = createElementDescriptors( GCPublicCharger.class );
@@ -362,9 +279,8 @@ private double _datasetUpdateTime_xjal() {
   /**
    * Simple constructor. Please add created agent to some population by calling goToPopulation() function.
    */
-  public GCPublicCharger( String p_parentNodeElectricID, String p_gridConnectionID, String p_parentNodeHeatID, J_EABuilding p_BuildingThermalAsset, String p_ownerID, J_EAStorageElectric p_batteryAsset, J_EAStorageHeat p_heatBuffer, J_EAStorageGas p_gasBuffer, J_ActivityTrackerCooking p_cookingTracker, OL_GridConnectionInsulationLabel p_insulationLabel, J_EAProfile p_DHWAsset, double p_longitude, double p_latitude, double p_floorSurfaceArea_m2, ConnectionOwner p_owner, double p_roofSurfaceArea_m2, String p_purposeBAG, J_Address p_address, GridNode p_parentNodeHeat, GridNode p_parentNodeElectric, boolean v_isActive, OL_GridConnectionEnergyLabel p_energyLabel, J_EAConversionAirConditioner p_airco, boolean p_isChargingCentre ) {
+  public GCPublicCharger( String p_parentNodeElectricID, String p_gridConnectionID, String p_parentNodeHeatID, J_EABuilding p_BuildingThermalAsset, String p_ownerID, J_EAStorageElectric p_batteryAsset, J_EAStorageHeat p_heatBuffer, J_EAStorageGas p_gasBuffer, J_ActivityTrackerCooking p_cookingTracker, OL_GridConnectionInsulationLabel p_insulationLabel, J_EAProfile p_DHWAsset, double p_longitude, double p_latitude, double p_floorSurfaceArea_m2, ConnectionOwner p_owner, double p_roofSurfaceArea_m2, String p_purposeBAG, J_Address p_address, GridNode p_parentNodeHeat, GridNode p_parentNodeElectric, boolean v_isActive, OL_GridConnectionEnergyLabel p_energyLabel, J_EAConversionAirConditioner p_airco ) {
     super( p_parentNodeElectricID, p_gridConnectionID, p_parentNodeHeatID, p_BuildingThermalAsset, p_ownerID, p_batteryAsset, p_heatBuffer, p_gasBuffer, p_cookingTracker, p_insulationLabel, p_DHWAsset, p_longitude, p_latitude, p_floorSurfaceArea_m2, p_owner, p_roofSurfaceArea_m2, p_purposeBAG, p_address, p_parentNodeHeat, p_parentNodeElectric, v_isActive, p_energyLabel, p_airco );
-    this.p_isChargingCentre = p_isChargingCentre;
   }
 
   @Override
@@ -380,6 +296,13 @@ Map<String, Set<?>> usdMapping = getRootAgent().ext(ExtRootModelAgent.class).get
 	_initialize_level_xjal();
     level.initialize();
     presentation.initialize_xjal( false, false , level );
+		presentation.getConfiguration3D().setEnvironmentRotationX(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationY(0.0f);
+		presentation.getConfiguration3D().setEnvironmentRotationZ(0.0f);
+		presentation.getConfiguration3D().setEnvironmentIntensity(1.0d);
+		presentation.getConfiguration3D().setUseEnvironmentForBackground(true);
+		presentation.getConfiguration3D().setUseEnvironmentForLightning(true);
+        presentation.getConfiguration3D().setSkybox(SkyboxType.NONE);
     presentation.getConfiguration3D().setBackgroundColor( silver );
     icon.initialize_xjal( this.<ModelElementDescriptorUtils[]>getElementProperty( "zero_engine.GCPublicCharger.icon", IElementDescriptor.MODEL_ELEMENT_DESCRIPTORS ), false, true  );
     icon.setIconOffsets( 0.0, 0.0 );
