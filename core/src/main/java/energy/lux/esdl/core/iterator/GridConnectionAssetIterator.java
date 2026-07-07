@@ -25,6 +25,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     private final GridConnection luxGridConnection;
 
     private final Zero_Loader luxLoader;
+    private final EnergyModel energyModel;
 
     private final ElectricityDemandLoader electricityDemandLoader;
 
@@ -36,6 +37,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     public GridConnectionAssetIterator(GridConnection luxGridConnection, Zero_Loader luxLoader, EConnection entryPoint) {
         this.luxGridConnection = luxGridConnection;
         this.luxLoader = luxLoader;
+        this.energyModel = luxLoader.energyModel;
         this.electricityDemandLoader = new ElectricityDemandLoader(luxLoader);
         // prevent exiting the grid connection while searching through the cables
         this.entryPoint = entryPoint;
@@ -108,7 +110,10 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     public SwitchStatus caseHeatPump(HeatPump heatPump) {
         if (this.processedAssets.add(heatPump)) {
             var maxThermalPowerKw = heatPump.getPower() * 0.001;
-            luxLoader.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, maxThermalPowerKw);
+            var heatingPreferences = luxLoader.f_getHouseHeatingPreferences();
+            luxLoader.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, maxThermalPowerKw, heatingPreferences);
+            I_HeatingManagement heatingManagement = new J_HeatingManagementPIcontrol(luxGridConnection, energyModel.p_timeParameters, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP);
+            luxGridConnection.f_setHeatingManagement(heatingManagement);
         }
         return DONE;
     }
@@ -117,7 +122,10 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     public SwitchStatus caseHybridHeatPump(HybridHeatPump hybridHeatPump) {
         if (this.processedAssets.add(hybridHeatPump)) {
             var maxThermalPowerKw = hybridHeatPump.getHeatPumpThermalPower() * 0.001;
-            luxLoader.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.HYBRID_HEATPUMP, maxThermalPowerKw);
+            var heatingPreferences = luxLoader.f_getHouseHeatingPreferences();
+            luxLoader.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.HYBRID_HEATPUMP, maxThermalPowerKw, heatingPreferences);
+            I_HeatingManagement heatingManagement = new J_HeatingManagementPIcontrolHybridHeatpump(luxGridConnection, energyModel.p_timeParameters, OL_GridConnectionHeatingType.HYBRID_HEATPUMP);
+            luxGridConnection.f_setHeatingManagement(heatingManagement);
         }
         return DONE;
     }
@@ -126,7 +134,9 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     public SwitchStatus caseEVChargingStation(EVChargingStation evChargingStation) {
         if (this.processedAssets.add(evChargingStation)) {
             var maxChargingPowerKw = evChargingStation.getPower() * 0.001;
-            luxLoader.f_addElectricVehicle(luxGridConnection, OL_VehicleType.CAR, true, 8_000, maxChargingPowerKw);
+            double consumedEnergy_kWh = evChargingStation.getFullLoadHours() * maxChargingPowerKw;
+            double traveledDistance_km = consumedEnergy_kWh / luxLoader.avgc_data.p_avgEVEnergyConsumptionCar_kWhpkm;
+            J_EAEV ev = luxLoader.f_addElectricVehicle(luxGridConnection, OL_EnergyAssetType.ELECTRIC_VEHICLE, false, traveledDistance_km, maxChargingPowerKw, OL_ChargingAttitude.SIMPLE);
         }
         return DONE;
     }

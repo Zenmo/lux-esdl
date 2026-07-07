@@ -17,7 +17,9 @@ public class PVLoader {
     private static double defaultInverterEfficiency = 0.95;
 
     public static void loadPVInstallation(PVInstallation pvInstallation, GridConnection luxGridConnection, Zero_Loader luxLoader) {
-        var installationPowerKw = getInstallationPowerKw(pvInstallation);
+        //var installationPowerKw = getInstallationPowerKw(pvInstallation);
+        // TODO: Fix the ESDL data so that we can use surface area & efficiencies
+        var installationPowerKw = pvInstallation.getPower() / 1000.0;
         luxLoader.f_addPVProductionAsset(luxGridConnection, pvInstallation.getName(), installationPowerKw, OL_PVOrientation.SOUTH);
     }
 

@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import zero_engine.*;
 import zerointerfaceloader.Zero_Loader;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AreaIterator {
@@ -85,6 +87,8 @@ public class AreaIterator {
         } else if (asset instanceof Transformer transformer) {
             var childGridNode = GridNodeLoader.loadTransformer(transformer, luxLoader.energyModel, currentGridNode);
             processExitPorts(asset.getPort(), luxLoader, childGridNode, visitedAssets);
+            // Create EnergyCoop for the GridNode. This Coop represents the aggregator that manages external setpoints of EV & Battery assets.
+            addEnergyCoopToGridNode(luxLoader, childGridNode);
         } else if (asset instanceof EConnection eConnection) {
             GridConnectionLoader.loadGridConnection(eConnection, luxLoader, currentGridNode);
             // Do not traverse further
@@ -116,5 +120,18 @@ public class AreaIterator {
                 );
             }
         }
+    }
+
+    private static void addEnergyCoopToGridNode(Zero_Loader luxLoader, GridNode gridNode) {
+        EnergyModel energyModel = luxLoader.energyModel;
+        ArrayList<GridConnection> gridConnectionList = new ArrayList<GridConnection>();
+        for (GridConnection gc : energyModel.c_gridConnections) {
+            if (gc.p_parentNodeElectricID.equals(gridNode.p_gridNodeID)) {
+                gridConnectionList.add(gc);
+            }
+        }
+        EnergyCoop energyCoop = energyModel.f_addEnergyCoop(gridConnectionList, energyModel.p_timeParameters);
+        J_ISIE_Aggregator_EMS ems = new J_ISIE_Aggregator_EMS(energyCoop, energyModel.p_timeParameters);
+        energyCoop.f_setAggregatorEnergyManagement(ems);
     }
 }

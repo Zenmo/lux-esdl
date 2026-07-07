@@ -12,7 +12,6 @@ public class GridNodeLoader {
         gridNode.p_gridNodeID = importAsset.getId();
         gridNode.p_description = importAsset.getName() + ", " + importAsset.getDescription();
         gridNode.p_energyCarrier = OL_EnergyCarriers.ELECTRICITY;
-
         return gridNode;
     }
 
@@ -22,6 +21,7 @@ public class GridNodeLoader {
         gridNode.set_p_parentNodeID(currentGridNode.p_gridNodeID);
         gridNode.p_description = transformer.getName();
         gridNode.p_energyCarrier = OL_EnergyCarriers.ELECTRICITY;
+        gridNode.p_capacity_kW = transformer.getCapacity() / 1000.0;
         return gridNode;
     }
 }

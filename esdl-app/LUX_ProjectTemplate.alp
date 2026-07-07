@@ -4,7 +4,7 @@
 	         AnyLogic Project File
 *************************************************
 -->
-<AnyLogicWorkspace WorkspaceVersion="1.9" AnyLogicVersion="8.9.7.202512121151" AlpVersion="8.9.7">
+<AnyLogicWorkspace WorkspaceVersion="1.9" AnyLogicVersion="8.9.9.202606170507" AlpVersion="8.9.9">
 <Model>
 	<Id>1658477103134</Id>
 	<Name><![CDATA[LUX_ProjectTemplate]]></Name>
@@ -76,7 +76,12 @@ public void f_readDatabase(){
 			<MakeDefaultViewArea>true</MakeDefaultViewArea>
 			<SceneGridColor/>
 			<SceneBackgroundColor>-4144960</SceneBackgroundColor>
-			<SceneSkybox>null</SceneSkybox>
+            <EnvironmentResourceRef></EnvironmentResourceRef>
+            <EnvironmentType>NONE</EnvironmentType>
+            <EnvironmentRotationX>0</EnvironmentRotationX>
+            <EnvironmentRotationY>0</EnvironmentRotationY>
+            <EnvironmentRotationZ>0</EnvironmentRotationZ>
+            <EnvironmentIntensity>1</EnvironmentIntensity>
 			<AgentProperties>
 				<EnvironmentDefinesInitialLocation>true</EnvironmentDefinesInitialLocation>
 				<RotateAnimationTowardsMovement>true</RotateAnimationTowardsMovement>
@@ -1187,7 +1192,12 @@ import java.io.PrintStream;]]></Import>
 			<MakeDefaultViewArea>true</MakeDefaultViewArea>
 			<SceneGridColor/>
 			<SceneBackgroundColor>-4144960</SceneBackgroundColor>
-			<SceneSkybox>null</SceneSkybox>
+            <EnvironmentResourceRef></EnvironmentResourceRef>
+            <EnvironmentType>NONE</EnvironmentType>
+            <EnvironmentRotationX>0</EnvironmentRotationX>
+            <EnvironmentRotationY>0</EnvironmentRotationY>
+            <EnvironmentRotationZ>0</EnvironmentRotationZ>
+            <EnvironmentIntensity>1</EnvironmentIntensity>
 			<AgentProperties>
 				<EnvironmentDefinesInitialLocation>true</EnvironmentDefinesInitialLocation>
 				<RotateAnimationTowardsMovement>true</RotateAnimationTowardsMovement>
@@ -1490,7 +1500,12 @@ import energy.lux.esdl.core.iterator.RootIterator;]]></Import>
 			<MakeDefaultViewArea>true</MakeDefaultViewArea>
 			<SceneGridColor/>
 			<SceneBackgroundColor>-4144960</SceneBackgroundColor>
-			<SceneSkybox>null</SceneSkybox>
+            <EnvironmentResourceRef></EnvironmentResourceRef>
+            <EnvironmentType>NONE</EnvironmentType>
+            <EnvironmentRotationX>0</EnvironmentRotationX>
+            <EnvironmentRotationY>0</EnvironmentRotationY>
+            <EnvironmentRotationZ>0</EnvironmentRotationZ>
+            <EnvironmentIntensity>1</EnvironmentIntensity>
 			<AgentProperties>
 				<EnvironmentDefinesInitialLocation>true</EnvironmentDefinesInitialLocation>
 				<RotateAnimationTowardsMovement>true</RotateAnimationTowardsMovement>
@@ -2487,6 +2502,7 @@ var energyModel = loader.energyModel;
 loader.settings = Settings.builder().build();
 loader.f_setSimulationTimeParameters();
 loader.avgc_data.f_setAVGC_data(grid_operator, energyModel.p_timeParameters.getStartYear());
+loader.f_setDefaultHeatingStrategies();
 
 loader.defaultProfiles_data = ExcelProfileReader.loadDefaultProfiles2025();
 loader.f_setEngineProfiles();
@@ -2495,23 +2511,28 @@ energyModel.p_truckTripsCsv = loader.inputCSVtruckTrips;
 energyModel.p_householdTripsCsv = loader.inputCSVhouseholdTrips;
 energyModel.p_cookingPatternCsv = loader.inputCSVcookingActivities;
 
-var esdl = ESDLReader.readResource("data_ProjectTemplate/tue.esdl");
+
+//var esdl = ESDLReader.readResource("data_ProjectTemplate/tue.esdl");
+var esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_weinigflex_test_updated_tou0_nolocalcongestion.esdl");
+//varr esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_veelflex_test_updated_tou0_nolocalcongestion.esdl");
+//var esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_veelflex_test_updated_tou0_localcongestion.esdl");
+
 RootIterator.loadEsdlIntoLux(esdl, loader);
 
 loader.f_createInterface();
 var zeroInterface = loader.zero_Interface;
 
-// TODO: we need this now but it's only available after EnergyModel::f_initializeEngine
-//var topGridNodeId = energyModel.f_getGridNodesTopLevel().get(0).p_gridNodeID;
-var topGridNodeId = "35c99886-75dc-482e-9747-7a84d9d739ad";
-// current ESDL's have only 1 transformer
-var transformerGridNode = "d2411d31-08fd-4965-bc85-78a1fb4b3b8d";
+var topGridNodeId = energyModel.f_getRootGridNodes().get(0).p_gridNodeID;
+var transformerGridNodes = energyModel.f_getNonRootGridNodes();
 
 loader.f_addSliderSolarfarm(zeroInterface.p_defaultMainSliderGCName_solarfarm, topGridNodeId);
 loader.f_createSolarParks();
 loader.f_addSliderWindfarm(zeroInterface.p_defaultMainSliderGCName_windfarm, topGridNodeId);
 loader.f_createWindFarms();
-loader.f_addSliderBattery(zeroInterface.p_defaultMainSliderGCName_battery + " " + transformerGridNode, transformerGridNode);
+for (GridNode gn : transformerGridNodes) {
+	var transformerGridNodeID = gn.p_gridNodeID;
+	loader.f_addSliderBattery(zeroInterface.p_defaultMainSliderGCName_battery + " " + transformerGridNodeID, transformerGridNodeID);
+}
 loader.f_createBatteries();
 
 energyModel.f_initializeEngine();
@@ -2951,7 +2972,6 @@ if(p_subScope_D){
 	<FixedTimeStep>1.0</FixedTimeStep>
 	<RelativeAccuracy>1.0</RelativeAccuracy>
 	<TimeAccuracy>0.1</TimeAccuracy>
-	<InspectionWindowColorTheme>DEFAULT</InspectionWindowColorTheme>
 	<Frame>
 		<Id>1658477089989</Id>
 		<Width>1920</Width>
@@ -3826,6 +3846,7 @@ public final class GrayConsoleAppender extends AbstractAppender {
 	<Uuid>404652e6-561a-404c-aab2-ab7415f40ef5</Uuid>
 	<Uuid>6fd6cd57-6dfe-4fc6-be0b-c74065351957</Uuid>
 	<Uuid>3325dc48-3ad4-41e3-836f-dfd0e98fe1ed</Uuid>
+	<Uuid>bb27038a-0f3a-48bb-b235-4a44066a14aa</Uuid>
 	<Uuid>3f69ef3d-706e-41a6-8af0-11658c5eef68</Uuid>
 	<Uuid>3f6fe405-e047-4304-91d6-6eee206d1106</Uuid>
 	<Uuid>820d2b51-5b4a-48e7-b0b6-e46418e3c0f2</Uuid>
@@ -3881,5 +3902,9 @@ public final class GrayConsoleAppender extends AbstractAppender {
 	<Uuid>1737c8c6-b526-4dd8-589e-ee4e205b06f4</Uuid>
 	<Uuid>6a43bef6-8b70-4253-a828-82c3ab399655</Uuid>
 	<Uuid>0a27038a-0f3a-48bb-b235-4a44066a1402</Uuid>
+	<Uuid>0a9ec2c3-5e18-4c0a-a183-fd86d9d9a08b</Uuid>
+	<Uuid>2216cdd0-177c-5678-9e88-dd8b95313334</Uuid>
+	<Uuid>2216cdd0-177c-5678-9e88-dd8b95313335</Uuid>
+	<Uuid>5b8ebeed-6b58-4c3a-8d5f-0958b1a90ce6</Uuid>
 </ConvertersApplied>
 </AnyLogicWorkspace>
