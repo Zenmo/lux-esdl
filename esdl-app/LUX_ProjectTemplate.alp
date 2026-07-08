@@ -31,6 +31,11 @@ public void f_createInterface(){
 @Override
 public void f_readDatabase(){
 	f_readDatabase_ProjectTemplate();
+}
+
+@Override
+public void f_setEngineProfiles() {
+	f_setEngineProfiles_ISIE();
 }]]></AdditionalClassCode>
 			<Import><![CDATA[import zerointerfaceloader.OL_ProjectType;]]></Import>
 			<ExtendsReference>
@@ -840,6 +845,91 @@ for(String columnName : columnNames){
         
 }]]></Body>
 				</Function>
+				<Function AccessType="public" StaticFunction="false">
+					<ReturnModificator>VOID</ReturnModificator>
+					<ReturnType><![CDATA[double]]></ReturnType>
+					<Id>1783438795836</Id>
+					<Name><![CDATA[f_setEngineProfiles_ISIE]]></Name>
+					<Description><![CDATA[Functie van gillis voor inladen weer data!]]></Description>
+					<X>90</X><Y>130</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Body><![CDATA[//Profile Arguments
+double[] a_arguments_hr = ListUtil.doubleListToArray(defaultProfiles_data.arguments_hr());
+
+//Weather data
+double[] a_ambientTemperatureProfile_degC = ListUtil.doubleListToArray(defaultProfiles_data.ambientTemperatureProfile_degC());
+//double[] a_PVProductionProfile35DegSouth_fr = ListUtil.doubleListToArray(defaultProfiles_data.PVProductionProfile35DegSouth_fr());
+//double[] a_PVProductionProfile15DegEastWest_fr = ListUtil.doubleListToArray(defaultProfiles_data.PVProductionProfile15DegEastWest_fr());
+double[] a_windProductionProfile_fr = ListUtil.doubleListToArray(defaultProfiles_data.windProductionProfile_fr());
+
+// CUSTOM PV
+List<Double> pvSouthValuesList = selectValues(double.class, "SELECT zuid_35_graden FROM zonnepanelen_2013");
+double[] a_PVProductionProfile35DegSouth_fr = pvSouthValuesList.stream().mapToDouble(Double::doubleValue).toArray();
+List<Double> pvEastWestValuesList = selectValues(double.class, "SELECT oost_west_15_graden FROM zonnepanelen_2013");
+double[] a_PVProductionProfile15DegEastWest_fr = pvEastWestValuesList.stream().mapToDouble(Double::doubleValue).toArray();
+
+//EPEX data
+double[] a_epexProfile_eurpMWh = ListUtil.doubleListToArray(defaultProfiles_data.epexProfile_eurpMWh()); 
+
+//CO2 emission data
+double[] a_CO2EmissionFactorElectricityImport_kgpkWh = ListUtil.doubleListToArray(defaultProfiles_data.CO2EmissionFactorElectricityImport_kgpkWh()); 
+
+//Various demand data
+double[] a_defaultHouseElectricityDemandProfile_fr = ListUtil.doubleListToArray(defaultProfiles_data.defaultHouseElectricityDemandProfile_fr());
+double[] a_defaultHouseHotWaterDemandProfile_fr = ListUtil.doubleListToArray(defaultProfiles_data.defaultHouseHotWaterDemandProfile_fr());
+double[] a_defaultHouseCookingDemandProfile_fr = ListUtil.doubleListToArray(defaultProfiles_data.defaultHouseCookingDemandProfile_fr());
+double[] a_defaultOfficeElectricityDemandProfile_fr = ListUtil.doubleListToArray(defaultProfiles_data.defaultOfficeElectricityDemandProfile_fr());
+double[] a_defaultBuildingHeatDemandProfile_fr = ListUtil.doubleListToArray(defaultProfiles_data.defaultBuildingHeatDemandProfile_fr());
+
+//Create Weather engine profiles
+energyModel.pp_ambientTemperature_degC = f_createEngineProfile("ambient_temperature_degC", a_arguments_hr, a_ambientTemperatureProfile_degC, OL_ProfileUnits.TEMPERATURE_DEGC);
+energyModel.pp_PVProduction35DegSouth_fr = f_createEngineProfile("pv_production_35degsouth_fr", a_arguments_hr, a_PVProductionProfile35DegSouth_fr, OL_ProfileUnits.NORMALIZEDPOWER);
+energyModel.pp_PVProduction15DegEastWest_fr = f_createEngineProfile("pv_production_15degeastwest_fr", a_arguments_hr, a_PVProductionProfile15DegEastWest_fr, OL_ProfileUnits.NORMALIZEDPOWER);
+energyModel.pp_windProduction_fr = f_createEngineProfile("wind_production_fr", a_arguments_hr, a_windProductionProfile_fr, OL_ProfileUnits.NORMALIZEDPOWER);
+
+//Create Epex engine profile
+energyModel.pp_dayAheadElectricityPricing_eurpMWh = f_createEngineProfile("epex_price_eurpMWh", a_arguments_hr, a_epexProfile_eurpMWh, OL_ProfileUnits.PRICE_EURPMWH);
+
+//Create CO2 emission engine profile
+energyModel.pp_CO2EmissionFactorElectricityImport_kgpkWh = f_createEngineProfile("CO2EmissionFactorElectricityImport_kgpkWh", a_arguments_hr, a_CO2EmissionFactorElectricityImport_kgpkWh, OL_ProfileUnits.CO2EMISSION_KGPKWH);
+
+//Create Consumption engine profiles:
+f_createEngineProfile("default_house_electricity_demand_fr", a_arguments_hr, a_defaultHouseElectricityDemandProfile_fr, OL_ProfileUnits.YEARLYTOTALFRACTION);
+f_createEngineProfile("default_house_hot_water_demand_fr", a_arguments_hr, a_defaultHouseHotWaterDemandProfile_fr, OL_ProfileUnits.YEARLYTOTALFRACTION);
+f_createEngineProfile("default_house_cooking_demand_fr", a_arguments_hr, a_defaultHouseCookingDemandProfile_fr, OL_ProfileUnits.YEARLYTOTALFRACTION);
+f_createEngineProfile("default_office_electricity_demand_fr", a_arguments_hr, a_defaultOfficeElectricityDemandProfile_fr, OL_ProfileUnits.YEARLYTOTALFRACTION);
+f_createEngineProfile("default_building_heat_demand_fr", a_arguments_hr, a_defaultBuildingHeatDemandProfile_fr, OL_ProfileUnits.YEARLYTOTALFRACTION);
+
+//Create custom engine profiles
+for(CustomProfile_data customProfile : c_customProfiles_data){
+	f_createEngineProfile(customProfile.customProfileID(), customProfile.getArgumentsArray(), customProfile.getValuesArray(), customProfile.profileUnits()); // What type of profiles usually in custom profiles?? Custom production profiles?
+}
+
+
+/*
+
+String pvSouthId = "pv_production_35degsouth_fr";
+String pvEastWestId = "pv_production_15degeastwest_fr";
+J_ProfilePointer pp_pvSouth = energyModel.f_findProfile(pvSouthId);
+J_ProfilePointer pp_pvEastWest = energyModel.f_findProfile(pvEastWestId);
+double offset_h = 0.0;
+List<Double> timesList = selectValues(double.class, "SELECT t_h FROM zonnepanelen_2013");
+List<Double> pvSouthValuesList = selectValues(double.class, "SELECT zuid_35_graden FROM zonnepanelen_2013");
+List<Double> pvEastWestValuesList = selectValues(double.class, "SELECT oost_west_15_graden FROM zonnepanelen_2013");
+double[] times = timesList.stream().mapToDouble(Double::doubleValue).toArray();
+double[] pvSouthValues = pvSouthValuesList.stream().mapToDouble(Double::doubleValue).toArray();
+double[] pvEastWestValues = pvEastWestValuesList.stream().mapToDouble(Double::doubleValue).toArray();
+pp_pvSouth = loader.f_createProfilePointer(pvSouthId, times, pvSouthValues, OL_ProfileUnits.NORMALIZEDPOWER, offset_h );
+pp_pvEastWest = loader.f_createProfilePointer(pvEastWestId, times, pvEastWestValues, OL_ProfileUnits.NORMALIZEDPOWER, offset_h );
+energyModel.pp_PVProduction35DegSouth_fr = pp_pvSouth;
+energyModel.pp_PVProduction15DegEastWest_fr = pp_pvEastWest;
+
+*/
+]]></Body>
+				</Function>
 			</Functions>
 			<AgentLinks>
 				<AgentLink>
@@ -901,90 +991,6 @@ for(String columnName : columnNames){
 					<Parameters>
 						<Parameter>
 							<Name><![CDATA[t_scenario_XXX]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[energyModel]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[settings]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_currentActiveInfoBubble]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_maxNrSelectedGCForExport]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_minSelectedGCForPublicAggregation]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[b_inEnergyHubSelectionMode]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[b_inEnergyHubMode]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[user]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[project_data]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[uI_Company]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[uI_Hydrogen]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[uI_Battery]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[uI_EnergyHub]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[rb_scenarios]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[t_scenario_current]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[t_scenario_future]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[t_scenario_custom]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_residentialScenario_Current]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[map_filterOptionUINames]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[map_UINamesFilterOption]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_defaultMainSliderGCName_solarfarm]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_defaultMainSliderGCName_windfarm]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_defaultMainSliderGCName_battery]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_defaultEnergyHubSliderGCName_solarfarm]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_defaultEnergyHubSliderGCName_windfarm]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_defaultEnergyHubSliderGCName_battery]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_customMapOverlayName]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_customMapOverlayLegend]]></Name>
 						</Parameter>
 					</Parameters>
 					<ReplicationFlag>false</ReplicationFlag>
@@ -1899,7 +1905,7 @@ If you don't: False (faster startup with false)]]></Description>
 						<UnitType><![CDATA[NONE]]></UnitType>
 						<SdArray>false</SdArray>
 						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[true]]></Code>
+							<Code><![CDATA[false]]></Code>
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1726236153258</Id>
@@ -2514,7 +2520,9 @@ energyModel.p_cookingPatternCsv = loader.inputCSVcookingActivities;
 
 //var esdl = ESDLReader.readResource("data_ProjectTemplate/tue.esdl");
 var esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_weinigflex_test_updated_tou0_nolocalcongestion.esdl");
-//varr esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_veelflex_test_updated_tou0_nolocalcongestion.esdl");
+//var esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_veelflex_test_updated_tou0_nolocalcongestion.esdl");
+
+// Requires manual change of congestionfactor in J_ISIE_Aggregator_EMS
 //var esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_veelflex_test_updated_tou0_localcongestion.esdl");
 
 RootIterator.loadEsdlIntoLux(esdl, loader);
@@ -2675,27 +2683,6 @@ if(p_subScope_D){
 						</GenericParameterSubstituteReference>
 					</GenericParameterSubstitute>
 					<Parameters>
-						<Parameter>
-							<Name><![CDATA[zero_Interface]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[defaultProfiles_data]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[project_data]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[settings]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[user]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_userIdToken]]></Name>
-						</Parameter>
-						<Parameter>
-							<Name><![CDATA[p_remainingTotals]]></Name>
-						</Parameter>
 					</Parameters>
 					<ReplicationFlag>false</ReplicationFlag>
 					<Replication Class="CodeValue">
@@ -3172,6 +3159,27 @@ if(p_subScope_D){
 				<Login><![CDATA[]]></Login>
 				<Password><![CDATA[]]></Password>
 			</ExternalConnection>
+			<ExternalConnection>
+				<Id>1783518973367</Id>
+				<Name><![CDATA[database]]></Name>
+				<X>0</X><Y>0</Y>
+				<Label><X>10</X><Y>0</Y></Label>
+				<PublicFlag>false</PublicFlag>
+				<PresentationFlag>true</PresentationFlag>
+				<ShowLabel>true</ShowLabel>
+				<DatabaseType>EXCEL_ACCESS</DatabaseType>
+				<ConnectionURL><![CDATA[]]></ConnectionURL>
+				<ConnectOnStartup>true</ConnectOnStartup>
+				<DatabaseName><![CDATA[]]></DatabaseName>
+				<ResourceReference>
+					<PackageName><![CDATA[energy.lux.esdl.app]]></PackageName>
+					<ClassName><![CDATA[data_Generic/Zonnepanelen.xlsx]]></ClassName>
+				</ResourceReference>
+				<Host><![CDATA[localhost]]></Host>
+				<JdbcDriverClassName><![CDATA[net.sourceforge.jtds.jdbc.Driver]]></JdbcDriverClassName>
+				<Login><![CDATA[]]></Login>
+				<Password><![CDATA[]]></Password>
+			</ExternalConnection>
 			<TableImportSettings>
 				<Id>1658477089981</Id>
 				<TableReference>
@@ -3260,6 +3268,16 @@ if(p_subScope_D){
 				</TableReference>
 				<ConnectionIndex>8</ConnectionIndex>
 				<ExternalTableName><![CDATA["solarfarms"]]></ExternalTableName>
+				<AutoImport>false</AutoImport>
+			</TableImportSettings>
+			<TableImportSettings>
+				<Id>1783518981474</Id>
+				<TableReference>
+					<PackageName><![CDATA[energy.lux.esdl.app]]></PackageName>
+					<ClassName><![CDATA[zonnepanelen_2013]]></ClassName>
+				</TableReference>
+				<ConnectionIndex>9</ConnectionIndex>
+				<ExternalTableName><![CDATA["2013"]]></ExternalTableName>
 				<AutoImport>false</AutoImport>
 			</TableImportSettings>
 		</ImportSettings>
@@ -3795,6 +3813,12 @@ public final class GrayConsoleAppender extends AbstractAppender {
 		<Resource>
 			<Id>1781518525334</Id>
 			<Path><![CDATA[log4j-slf4j-impl-2.24.3.jar]]></Path>
+			<ReferencedFromUserCode>false</ReferencedFromUserCode>
+			<Location>FILE_SYSTEM</Location>
+		</Resource>
+		<Resource>
+			<Id>1783437672909</Id>
+			<Path><![CDATA[data_Generic/Zonnepanelen.xlsx]]></Path>
 			<ReferencedFromUserCode>false</ReferencedFromUserCode>
 			<Location>FILE_SYSTEM</Location>
 		</Resource>

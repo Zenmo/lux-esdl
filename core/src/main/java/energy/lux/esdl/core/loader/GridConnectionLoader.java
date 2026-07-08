@@ -14,6 +14,7 @@ import zero_engine.J_ChargingManagementExternalSetpoint;
 import zero_engine.J_BatteryManagementExternalSetpoint;
 import zero_engine.J_HeatingPreferences;
 import zero_engine.OL_GridConnectionHeatingType;
+import zero_engine.ConnectionOwner;
 import zerointerfaceloader.Zero_Loader;
 
 
@@ -45,6 +46,11 @@ public class GridConnectionLoader {
         var gridConnection = energyModel.add_pop_gridConnections();
         gridConnection.p_gridConnectionID = eConnection.getId();
         gridConnection.p_parentNodeElectricID = parentGridNode.p_gridNodeID;
+        ConnectionOwner owner = energyModel.add_pop_connectionOwners();
+        String ownerID = gridConnection.p_gridConnectionID + " owner";
+        gridConnection.p_ownerID = ownerID;
+        owner.p_actorID = ownerID;
+        owner.p_detailedCompany = true;
         return gridConnection;
     }
 

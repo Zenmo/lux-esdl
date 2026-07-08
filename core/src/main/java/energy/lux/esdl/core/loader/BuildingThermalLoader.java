@@ -28,7 +28,9 @@ public class BuildingThermalLoader {
         luxGridConnection.p_insulationLabel = toLuxInsulationLabel(building.getEnergyLabel());
 
         var floorAreaM2 = Util.defaultIfZero(building.getFloorArea(), defaultFloorArea);
-        luxLoader.f_addBuildingHeatModel(luxGridConnection, floorAreaM2, null, new J_HeatingPreferences());
+        // TODO: Remove this temp. hardcoded value
+        double heatDemand_kWhpa = 10130.0;
+        luxLoader.f_addBuildingHeatModel(luxGridConnection, floorAreaM2, heatDemand_kWhpa, new J_HeatingPreferences());
     }
 
     private static OL_GridConnectionEnergyLabel toLuxEnergyLabel(EnergyLabelEnum esdlEnergyLabel) {
