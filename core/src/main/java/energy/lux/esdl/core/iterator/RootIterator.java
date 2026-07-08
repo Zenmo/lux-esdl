@@ -177,7 +177,7 @@ public class RootIterator {
         profileLoader.loadSolarIrradiance(environmentalProfiles);
 
         if (environmentalProfiles.getSoilTemperatureProfile() != null) {
-            logger.info("Skipping soil temperature profile, not implemented in LUX");
+            logger.debug("Skipping soil temperature profile, not implemented in LUX");
         }
     }
 
@@ -201,13 +201,30 @@ public class RootIterator {
     private static void loadServices(Services services, Zero_Loader luxLoader) {
         if (services == null) return;
         for (Service service : services.getService()) {
-            if (service instanceof EnergyMarket energyMarket) {
+            loadService(service, luxLoader);
+        }
+    }
+
+    private static void loadService(Service service, Zero_Loader luxLoader) {
+        if (service instanceof EnergyMarket energyMarket) {
+            if (isElectricityMarket(energyMarket)) {
                 var profileLoader = new GlobalProfileLoader(luxLoader);
-                // TODO: verify that carrier is electricity
                 profileLoader.loadDayAheadElectricityPricing(energyMarket);
             } else {
-                logger.warn("Loading ESDL service type {} not implemented", service.getClass());
+                logger.warn("Energy market with carrier {} not implemented", energyMarket.getCarrier());
             }
+        } else {
+            logger.warn("Loading ESDL service type {} not implemented", service.getClass());
         }
+    }
+
+    private static boolean isElectricityMarket(EnergyMarket energyMarket) {
+        var carrier = energyMarket.getCarrier();
+        if (carrier == null) {
+            logger.warn("No energy carrier given for EnergyMarket. Assuming electricity.");
+            return true;
+        }
+
+        return carrier instanceof ElectricityCommodity;
     }
 }

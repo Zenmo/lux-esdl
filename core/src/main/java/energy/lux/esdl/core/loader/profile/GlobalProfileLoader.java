@@ -73,6 +73,7 @@ public class GlobalProfileLoader {
     ) {
         var marketPrice = energyMarket.getMarketPrice();
         if (marketPrice == null) {
+            logger.warn("Loading EnergyMarket without price profile is not implemented");
             return;
         }
 
