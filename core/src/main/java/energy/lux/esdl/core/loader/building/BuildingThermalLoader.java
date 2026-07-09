@@ -1,10 +1,8 @@
-package energy.lux.esdl.core.loader;
+package energy.lux.esdl.core.loader.building;
 
 import energy.lux.esdl.core.NotImplemented;
 import energy.lux.esdl.core.util.Util;
-import esdl.AbstractBuilding;
-import esdl.EnergyLabelEnum;
-import esdl.GenericBuilding;
+import esdl.*;
 import zero_engine.GridConnection;
 import zero_engine.J_HeatingPreferences;
 import zero_engine.OL_GridConnectionEnergyLabel;
@@ -12,6 +10,7 @@ import zero_engine.OL_GridConnectionInsulationLabel;
 import zerointerfaceloader.Zero_Loader;
 
 public class BuildingThermalLoader {
+
     private static final double defaultFloorArea = 100;
 
     public static void loadBuilding(AbstractBuilding building, Zero_Loader luxLoader, GridConnection luxGridConnection) {

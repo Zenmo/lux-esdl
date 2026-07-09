@@ -1,6 +1,9 @@
 package energy.lux.esdl.core.loader;
 
 import energy.lux.esdl.core.iterator.GridConnectionAssetIterator;
+import energy.lux.esdl.core.loader.building.BuildingGisLoader;
+import energy.lux.esdl.core.loader.building.BuildingLoader;
+import energy.lux.esdl.core.loader.building.BuildingThermalLoader;
 import esdl.EConnection;
 import esdl.OutPort;
 import org.slf4j.Logger;
@@ -43,7 +46,7 @@ public class GridConnectionLoader {
     private static void loadBuilding(EConnection eConnection, Zero_Loader luxLoader, GridConnection luxGridConnection) {
         var building = eConnection.getContainingBuilding();
         if (building != null) {
-            BuildingThermalLoader.loadBuilding(building, luxLoader, luxGridConnection);
+            BuildingLoader.loadBuilding(building, luxLoader, luxGridConnection);
         }
         // It seems valid to have a grid connection without a building, no warning necessary.
     }
