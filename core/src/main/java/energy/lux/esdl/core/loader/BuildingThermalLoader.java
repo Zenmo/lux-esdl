@@ -29,8 +29,13 @@ public class BuildingThermalLoader {
 
         var floorAreaM2 = Util.defaultIfZero(building.getFloorArea(), defaultFloorArea);
         // TODO: Remove this temp. hardcoded value
-        double heatDemand_kWhpa = 10130.0;
-        luxLoader.f_addBuildingHeatModel(luxGridConnection, floorAreaM2, heatDemand_kWhpa, new J_HeatingPreferences());
+        double heatDemand_kWhpa = 10130.0 / 1.35; // correction factor because f_addBuildingHeat seems quite far off from the yearly heat demand
+        J_HeatingPreferences heatingPreferences = new J_HeatingPreferences(); //luxLoader.f_getHouseHeatingPreferences();
+        luxLoader.f_addBuildingHeatModel(luxGridConnection, floorAreaM2, heatDemand_kWhpa, heatingPreferences);
+
+        double hotWaterDemand_kWhpa = 545.0;
+        int numberOfResidents = 2;
+        luxLoader.f_addHotWaterDemand(luxGridConnection, hotWaterDemand_kWhpa, numberOfResidents);
     }
 
     private static OL_GridConnectionEnergyLabel toLuxEnergyLabel(EnergyLabelEnum esdlEnergyLabel) {
