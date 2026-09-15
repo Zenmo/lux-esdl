@@ -46,9 +46,12 @@ INVERTER_PARAMETERS = {"pdc0": 1.0, "pac0": 0.96, "eta_inv_nom": 0.95}
 
 
 def read_request(path):
-    """Read the header lines, then the irradiance values that follow the count."""
+    """Read the request.
+
+    A line is either a single setting, "<key> <value>", or the header of a block of values,
+    "values <key> <count>", which the next <count> non-empty lines hold one per line.
+    """
     request = {}
-    values = []
 
     # utf-8-sig so that a byte order mark, which some editors add, does not end up in the
     # first key.
@@ -59,25 +62,29 @@ def read_request(path):
                 continue
 
             key, _, rest = line.partition(" ")
-            if key == "global_horizontal_irradiance_w_per_m2":
-                expected = int(rest)
-                for value_line in request_file:
-                    value_line = value_line.strip()
-                    if value_line:
-                        values.append(float(value_line))
-                if len(values) != expected:
-                    raise ValueError(
-                        "Expected %d irradiance values but read %d" % (expected, len(values))
-                    )
-                break
-
-            request[key] = rest
+            if key == "values":
+                name, _, count = rest.partition(" ")
+                request[name] = read_values(request_file, name, int(count))
+            else:
+                request[key] = rest
 
     request["orientations"] = [
         parse_orientation(key) for key in request["orientations"].split(" ") if key
     ]
-    request["ghi"] = np.array(values)
     return request
+
+
+def read_values(request_file, name, count):
+    values = []
+    for line in request_file:
+        line = line.strip()
+        if not line:
+            continue
+        values.append(float(line))
+        if len(values) == count:
+            return np.array(values)
+
+    raise ValueError("Expected %d values for %s but read %d" % (count, name, len(values)))
 
 
 def parse_orientation(key):
@@ -111,10 +118,12 @@ def build_weather(request, site):
     start = parse_start(request["start"], time_zone)
     step = pd.Timedelta(seconds=int(request["step_seconds"]))
 
-    times = pd.date_range(start=start, periods=len(request["ghi"]), freq=step)
+    ghi_values = request["global_horizontal_irradiance_w_per_m2"]
+
+    times = pd.date_range(start=start, periods=len(ghi_values), freq=step)
     times = times.tz_convert(time_zone)
 
-    ghi = pd.Series(request["ghi"], index=times)
+    ghi = pd.Series(ghi_values, index=times)
 
     solar_position = site.get_solarposition(times)
     decomposed = pvlib.irradiance.erbs(ghi, solar_position["zenith"], times)
@@ -124,12 +133,29 @@ def build_weather(request, site):
             "ghi": ghi,
             "dni": decomposed["dni"].fillna(0.0),
             "dhi": decomposed["dhi"].fillna(0.0),
-            "temp_air": float(request["ambient_temperature_deg_c"]),
+            "temp_air": ambient_temperature(request, len(times)),
             "wind_speed": float(request["wind_speed_m_per_s"]),
         },
         index=times,
     )
     return weather
+
+
+def ambient_temperature(request, steps):
+    """The measured outside temperature when the ESDL states one, otherwise a fixed value.
+
+    The reader sends a block of values in the first case and a single number in the second,
+    so which of the two arrived decides what pvlib is given.
+    """
+    temperature = request["ambient_temperature_deg_c"]
+    if not isinstance(temperature, np.ndarray):
+        return float(temperature)
+
+    if len(temperature) != steps:
+        raise ValueError(
+            "Got %d ambient temperatures for %d timesteps" % (len(temperature), steps)
+        )
+    return temperature
 
 
 def run_orientation(site, weather, tilt_degrees, azimuth_degrees):

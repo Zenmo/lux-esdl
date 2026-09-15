@@ -1,7 +1,7 @@
 package energy.lux.esdl.core.loader.pv;
 
-import com.zenmo.timeseries.untyped.ArrayTimeSeries;
 import energy.lux.esdl.core.EsdlException;
+import energy.lux.esdl.core.loader.profile.Weather;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,46 +26,19 @@ import static energy.lux.esdl.core.util.DateTimeUtil.durationToHours;
 /**
  * Turns the irradiance of the ESDL into one normalized production profile per PV orientation,
  * by running pvlib.
- * <p>
  * pvlib is a Python package with no Java equivalent, so it runs as a separate process. Starting
  * an interpreter and importing pvlib costs seconds while modelling one more orientation costs
  * a fraction of one, so every orientation in the file is sent in a single request.
- * <p>
- * The exchange uses plain text files rather than a serialization library, because the only
- * JSON libraries available here arrive through the AnyLogic distribution and are not part of
- * the jar that the model is loaded from.
  */
 public class PvlibProfileGenerator {
     private static final Logger logger = LoggerFactory.getLogger(PvlibProfileGenerator.class);
 
-    /**
-     * Overridable because the interpreter that has pvlib installed is not always the one on
-     * the PATH, and AnyLogic does not run with the environment of a login shell.
-     */
     private static final String pythonExecutableProperty = "lux.pythonExecutable";
-
     private static final String defaultPythonExecutable = "python";
-
     private static final String scriptResource = "/pv/generate_pv_profiles.py";
-
-    private static final Duration generatorTimeout = Duration.ofMinutes(30);
-
-    /**
-     * pvlib needs an ambient temperature to derive the cell temperature from. The ESDL could
-     * supply one through its outside temperature profile, but the rest of this loader reads
-     * that profile as Kelvin while the ESDL specification calls for Celsius, and handing the
-     * wrong one to pvlib would put the cells at hundreds of degrees. Until that is settled a
-     * fixed temperature is used: it costs a few percent in summer, against the tens of percent
-     * that the orientation is worth.
-     */
-    private static final double ambientTemperatureDegC = 20.0;
-
-    /**
-     * The reference script that produced the two PV profiles LUX shipped with assumed this
-     * rather than reading a measured wind speed.
-     */
+    private static final Duration generatorTimeout = Duration.ofMinutes(3);
+    private static final double fallbackAmbientTemperature_degC = 20.0;
     private static final double windSpeedMPerS = 1.0;
-
     private final PVSite site;
 
     public PvlibProfileGenerator(PVSite site) {
@@ -73,13 +46,13 @@ public class PvlibProfileGenerator {
     }
 
     /**
-     * @param globalHorizontalIrradiance the solar irradiance of the ESDL, in W/m2,
-     *                                   at whatever step the ESDL states
-     * @return one profile per requested orientation, normalized to a fraction of installed
-     * power, on the same time axis as the irradiance
+     * Weather contains the irradiance data to model the production from,
+     * and the outside temperature the cells warm up from
+     * Returns one profile per requested orientation, normalized to a fraction of installed power,
+     * on the same time axis as the irradiance data.
      */
     public Map<PVOrientation, double[]> generateProfiles(
-            ArrayTimeSeries globalHorizontalIrradiance,
+            Weather weather,
             Collection<PVOrientation> orientations
     ) {
         if (orientations.isEmpty()) {
@@ -92,7 +65,7 @@ public class PvlibProfileGenerator {
             var responseFile = workingDirectory.resolve("response.txt");
             var scriptFile = copyScriptTo(workingDirectory);
 
-            writeRequest(requestFile, globalHorizontalIrradiance, orientations);
+            writeRequest(requestFile, weather, orientations);
 
             logger.info("Generating {} PV profile(s) with pvlib at {}", orientations.size(), site);
             runGenerator(scriptFile, requestFile, responseFile);
@@ -132,31 +105,57 @@ public class PvlibProfileGenerator {
 
     private void writeRequest(
             Path requestFile,
-            ArrayTimeSeries globalHorizontalIrradiance,
+            Weather weather,
             Collection<PVOrientation> orientations
     ) {
-        var values = globalHorizontalIrradiance.copyValuesArray();
-        var stepSeconds = (long) (durationToHours(globalHorizontalIrradiance.getStep()) * 3600);
+        var globalHorizontalIrradiance_wpm2 = weather.globalHorizontalIrradiance_wpm2();
+        var values = globalHorizontalIrradiance_wpm2.copyValuesArray();
+        var stepSeconds = (long) (durationToHours(globalHorizontalIrradiance_wpm2.getStep()) * 3600);
 
         try (BufferedWriter writer = Files.newBufferedWriter(requestFile, StandardCharsets.UTF_8)) {
             writer.write("latitude " + site.latitudeDegrees() + "\n");
             writer.write("longitude " + site.longitudeDegrees() + "\n");
             writer.write("time_zone " + site.timeZone() + "\n");
-            writer.write("start " + globalHorizontalIrradiance.getStart() + "\n");
+            writer.write("start " + globalHorizontalIrradiance_wpm2.getStart() + "\n");
             writer.write("step_seconds " + stepSeconds + "\n");
-            writer.write("ambient_temperature_deg_c " + ambientTemperatureDegC + "\n");
             writer.write("wind_speed_m_per_s " + windSpeedMPerS + "\n");
 
             var keys = orientations.stream().map(PVOrientation::toKey).toList();
             writer.write("orientations " + String.join(" ", keys) + "\n");
 
-            writer.write("global_horizontal_irradiance_w_per_m2 " + values.length + "\n");
-            for (double value : values) {
-                writer.write(Double.toString(value));
-                writer.write("\n");
-            }
+            writeAmbientTemperature(writer, weather);
+            writeValues(writer, "global_horizontal_irradiance_w_per_m2", values);
         } catch (IOException e) {
             throw new EsdlException("Could not write the PV profile generator request", e);
+        }
+    }
+
+    /**
+     * A temperature for every moment when the ESDL states one, a single fixed temperature when
+     * it does not. The generator reads whichever of the two it is handed.
+     */
+    private void writeAmbientTemperature(
+            BufferedWriter writer,
+            Weather weather
+    ) throws IOException {
+        var outsideTemperature_degC = weather.outsideTemperature_degC();
+        if (outsideTemperature_degC == null) {
+            logger.warn(
+                    "The ESDL states no outside temperature, modelling the PV cells at a fixed {} degrees C",
+                    fallbackAmbientTemperature_degC
+            );
+            writer.write("ambient_temperature_deg_c " + fallbackAmbientTemperature_degC + "\n");
+            return;
+        }
+
+        writeValues(writer, "ambient_temperature_deg_c", outsideTemperature_degC.copyValuesArray());
+    }
+
+    private void writeValues(BufferedWriter writer, String name, double[] values) throws IOException {
+        writer.write("values " + name + " " + values.length + "\n");
+        for (double value : values) {
+            writer.write(Double.toString(value));
+            writer.write("\n");
         }
     }
 

@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zero_engine.EnergyModel;
 import zero_engine.GridConnection;
-import zero_engine.J_ISIE_Aggregator_EMS;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,21 +66,25 @@ public class ScenarioExport {
     }
 
     /**
-     * The three scenarios differ in which ESDL they read and in the congestion factor the
-     * aggregator charges. The ESDL decides whether a time of use tariff is added to the market
-     * price; the factor decides whether the aggregator also prices congestion at the transformer.
+     * A scenario is the ESDL it reads and nothing else: the file states both the weights of the
+     * time of use tariff and whether the local dynamic measure is active, and the reader sets
+     * the congestion factor of the aggregators from that.
+     * <p>
+     * The two decorated_test_congestion files carry the same non-zero tariff and differ only in
+     * the local dynamic measure, so neither of them can describe an area without any signal at
+     * all. Only the newest generation of files states a tariff of zero, and it describes a
+     * different area, so {@link #NO_CONGESTION_SIGNAL} is not directly comparable to the two
+     * below it.
      */
     public enum Scenario {
-        NO_CONGESTION_SIGNAL("decorated_test_congestion_false.esdl", 0.0),
-        TIME_OF_USE_TARIFF("decorated_test_congestion_true.esdl", 0.0),
-        DYNAMIC_CONGESTION_TARIFF("decorated_test_congestion_false.esdl", 1000.0);
+        NO_CONGESTION_SIGNAL("decorated_corrected_BU31_veelflex_test_updated_tou0_nolocalcongestion.esdl"),
+        TIME_OF_USE_TARIFF("decorated_test_congestion_false.esdl"),
+        DYNAMIC_CONGESTION_TARIFF("decorated_test_congestion_true.esdl");
 
         private final String esdlFileName;
-        private final double congestionFactor_eurpMWhpkW;
 
-        Scenario(String esdlFileName, double congestionFactor_eurpMWhpkW) {
+        Scenario(String esdlFileName) {
             this.esdlFileName = esdlFileName;
-            this.congestionFactor_eurpMWhpkW = congestionFactor_eurpMWhpkW;
         }
     }
 
@@ -94,7 +97,6 @@ public class ScenarioExport {
         RootIterator.loadEsdlIntoLux(esdl, luxLoader);
 
         var energyModel = luxLoader.energyModel;
-        setCongestionFactor(energyModel, scenario.congestionFactor_eurpMWhpkW);
 
         logger.info("Running the simulated year");
         energyModel.f_initializeEngine();
@@ -117,22 +119,6 @@ public class ScenarioExport {
         );
 
         logger.info("Exports written to {}", exportDirectory.toAbsolutePath());
-    }
-
-    /**
-     * The aggregator prices congestion above a deadzone of the transformer capacity. Every grid
-     * node has its own aggregator, so all of them are set.
-     */
-    private static void setCongestionFactor(EnergyModel energyModel, double congestionFactor_eurpMWhpkW) {
-        var aggregators = 0;
-        for (var energyCoop : energyModel.pop_energyCoops) {
-            if (energyCoop.f_getAggregatorEnergyManagement() instanceof J_ISIE_Aggregator_EMS aggregator) {
-                aggregator.setCongestionFactor(congestionFactor_eurpMWhpkW);
-                aggregators++;
-            }
-        }
-        logger.info("Set the congestion factor of {} aggregators to {} EUR/MWh/kW",
-                aggregators, congestionFactor_eurpMWhpkW);
     }
 
     /**

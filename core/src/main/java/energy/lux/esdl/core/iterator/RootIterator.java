@@ -2,10 +2,10 @@ package energy.lux.esdl.core.iterator;
 
 import energy.lux.esdl.core.EsdlException;
 import energy.lux.esdl.core.NotImplemented;
-import com.zenmo.timeseries.untyped.ArrayTimeSeries;
 import energy.lux.esdl.core.loader.profile.GlobalProfileLoader;
 import energy.lux.esdl.core.loader.profile.ProfilePointerRegistry;
 import energy.lux.esdl.core.loader.profile.TimeOfUseTariff;
+import energy.lux.esdl.core.loader.profile.Weather;
 import energy.lux.esdl.core.loader.pv.PVOrientationScanner;
 import energy.lux.esdl.core.loader.pv.PVProfileLoader;
 import energy.lux.esdl.core.loader.pv.PVSite;
@@ -15,6 +15,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zero_engine.EnergyModel;
+import zero_engine.J_ISIE_Aggregator_EMS;
 import zerointerfaceloader.Zero_Loader;
 
 import java.time.Duration;
@@ -31,44 +32,20 @@ import static energy.lux.esdl.core.util.CollectionUtil.single;
 public class RootIterator {
     private static final Logger logger = LoggerFactory.getLogger(RootIterator.class);
 
-    /**
-     * Holds the hourly weights of the time of use tariff, for the first day of every month.
-     */
     private static final String timeOfUseTariffMeasureName = "tou_tariff";
-
-    /**
-     * Switches the time of use tariff on. Both congestion scenario files carry the same
-     * tariff and differ only in this measure.
-     */
-    private static final String congestionSignalMeasureName = "congestion management active";
-
-    /**
-     * How much weather a file has to carry before its PV production can be modelled at all.
-     * <p>
-     * LUX repeats a profile that runs out before the simulation does. For a full year of
-     * weather that lands on the same day of the year, so the repetition is harmless. For less
-     * than a year it is not: tue.esdl carries three days of August, and modelling the whole
-     * year on those yields an August output in January.
-     * <p>
-     * A day of slack rather than a full 365, because a year of measurements tends to end just
-     * short of one: BU31_veelflex_vTimeSeries.esdl stops at 23:50 on the 31st of December, one
-     * ten-minute sample shy of the year. Wrapping by a quarter of an hour costs nothing, while
-     * anything that repeats often enough to move weather between seasons is still caught.
-     */
+    private static final String localDynamicMeasureName = "congestion management active";
+    private static final double localDynamicCongestionFactor_eurpMWhpkW = 1000.0;
     private static final Duration shortestUsableIrradiance = Duration.ofDays(364);
 
-    /**
-     * LUX {@link EnergyModel} is a property of the loader {@link Zero_Loader}.
-     * The loader is passed because it might have some useful methods.
-     */
     public static void loadEsdlIntoLux(
             EnergySystem esdlEnergySystem,
             Zero_Loader luxLoader
     ) {
-        var solarIrradiance = loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), luxLoader);
+        Measures measures = esdlEnergySystem.getMeasures();
+
+        var weather = loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), luxLoader);
         loadParties(esdlEnergySystem.getParties(), luxLoader);
-        var timeOfUseTariff = readTimeOfUseTariff(esdlEnergySystem.getMeasures());
-        loadServices(esdlEnergySystem.getServices(), luxLoader, timeOfUseTariff);
+        loadServices(esdlEnergySystem.getServices(), luxLoader, readTimeOfUseTariff(measures));
 
         var instance = single(esdlEnergySystem.getInstance(), Instance.class.getName());
 
@@ -82,9 +59,12 @@ public class RootIterator {
         var profilePointerRegistry = new ProfilePointerRegistry(luxLoader.energyModel);
 
         // Before the traversal, so that loading a PV installation is only a lookup.
-        generatePVProfiles(area, profilePointerRegistry, solarIrradiance);
+        generatePVProfiles(area, profilePointerRegistry, weather);
 
         AreaIterator.loadArea(area, luxLoader, profilePointerRegistry);
+
+        // After the traversal, which is where the aggregators it acts on are created.
+        loadLocalDynamicMeasure(measures, luxLoader.energyModel);
 
         verifyNumberOfGridConnections(area, luxLoader.energyModel);
     }
@@ -207,45 +187,45 @@ public class RootIterator {
     }
 
     /**
-     * @return the solar irradiance to model PV production from, or null when the ESDL has none
+     * Return the weather to model PV production from, empty when the ESDL states none.
+     * The outside temperature is registered with the engine on the way through, the irradiance
+     * is not: LUX has no use for it beyond the panels.
      */
-    private static ArrayTimeSeries loadEnvironmentalProfiles(
+    private static Weather loadEnvironmentalProfiles(
             EnergySystemInformation info,
             Zero_Loader luxLoader
     ) {
-        if (info == null) return null;
+        if (info == null) return Weather.none();
         EnvironmentalProfiles environmentalProfiles = info.getEnvironmentalProfiles();
-        if (environmentalProfiles == null) return null;
+        if (environmentalProfiles == null) return Weather.none();
 
         var profileLoader = new GlobalProfileLoader(luxLoader);
-        profileLoader.loadOutsideTemperature(environmentalProfiles);
-        var solarIrradiance = profileLoader.readSolarIrradiance(environmentalProfiles);
+        var outsideTemperature_degC = profileLoader.loadOutsideTemperature(environmentalProfiles);
+        var globalHorizontalIrradiance_wpm2 = profileLoader.readSolarIrradiance(environmentalProfiles);
 
         if (environmentalProfiles.getSoilTemperatureProfile() != null) {
             logger.info("Skipping soil temperature profile, not implemented in LUX");
         }
 
-        return solarIrradiance;
+        return new Weather(globalHorizontalIrradiance_wpm2, outsideTemperature_degC);
     }
 
     /**
      * Model a PV production profile for every orientation the file uses, before any asset is
      * loaded, so that loading a PV installation only has to look one up.
-     * <p>
-     * Without irradiance there is nothing to model from. That is not an error: the older files
-     * carry no weather at all, and PV then falls back to the profiles that LUX ships with.
      */
     private static void generatePVProfiles(
             Area area,
             ProfilePointerRegistry profilePointerRegistry,
-            ArrayTimeSeries solarIrradiance
+            Weather weather
     ) {
         var orientations = PVOrientationScanner.scanOrientations(area);
         if (orientations.isEmpty()) {
             return;
         }
 
-        if (solarIrradiance == null) {
+        var globalHorizontalIrradiance_wpm2 = weather.globalHorizontalIrradiance_wpm2();
+        if (globalHorizontalIrradiance_wpm2 == null) {
             logger.warn(
                     "The ESDL describes PV but states no solar irradiance,"
                             + " falling back to the default PV profiles of LUX"
@@ -254,8 +234,8 @@ public class RootIterator {
         }
 
         var irradianceDuration = Duration.between(
-                Instant.from(solarIrradiance.getStart()),
-                Instant.from(solarIrradiance.getEnd())
+                Instant.from(globalHorizontalIrradiance_wpm2.getStart()),
+                Instant.from(globalHorizontalIrradiance_wpm2.getEnd())
         );
         if (irradianceDuration.compareTo(shortestUsableIrradiance) < 0) {
             throw new EsdlException(
@@ -271,7 +251,7 @@ public class RootIterator {
         PVProfileLoader.generateAndRegister(
                 profilePointerRegistry,
                 PVSite.cabauw(),
-                solarIrradiance,
+                weather,
                 orientations
         );
     }
@@ -284,27 +264,21 @@ public class RootIterator {
     }
 
     /**
+     * The tariff is charged whenever the ESDL states one. A scenario that charges none states
+     * weights of zero rather than leaving the measure out, so there is no switch to read.
+     *
      * @return the tariff that this scenario charges on top of the market price,
-     *         or null when it charges none.
+     *         or null when the ESDL states none.
      */
     private static TimeOfUseTariff readTimeOfUseTariff(Measures measures) {
         if (measures == null) {
             return null;
         }
 
-        if (!isCongestionSignalActive(measures)) {
-            logger.info(
-                    "Measure '{}' is not True, so no time of use tariff is charged",
-                    congestionSignalMeasureName
-            );
-            return null;
-        }
-
         var costInformation = findCostInformation(measures, timeOfUseTariffMeasureName);
         if (costInformation == null) {
-            logger.warn(
-                    "Measure '{}' is True but there is no '{}' measure to take the tariff from",
-                    congestionSignalMeasureName,
+            logger.info(
+                    "The ESDL has no '{}' measure, so no time of use tariff is charged",
                     timeOfUseTariffMeasureName
             );
             return null;
@@ -321,12 +295,49 @@ public class RootIterator {
         return TimeOfUseTariff.fromProfile(dateTimeProfile);
     }
 
-    private static boolean isCongestionSignalActive(Measures measures) {
-        var measure = findMeasure(measures, congestionSignalMeasureName);
+    /**
+     * LUX has no local dynamic measure of its own, so it is modelled as the congestion factor of
+     * the aggregators.
+     */
+    private static void loadLocalDynamicMeasure(Measures measures, EnergyModel luxEngine) {
+        setCongestionFactor(
+                luxEngine,
+                isLocalDynamicMeasureActive(measures) ? localDynamicCongestionFactor_eurpMWhpkW : 0.0
+        );
+    }
+
+    private static boolean isLocalDynamicMeasureActive(Measures measures) {
+        var measure = measures == null ? null : findMeasure(measures, localDynamicMeasureName);
         if (measure == null) {
+            logger.warn(
+                    "The ESDL states no '{}' measure, so the local dynamic measure is read as"
+                            + " inactive and the aggregators price no congestion",
+                    localDynamicMeasureName
+            );
             return false;
         }
         return Boolean.parseBoolean(measure.getDescription());
+    }
+
+    /**
+     * The congestion factor is what the aggregator charges for every kW its grid node draws above
+     * the deadzone of the transformer. Every grid node has an aggregator of its own, so all of
+     * them are set.
+     */
+    private static void setCongestionFactor(EnergyModel luxEngine, double congestionFactor_eurpMWhpkW) {
+        var aggregators = 0;
+        for (var energyCoop : luxEngine.pop_energyCoops) {
+            if (energyCoop.f_getAggregatorEnergyManagement() instanceof J_ISIE_Aggregator_EMS aggregator) {
+                aggregator.setCongestionFactor(congestionFactor_eurpMWhpkW);
+                aggregators++;
+            }
+        }
+
+        logger.info(
+                "Set the congestion factor of {} aggregators to {} EUR/MWh/kW",
+                aggregators,
+                congestionFactor_eurpMWhpkW
+        );
     }
 
     private static CostInformation findCostInformation(Measures measures, String measureName) {

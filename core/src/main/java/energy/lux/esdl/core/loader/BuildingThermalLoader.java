@@ -31,36 +31,16 @@ public class BuildingThermalLoader {
     private static final Logger logger = LoggerFactory.getLogger(BuildingThermalLoader.class);
 
     private static final double defaultFloorArea = 100;
-
     private static final double hoursPerYear = 8760;
-
     private static final double litresPerCubicMetre = 1000;
-
     private static final double wattsPerKilowatt = 1000;
-
-    /**
-     * Correction factor because f_addBuildingHeatModel seems quite far off from the yearly heat demand.
-     */
     private static final double heatDemandCorrectionFactor = 1.35;
-
-    /**
-     * How far the drawn water has to be heated: from a supply of 15 degrees to 55 degrees at
-     * the tap, agreed with the people who produce the profiles.
-     * <p>
-     * The ESDL states a water flow and no temperature at all, and LUX has no hot water setpoint
-     * to take one from, so this is the single assumption that turns the profiles into energy.
-     * Everything else in the conversion is physics, and the energy scales linearly with it.
-     */
     private static final double hotWaterTemperatureRise_K = 55.0 - 15.0;
-
     private static final double fallbackHotWaterDemand_kWhpa = 545.0;
-
     private static final int fallbackNumberOfResidents = 2;
 
     private final Zero_Loader luxLoader;
-
     private final ProfilePointerRegistry profilePointerRegistry;
-
     private final BareProfileReader bareProfileReader;
 
     public BuildingThermalLoader(Zero_Loader luxLoader, ProfilePointerRegistry profilePointerRegistry) {
@@ -108,9 +88,6 @@ public class BuildingThermalLoader {
         luxLoader.f_addBuildingHeatModel(luxGridConnection, floorAreaM2, correctedHeatDemand_kWhpa, heatingPreferences);
     }
 
-    /**
-     * @return the yearly space heating demand of the building, or null when the ESDL has none.
-     */
     private Double findAnnualSpaceHeatingDemand_kWhpa(AbstractBuilding building) {
         var profile = findHeatingDemandProfile(building, HeatDemandTypeEnum.SPACE_HEATING);
         if (profile == null) {
@@ -150,15 +127,7 @@ public class BuildingThermalLoader {
     }
 
     /**
-     * The hot tap water profiles hold the water drawn in litres per second, averaged over the
-     * timestep. A flow is already a rate, so it becomes thermal power without any reference to
-     * how long a timestep is:
-     * <pre>
-     * kW = l/s  x  kg/l  x  J/kgK  x  K  /  (W per kW)
-     * </pre>
-     * with the density and heat capacity of water that LUX itself carries, over
-     * {@link #hotWaterTemperatureRise_K}. That comes out at 167.1 kW per l/s, so a 10 l/min
-     * shower draws about 28 kW while it runs.
+     * The hot tap water profiles hold the water drawn in litres per second, averaged over the timestep
      */
     private ArrayTimeSeries readHotWaterProfileAsKilowatt(GenericProfile profile) {
         var timeSeries = this.bareProfileReader.readProfile(profile);

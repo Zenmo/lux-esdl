@@ -42,29 +42,28 @@ public class GlobalProfileLoader {
     }
 
     /**
-     * This interprets the source data as Kelvin.
-     * The ESDL specification says it should be Celsius.
+     * @return the outside temperature in Celsius, or null when the ESDL states none. It is
+     * handed back as well as registered because the PV production model needs it too.
      */
-    public void loadOutsideTemperature(
+    public ArrayTimeSeries loadOutsideTemperature(
             EnvironmentalProfiles environmentalProfiles
     ) {
         var temperatureProfile = environmentalProfiles.getOutsideTemperatureProfile();
         if (temperatureProfile == null) {
-            return;
+            return null;
         }
 
-        var temperatureTimeSeries = this.bareProfileReader.readProfile(temperatureProfile);
+        var outsideTemperature_degC = this.bareProfileReader.readProfile(temperatureProfile);
+
         var temperatureProfilePointer = this.profilePointerFactory.timeSeriesToProfilePointer(
-                temperatureTimeSeries,
+                outsideTemperature_degC,
                 "esdl_outside_temperature_deg_c",
                 OL_ProfileUnits.TEMPERATURE_DEGC
         );
 
         luxLoader.energyModel.pp_ambientTemperature_degC = temperatureProfilePointer;
-    }
 
-    public static double kelvinToCelsius(double v) {
-        return v - 273.15;
+        return outsideTemperature_degC;
     }
 
     /**
@@ -108,15 +107,11 @@ public class GlobalProfileLoader {
     }
 
     /**
-     * The irradiance is not a profile that LUX evaluates on its own. It is the input the PV
+     * The irradiance is not a profile that LUX uses on its own. It is the input the PV
      * production profiles are modelled from, so it is handed back to the caller rather than
      * registered with the engine.
-     * <p>
-     * Reading it like any other bare profile resamples it to the LUX time step, so the panels
-     * are modelled at the resolution the simulation runs at rather than the ten minutes the
-     * congestion scenario files state. Averaging the irradiance before transposing it to the
-     * plane of the panels rather than after costs far less than the orientation is worth.
-     *
+     * It is resampled to the LUX time step, so the panels are modelled at the resolution the simulation runs at
+     * rather than the ten minutes the ESDL files state.
      * @return global horizontal irradiance in W/m2, or null when the ESDL states none
      */
     public ArrayTimeSeries readSolarIrradiance(

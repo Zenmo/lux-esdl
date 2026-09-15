@@ -12,24 +12,14 @@ import java.util.Set;
 
 /**
  * Collects the distinct orientations of all PV installations in an area, before any of them
- * is loaded.
- * <p>
- * Generating a profile means calling out to pvlib, which is expensive to start and cheap to
- * run once started, so every orientation in the file has to be known before the first call.
+ * are loaded.
+ * Generating a profile means calling out to pvlib, a python package, which is expensive to start.
  * Scanning up front keeps the loading of an individual installation unchanged: it reads its
  * asset and creates its asset, with the profile it needs already registered.
- * <p>
- * This walks the containment of the area rather than the electricity network, so it also finds
- * installations that no cable reaches. Generating a profile for one of those wastes a pvlib run
- * but cannot make the model wrong.
  */
 public class PVOrientationScanner {
     private static final Logger logger = LoggerFactory.getLogger(PVOrientationScanner.class);
 
-    /**
-     * Insertion ordered so that a run generates its profiles in the same order every time,
-     * which keeps the logs and the generator request comparable between runs.
-     */
     public static Set<PVOrientation> scanOrientations(Area area) {
         var orientations = new LinkedHashSet<PVOrientation>();
         collectFromArea(area, orientations);
@@ -42,6 +32,7 @@ public class PVOrientationScanner {
         return orientations;
     }
 
+    // Current ESDL files only have PVInstallations inside Buildings, for completeness we also walk through the area.
     private static void collectFromArea(Area area, Set<PVOrientation> orientations) {
         for (Asset asset : area.getAsset()) {
             collectFromAsset(asset, orientations);
@@ -58,7 +49,6 @@ public class PVOrientationScanner {
             return;
         }
 
-        // The congestion scenario files put the PV installation of a house inside its building.
         if (asset instanceof AbstractBuilding building) {
             for (Asset containedAsset : building.getAsset()) {
                 collectFromAsset(containedAsset, orientations);
