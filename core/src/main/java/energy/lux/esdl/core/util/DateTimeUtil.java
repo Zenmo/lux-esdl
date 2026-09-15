@@ -7,14 +7,20 @@ import java.time.temporal.TemporalUnit;
 import java.util.Date;
 
 public class DateTimeUtil {
+    /**
+     * LUX usually runs in the timezone Europe/Amsterdam.
+     * <p>
+     * It is also the zone that the ESDL timestamps without an offset end up in,
+     * because EMF reads those in the default timezone of the machine.
+     */
+    public static final ZoneId luxTimeZone = ZoneId.of("Europe/Amsterdam");
+
     public static Instant luxJan1stInstant(int year) {
         return luxJan1stInstant(Year.of(year));
     }
 
     public static Instant luxJan1stInstant(Year year) {
-        // LUX usually runs in the timezone Europe/Amsterdam
-        var timeZone = ZoneId.of("Europe/Amsterdam");
-        return year.atMonth(1).atDay(1).atStartOfDay(timeZone).toInstant();
+        return year.atMonth(1).atDay(1).atStartOfDay(luxTimeZone).toInstant();
     }
 
     public static double hoursBetween(Date from, Date to) {

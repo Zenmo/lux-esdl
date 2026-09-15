@@ -2607,7 +2607,9 @@ energyModel.p_cookingPatternCsv = loader.inputCSVcookingActivities;
 //var esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_veelflex_test_updated_tou0_nolocalcongestion.esdl");
 
 // Requires manual change of congestionfactor in J_ISIE_Aggregator_EMS
-var esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_veelflex_test_updated_tou0_localcongestion.esdl");
+//var esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_corrected_BU31_veelflex_test_updated_tou0_localcongestion.esdl");
+
+var esdl = ESDLReader.readResource("data_ProjectTemplate/decorated_test_congestion_false.esdl");
 
 RootIterator.loadEsdlIntoLux(esdl, loader);
 
@@ -3555,7 +3557,7 @@ if(p_subScope_D){
 			</PresentationProperties>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Never]]></StopOption>
-				<InitialDate><![CDATA[1735689600000]]></InitialDate>
+				<InitialDate><![CDATA[2524608000000]]></InitialDate>
 				<InitialTime><![CDATA[0.0]]></InitialTime>
 				<FinalDate><![CDATA[1767225600000]]></FinalDate>
 				<FinalTime><![CDATA[8760.0]]></FinalTime>

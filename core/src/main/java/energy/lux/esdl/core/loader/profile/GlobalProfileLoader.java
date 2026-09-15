@@ -71,7 +71,8 @@ public class GlobalProfileLoader {
      * TODO: This assumes that only electricity prices are given.
      */
     public void loadDayAheadElectricityPricing(
-            EnergyMarket energyMarket
+            EnergyMarket energyMarket,
+            TimeOfUseTariff timeOfUseTariff
     ) {
         var marketPrice = energyMarket.getMarketPrice();
         if (marketPrice == null) {
@@ -79,6 +80,17 @@ public class GlobalProfileLoader {
         }
 
         var priceTimeSeries = this.bareProfileReader.readProfile(marketPrice);
+
+        // LUX has no time of use tariff of its own, so it is charged by raising the price
+        // that the engine sees. Do this before the range check so it covers the final prices.
+        if (timeOfUseTariff != null) {
+            priceTimeSeries = timeOfUseTariff.addTo(priceTimeSeries);
+            logger.info(
+                    "Added a time of use tariff of up to {} EUR/MWh to the day-ahead electricity price",
+                    timeOfUseTariff.peakTariff_eurpMWh()
+            );
+        }
+
         for (var value : priceTimeSeries.copyValuesArray()) {
             if (value < -1000 || value > 10_000) {
                 logger.error(

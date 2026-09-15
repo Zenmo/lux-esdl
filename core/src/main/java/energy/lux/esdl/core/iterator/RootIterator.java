@@ -1,7 +1,10 @@
 package energy.lux.esdl.core.iterator;
 
 import energy.lux.esdl.core.EsdlException;
+import energy.lux.esdl.core.NotImplemented;
 import energy.lux.esdl.core.loader.profile.GlobalProfileLoader;
+import energy.lux.esdl.core.loader.profile.ProfilePointerRegistry;
+import energy.lux.esdl.core.loader.profile.TimeOfUseTariff;
 import esdl.*;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -23,6 +26,17 @@ public class RootIterator {
     private static final Logger logger = LoggerFactory.getLogger(RootIterator.class);
 
     /**
+     * Holds the hourly weights of the time of use tariff, for the first day of every month.
+     */
+    private static final String timeOfUseTariffMeasureName = "tou_tariff";
+
+    /**
+     * Switches the time of use tariff on. Both congestion scenario files carry the same
+     * tariff and differ only in this measure.
+     */
+    private static final String congestionSignalMeasureName = "congestion management active";
+
+    /**
      * LUX {@link EnergyModel} is a property of the loader {@link Zero_Loader}.
      * The loader is passed because it might have some useful methods.
      */
@@ -32,8 +46,8 @@ public class RootIterator {
     ) {
         loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), luxLoader);
         loadParties(esdlEnergySystem.getParties(), luxLoader);
-        loadMeasures(esdlEnergySystem.getMeasures(), luxLoader);
-        loadServices(esdlEnergySystem.getServices(), luxLoader);
+        var timeOfUseTariff = readTimeOfUseTariff(esdlEnergySystem.getMeasures());
+        loadServices(esdlEnergySystem.getServices(), luxLoader, timeOfUseTariff);
 
         var instance = single(esdlEnergySystem.getInstance(), Instance.class.getName());
 
@@ -42,7 +56,10 @@ public class RootIterator {
             throw new EsdlException("No area in energy system");
         }
 
-        AreaIterator.loadArea(area, luxLoader);
+        // One registry for the whole file so that a profile shared by several grid connections
+        // is only handed to the LUX engine once.
+        var profilePointerRegistry = new ProfilePointerRegistry(luxLoader.energyModel);
+        AreaIterator.loadArea(area, luxLoader, profilePointerRegistry);
 
         verifyNumberOfGridConnections(area, luxLoader.energyModel);
     }
@@ -188,22 +205,77 @@ public class RootIterator {
         }
     }
 
-    private static void loadMeasures(Measures measures, Zero_Loader luxLoader) {
-        if (measures == null) return;
-        for (AbstractMeasure abstractMeasure : measures.getMeasure()) {
-            if (abstractMeasure instanceof Measure measure) {
-                CostInformation costInfo = measure.getCostInformation();
-                // TODO: use cost information (e.g. bandwidth tariff prices)
-            }
+    /**
+     * @return the tariff that this scenario charges on top of the market price,
+     *         or null when it charges none.
+     */
+    private static TimeOfUseTariff readTimeOfUseTariff(Measures measures) {
+        if (measures == null) {
+            return null;
         }
+
+        if (!isCongestionSignalActive(measures)) {
+            logger.info(
+                    "Measure '{}' is not True, so no time of use tariff is charged",
+                    congestionSignalMeasureName
+            );
+            return null;
+        }
+
+        var costInformation = findCostInformation(measures, timeOfUseTariffMeasureName);
+        if (costInformation == null) {
+            logger.warn(
+                    "Measure '{}' is True but there is no '{}' measure to take the tariff from",
+                    congestionSignalMeasureName,
+                    timeOfUseTariffMeasureName
+            );
+            return null;
+        }
+
+        var tariffProfile = costInformation.getVariableOperationalCosts();
+        if (!(tariffProfile instanceof DateTimeProfile dateTimeProfile)) {
+            throw new NotImplemented(
+                    "Expected the variable operational costs of the time of use tariff to be a"
+                            + " DateTimeProfile, found " + tariffProfile
+            );
+        }
+
+        return TimeOfUseTariff.fromProfile(dateTimeProfile);
     }
 
-    private static void loadServices(Services services, Zero_Loader luxLoader) {
+    private static boolean isCongestionSignalActive(Measures measures) {
+        var measure = findMeasure(measures, congestionSignalMeasureName);
+        if (measure == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(measure.getDescription());
+    }
+
+    private static CostInformation findCostInformation(Measures measures, String measureName) {
+        var measure = findMeasure(measures, measureName);
+        return measure == null ? null : measure.getCostInformation();
+    }
+
+    private static Measure findMeasure(Measures measures, String measureName) {
+        for (AbstractMeasure abstractMeasure : measures.getMeasure()) {
+            if (abstractMeasure instanceof Measure measure
+                    && measureName.equals(measure.getName())) {
+                return measure;
+            }
+        }
+        return null;
+    }
+
+    private static void loadServices(
+            Services services,
+            Zero_Loader luxLoader,
+            TimeOfUseTariff timeOfUseTariff
+    ) {
         if (services == null) return;
         for (Service service : services.getService()) {
             if (service instanceof EnergyMarket energyMarket) {
                 var profileLoader = new GlobalProfileLoader(luxLoader);
-                profileLoader.loadDayAheadElectricityPricing(energyMarket);
+                profileLoader.loadDayAheadElectricityPricing(energyMarket, timeOfUseTariff);
             } else {
                 logger.warn("Loading ESDL service type {} not implemented", service.getClass());
             }

@@ -4,6 +4,7 @@ import com.anylogic.engine.Engine;
 import com.anylogic.engine.ExperimentSimulation;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import zero_engine.EnergyModel;
+import zero_engine.OL_GridOperator;
 import zerointerfaceloader.Settings;
 import zerointerfaceloader.Zero_Loader;
 
@@ -13,6 +14,20 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 public class LuxModelFactory {
+    /**
+     * The ESDL files we load describe the year 2050, and LUX evaluates a profile by its offset
+     * from the 1st of January of the simulation year, so the simulation has to run in 2050 too.
+     * <p>
+     * Several tables in the AnyLogic AVGC_data agent are keyed by year.
+     * They need an entry for this year or model initialization fails with a NullPointerException.
+     */
+    private static final int simulationStartYear = 2050;
+
+    /**
+     * Matches the default of the grid_operator parameter in LUX_ProjectTemplate.alp.
+     */
+    private static final OL_GridOperator gridOperator = OL_GridOperator.ENEXIS;
+
     /**
      * Create a LUX energy model with no assets or grid connections.
      * <p>
@@ -39,7 +54,7 @@ public class LuxModelFactory {
                 super.setupEngine(engine);
 
                 // needs to start at midnight
-                var start = ZonedDateTime.of(2025, 1, 1, 0, 0, 0, 0, ZoneId.of("Europe/Amsterdam"));
+                var start = ZonedDateTime.of(simulationStartYear, 1, 1, 0, 0, 0, 0, ZoneId.of("Europe/Amsterdam"));
                 engine.setStartDate(Date.from(start.toInstant()));
             }
 
@@ -79,6 +94,13 @@ public class LuxModelFactory {
 
         loader.settings = Settings.builder().build();
         loader.f_setSimulationTimeParameters();
+
+        // These two mirror LUX_ProjectTemplate.alp. Without f_setAVGC_data the engine has no
+        // avgc_data, which among other things holds the insulation label loss factors that
+        // f_addBuildingHeatModel falls back on. Without f_setDefaultHeatingStrategies every
+        // attempt to add a heating asset fails with "No heating strategy available".
+        loader.avgc_data.f_setAVGC_data(gridOperator, energyModel.p_timeParameters.getStartYear());
+        loader.f_setDefaultHeatingStrategies();
 
         loader.defaultProfiles_data = ExcelProfileReader.loadDefaultProfiles2025();
         loader.f_setEngineProfiles();

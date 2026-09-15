@@ -37,15 +37,21 @@ public class TueTest {
 
         var timeZone = ZoneId.of("Europe/Amsterdam");
         var timestampToCheck = LocalDateTime.parse("2020-08-11T01:30:00.000000").atZone(timeZone);
-        var hourOffset = DateTimeUtil.getHourOffset(Year.of(2025), timestampToCheck);
+        // The offset has to be relative to the same year the profile pointers were registered against,
+        // which is the simulation year, not a fixed one.
+        var simulationYear = Year.of(luxEngine.p_timeParameters.getStartYear());
+        var hourOffset = DateTimeUtil.getHourOffset(simulationYear, timestampToCheck);
 
-        var degC = luxEngine.pp_ambientTemperature_degC.getValue(hourOffset);
-        // The ESDL file seems to have kelvin,
-        // but the ESDL spec says it should be Celsius
-        assertEquals(295.85 - 273.15, degC, 0.01);
+        var ambientTemperature = luxEngine.pp_ambientTemperature_degC.getValue(hourOffset);
+        // tue.esdl holds Kelvin even though the ESDL spec says outside temperature is Celsius,
+        // and it declares no profileQuantityAndUnit for us to detect that with.
+        // Profile values are therefore passed through unchanged, which is what this asserts.
+        assertEquals(295.85, ambientTemperature, 0.01);
 
-        var eurpMWh = luxEngine.pp_dayAheadElectricityPricing_eurpMWh.getValue(hourOffset);
-        assertEquals(98.2, eurpMWh, 0.01);
+        // Same story as the temperature above: tue.esdl prices are EUR/kWh, LUX wants EUR/MWh,
+        // and the file declares no unit, so the value arrives unscaled.
+        var dayAheadPrice = luxEngine.pp_dayAheadElectricityPricing_eurpMWh.getValue(hourOffset);
+        assertEquals(0.0982, dayAheadPrice, 0.0001);
 
         assertEquals(2, luxEngine.pop_gridNodes.size());
         var importGridNode = TestUtil.findGridNodeById(luxEngine, "35c99886-75dc-482e-9747-7a84d9d739ad");
@@ -67,9 +73,11 @@ public class TueTest {
         // 4. heat pump
         // 5. gas burner (hybrid configuration)
         // 6. building thermals
-        assertEquals(6, connectionHome1.c_energyAssets.size());
-        // fixed consumption + building thermals
-        assertEquals(2, connectionHome2.c_energyAssets.size());
+        // 7. hot water demand
+        assertEquals(7, connectionHome1.c_energyAssets.size());
+        // fixed consumption, building thermals, hot water demand,
+        // and the gas burner that checkHeatingAsset gives a house with no heating asset
+        assertEquals(4, connectionHome2.c_energyAssets.size());
 
         assertThat(connectionHome1.p_BuildingThermalAsset.getHeatCapacity_JpK())
                 .isGreaterThan(1.0);

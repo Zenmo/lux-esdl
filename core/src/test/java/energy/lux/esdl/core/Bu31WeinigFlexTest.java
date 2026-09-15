@@ -37,16 +37,27 @@ public class Bu31WeinigFlexTest {
         assertThat(luxAssets)
                 .filteredOn(asset -> asset instanceof J_EAConversionHeatPump)
                 .hasSize(1);
+        // Electricity demand plus the hot water demand that BuildingThermalLoader adds.
         assertThat(luxAssets)
                 .filteredOn(asset -> asset instanceof J_EAConsumption)
-                .hasSize(1);
+                .hasSize(2);
 
-        assertThat(luxAssets).hasSize(5);
+        assertThat(luxAssets).hasSize(6);
 
-        assertThat(gridConnection.c_consumptionAssets).hasSize(1);
-        var consumptionAsset = gridConnection.c_consumptionAssets.get(0);
-        assertThat(consumptionAsset.getBaseConsumption_kWh())
+        assertThat(gridConnection.c_consumptionAssets).hasSize(2);
+        var electricityDemand = gridConnection.c_consumptionAssets.stream()
+                .filter(asset -> asset.getEnergyCarrier() == OL_EnergyCarriers.ELECTRICITY)
+                .findFirst()
+                .orElseThrow();
+        assertThat(electricityDemand.getBaseConsumption_kWh())
                 .isEqualTo(2494.153162899, Offset.offset(0.001));
+
+        var hotWaterDemand = gridConnection.c_consumptionAssets.stream()
+                .filter(asset -> asset.getEnergyCarrier() == OL_EnergyCarriers.HEAT)
+                .findFirst()
+                .orElseThrow();
+        assertThat(hotWaterDemand.getBaseConsumption_kWh())
+                .isEqualTo(545.0, Offset.offset(0.001));
 
         var battery = gridConnection.p_batteryAsset;
         assertThat(battery).isNotNull();

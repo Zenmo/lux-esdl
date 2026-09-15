@@ -5,6 +5,7 @@ import energy.lux.esdl.core.util.CollectionUtil;
 import energy.lux.esdl.core.util.Util;
 import energy.lux.esdl.core.loader.GridConnectionLoader;
 import energy.lux.esdl.core.loader.GridNodeLoader;
+import energy.lux.esdl.core.loader.profile.ProfilePointerRegistry;
 import esdl.*;
 import org.eclipse.emf.common.util.EList;
 import org.slf4j.Logger;
@@ -20,11 +21,11 @@ import java.util.Set;
 public class AreaIterator {
     private static final Logger logger = LoggerFactory.getLogger(AreaIterator.class);
 
-    public static void loadArea(Area area, Zero_Loader luxLoader) {
+    public static void loadArea(Area area, Zero_Loader luxLoader, ProfilePointerRegistry profilePointerRegistry) {
         // assumption: import asset is the root of the area network
         var importAsset = findImportAsset(area);
         var rootGridNode = GridNodeLoader.loadImportAsset(importAsset, luxLoader.energyModel);
-        processNetworkAsset(importAsset, luxLoader, rootGridNode, new HashSet<>());
+        processNetworkAsset(importAsset, luxLoader, rootGridNode, new HashSet<>(), profilePointerRegistry);
 
         for (Area ignored : area.getArea()) {
             throw new NotImplemented("Nested areas are not supported yet");
@@ -38,9 +39,10 @@ public class AreaIterator {
             Port entryPort,
             Zero_Loader luxLoader,
             GridNode gridNode,
-            Set<EnergyAsset> visitedAssets
+            Set<EnergyAsset> visitedAssets,
+            ProfilePointerRegistry profilePointerRegistry
     ) {
-        processNetworkAsset(entryPort.getEnergyasset(), luxLoader, gridNode, visitedAssets);
+        processNetworkAsset(entryPort.getEnergyasset(), luxLoader, gridNode, visitedAssets, profilePointerRegistry);
     }
 
     /**
@@ -50,18 +52,19 @@ public class AreaIterator {
             EList<Port> exitPorts,
             Zero_Loader luxLoader,
             GridNode gridNode,
-            Set<EnergyAsset> visitedAssets
+            Set<EnergyAsset> visitedAssets,
+            ProfilePointerRegistry profilePointerRegistry
     ) {
         for (Port port : exitPorts) {
             if (port instanceof OutPort outPort) {
                 for (InPort connectedInPort : outPort.getConnectedTo()) {
-                    processEntryPort(connectedInPort, luxLoader, gridNode, visitedAssets);
+                    processEntryPort(connectedInPort, luxLoader, gridNode, visitedAssets, profilePointerRegistry);
                 }
             }
 
             if (port instanceof InPort inPort) {
                 for (OutPort connectedOutPort : inPort.getConnectedTo()) {
-                    processEntryPort(connectedOutPort, luxLoader, gridNode, visitedAssets);
+                    processEntryPort(connectedOutPort, luxLoader, gridNode, visitedAssets, profilePointerRegistry);
                 }
             }
         }
@@ -71,7 +74,8 @@ public class AreaIterator {
             EnergyAsset asset,
             Zero_Loader luxLoader,
             GridNode currentGridNode,
-            Set<EnergyAsset> visitedAssets
+            Set<EnergyAsset> visitedAssets,
+            ProfilePointerRegistry profilePointerRegistry
     ) {
         if (visitedAssets.contains(asset)) {
             return;
@@ -79,18 +83,18 @@ public class AreaIterator {
         visitedAssets.add(asset);
 
         if (asset instanceof Import) {
-            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets);
+            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets, profilePointerRegistry);
         } else if (asset instanceof ElectricityCable) {
-            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets);
+            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets, profilePointerRegistry);
         } else if (asset instanceof Joint) {
-            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets);
+            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets, profilePointerRegistry);
         } else if (asset instanceof Transformer transformer) {
             var childGridNode = GridNodeLoader.loadTransformer(transformer, luxLoader.energyModel, currentGridNode);
-            processExitPorts(asset.getPort(), luxLoader, childGridNode, visitedAssets);
+            processExitPorts(asset.getPort(), luxLoader, childGridNode, visitedAssets, profilePointerRegistry);
             // Create EnergyCoop for the GridNode. This Coop represents the aggregator that manages external setpoints of EV & Battery assets.
             addEnergyCoopToGridNode(luxLoader, childGridNode);
         } else if (asset instanceof EConnection eConnection) {
-            GridConnectionLoader.loadGridConnection(eConnection, luxLoader, currentGridNode);
+            GridConnectionLoader.loadGridConnection(eConnection, luxLoader, currentGridNode, profilePointerRegistry);
             // Do not traverse further
         } else {
             throw new NotImplemented(
