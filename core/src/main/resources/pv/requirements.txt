@@ -1,0 +1,20 @@
+# What generate_pv_profiles.py needs. It runs in whatever interpreter
+# lux.pythonExecutable points at, so these have to be installed there.
+#
+#   python -m venv .venv
+#   .venv/Scripts/pip install -r core/src/main/resources/pv/requirements.txt   # Windows
+#   .venv/bin/pip install -r core/src/main/resources/pv/requirements.txt       # Linux, macOS
+#
+# then set luxPythonExecutable in gradle.properties to that interpreter.
+# A conda environment with the same packages works just as well.
+#
+# pvlib is pinned rather than bounded because its model chain and irradiance
+# APIs move between minor versions, and the numbers it produces end up in
+# energy results. Only 0.13.0 has been verified against this script.
+pvlib==0.13.0
+
+# Floors rather than pins: pvlib brings its own compatible versions, these only
+# rule out ones too old for the script. Verified with pandas 2.2.2, numpy 1.26.4
+# on Python 3.12.
+pandas>=2.0
+numpy>=1.24

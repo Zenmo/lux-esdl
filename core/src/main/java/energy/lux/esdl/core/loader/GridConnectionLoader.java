@@ -16,6 +16,8 @@ import zero_engine.J_ChargingManagementExternalSetpoint;
 import zero_engine.J_BatteryManagementExternalSetpoint;
 import zero_engine.J_EAConversionHeatPump;
 import zero_engine.J_EAProfile;
+import zero_engine.J_EAStorageHeat;
+import zero_engine.OL_AmbientTempType;
 import zero_engine.J_HeatingPreferences;
 import zero_engine.OL_EnergyAssetType;
 import zero_engine.OL_GridConnectionHeatingType;
@@ -27,12 +29,6 @@ public class GridConnectionLoader {
     private static final Logger logger = LoggerFactory.getLogger(GridConnectionLoader.class);
 
     /**
-     * f_addStorage starts a heat buffer half way between its minimum and maximum temperature,
-     * so only half of the capacity it is given is there to draw on before it is first refilled.
-     */
-    private static final double bufferInitialStateOfCharge_fr = 0.5;
-
-    /**
      * Margin on top of the sized buffer. The sizing uses the heat pump output as it stands at
      * load time, but that output is its input capacity times a COP that falls as the outside
      * air gets colder, and space heating competes for the same output. The sizing barely moves
@@ -41,6 +37,8 @@ public class GridConnectionLoader {
      * manageHotWaterHeatBuffer throws when the buffer runs dry.
      */
     private static final double bufferSafetyFactor = 1.25;
+
+    private static final double joulesPerKilowattHour = 3.6e6;
 
     public static GridConnection loadGridConnection(
             EConnection eConnection,
@@ -166,16 +164,57 @@ public class GridConnectionLoader {
             return;
         }
 
-        var capacity_kWh = storedEnergy_kWh * bufferSafetyFactor / bufferInitialStateOfCharge_fr;
+        var capacity_kWh = storedEnergy_kWh * bufferSafetyFactor;
         // The buffer carries the whole draw whenever the heat pump is already at its output, so
         // rate it for the peak. f_updateFlexAssetFlows takes the flow as a fraction of this.
         var power_kW = hotWaterAsset.getPeakConsumptionPower_kW();
 
-        luxLoader.f_addStorage(luxGridConnection, power_kW, capacity_kWh, OL_EnergyAssetType.STORAGE_HEAT);
+        createHotWaterBuffer(luxLoader, luxGridConnection, power_kW, capacity_kWh);
 
         logger.debug(
                 "Hot water buffer of {} kWh at {} kW for grid connection {}, heat pump delivers {} kW",
                 capacity_kWh, power_kW, luxGridConnection.p_gridConnectionID, heatPump.getOutputCapacity_kW()
+        );
+    }
+
+    /**
+     * The buffer starts at its maximum temperature, so all of the capacity it is sized for is
+     * there from the first timestep. f_addStorage would have started it half way up its
+     * temperature band, which costs twice the tank for the same usable energy, so this builds
+     * the asset directly rather than going through the loader. The two are otherwise the same:
+     * f_addStorage adds no management to a heat buffer, and registering the asset with the grid
+     * connection is what the constructor does anyway.
+     * <p>
+     * The initial temperature is also the one storeStatesAndReset returns to, so a rapid run
+     * starts from a full buffer as well.
+     */
+    private static void createHotWaterBuffer(
+            Zero_Loader luxLoader,
+            GridConnection luxGridConnection,
+            double power_kW,
+            double capacity_kWh
+    ) {
+        var averagesData = luxLoader.energyModel.avgc_data;
+        var minTemperature_degC = averagesData.p_avgMinHeatBufferTemperature_degC;
+        var maxTemperature_degC = averagesData.p_avgMaxHeatBufferTemperature_degC;
+
+        // No losses yet, the same as f_addStorage: the loss factor of a cylinder depends on
+        // where it stands, which the ESDL does not say.
+        var lossFactor_WpK = 0.0;
+        var heatCapacity_JpK = capacity_kWh * joulesPerKilowattHour / (maxTemperature_degC - minTemperature_degC);
+
+        new J_EAStorageHeat(
+                luxGridConnection,
+                OL_EnergyAssetType.STORAGE_HEAT,
+                power_kW,
+                lossFactor_WpK,
+                luxLoader.energyModel.p_timeParameters,
+                maxTemperature_degC,
+                minTemperature_degC,
+                maxTemperature_degC,
+                maxTemperature_degC,
+                heatCapacity_JpK,
+                OL_AmbientTempType.AMBIENT_AIR
         );
     }
 

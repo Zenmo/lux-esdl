@@ -2,9 +2,13 @@ package energy.lux.esdl.core.iterator;
 
 import energy.lux.esdl.core.EsdlException;
 import energy.lux.esdl.core.NotImplemented;
+import com.zenmo.timeseries.untyped.ArrayTimeSeries;
 import energy.lux.esdl.core.loader.profile.GlobalProfileLoader;
 import energy.lux.esdl.core.loader.profile.ProfilePointerRegistry;
 import energy.lux.esdl.core.loader.profile.TimeOfUseTariff;
+import energy.lux.esdl.core.loader.pv.PVOrientationScanner;
+import energy.lux.esdl.core.loader.pv.PVProfileLoader;
+import energy.lux.esdl.core.loader.pv.PVSite;
 import esdl.*;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -13,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import zero_engine.EnergyModel;
 import zerointerfaceloader.Zero_Loader;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +43,21 @@ public class RootIterator {
     private static final String congestionSignalMeasureName = "congestion management active";
 
     /**
+     * How much weather a file has to carry before its PV production can be modelled at all.
+     * <p>
+     * LUX repeats a profile that runs out before the simulation does. For a full year of
+     * weather that lands on the same day of the year, so the repetition is harmless. For less
+     * than a year it is not: tue.esdl carries three days of August, and modelling the whole
+     * year on those yields an August output in January.
+     * <p>
+     * A day of slack rather than a full 365, because a year of measurements tends to end just
+     * short of one: BU31_veelflex_vTimeSeries.esdl stops at 23:50 on the 31st of December, one
+     * ten-minute sample shy of the year. Wrapping by a quarter of an hour costs nothing, while
+     * anything that repeats often enough to move weather between seasons is still caught.
+     */
+    private static final Duration shortestUsableIrradiance = Duration.ofDays(364);
+
+    /**
      * LUX {@link EnergyModel} is a property of the loader {@link Zero_Loader}.
      * The loader is passed because it might have some useful methods.
      */
@@ -44,7 +65,7 @@ public class RootIterator {
             EnergySystem esdlEnergySystem,
             Zero_Loader luxLoader
     ) {
-        loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), luxLoader);
+        var solarIrradiance = loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), luxLoader);
         loadParties(esdlEnergySystem.getParties(), luxLoader);
         var timeOfUseTariff = readTimeOfUseTariff(esdlEnergySystem.getMeasures());
         loadServices(esdlEnergySystem.getServices(), luxLoader, timeOfUseTariff);
@@ -59,6 +80,10 @@ public class RootIterator {
         // One registry for the whole file so that a profile shared by several grid connections
         // is only handed to the LUX engine once.
         var profilePointerRegistry = new ProfilePointerRegistry(luxLoader.energyModel);
+
+        // Before the traversal, so that loading a PV installation is only a lookup.
+        generatePVProfiles(area, profilePointerRegistry, solarIrradiance);
+
         AreaIterator.loadArea(area, luxLoader, profilePointerRegistry);
 
         verifyNumberOfGridConnections(area, luxLoader.energyModel);
@@ -181,21 +206,74 @@ public class RootIterator {
                 .toList();
     }
 
-    private static void loadEnvironmentalProfiles(
+    /**
+     * @return the solar irradiance to model PV production from, or null when the ESDL has none
+     */
+    private static ArrayTimeSeries loadEnvironmentalProfiles(
             EnergySystemInformation info,
             Zero_Loader luxLoader
     ) {
-        if (info == null) return;
+        if (info == null) return null;
         EnvironmentalProfiles environmentalProfiles = info.getEnvironmentalProfiles();
-        if (environmentalProfiles == null) return;
+        if (environmentalProfiles == null) return null;
 
         var profileLoader = new GlobalProfileLoader(luxLoader);
         profileLoader.loadOutsideTemperature(environmentalProfiles);
-        profileLoader.loadSolarIrradiance(environmentalProfiles);
+        var solarIrradiance = profileLoader.readSolarIrradiance(environmentalProfiles);
 
         if (environmentalProfiles.getSoilTemperatureProfile() != null) {
             logger.info("Skipping soil temperature profile, not implemented in LUX");
         }
+
+        return solarIrradiance;
+    }
+
+    /**
+     * Model a PV production profile for every orientation the file uses, before any asset is
+     * loaded, so that loading a PV installation only has to look one up.
+     * <p>
+     * Without irradiance there is nothing to model from. That is not an error: the older files
+     * carry no weather at all, and PV then falls back to the profiles that LUX ships with.
+     */
+    private static void generatePVProfiles(
+            Area area,
+            ProfilePointerRegistry profilePointerRegistry,
+            ArrayTimeSeries solarIrradiance
+    ) {
+        var orientations = PVOrientationScanner.scanOrientations(area);
+        if (orientations.isEmpty()) {
+            return;
+        }
+
+        if (solarIrradiance == null) {
+            logger.warn(
+                    "The ESDL describes PV but states no solar irradiance,"
+                            + " falling back to the default PV profiles of LUX"
+            );
+            return;
+        }
+
+        var irradianceDuration = Duration.between(
+                Instant.from(solarIrradiance.getStart()),
+                Instant.from(solarIrradiance.getEnd())
+        );
+        if (irradianceDuration.compareTo(shortestUsableIrradiance) < 0) {
+            throw new EsdlException(
+                    "The solar irradiance of the ESDL covers " + irradianceDuration
+                            + ", which is less than the year that is simulated."
+                            + " LUX repeats a profile that runs out, so the PV production of"
+                            + " every season would be modelled on this one stretch of weather."
+                            + " Give the ESDL a full year of irradiance,"
+                            + " or remove its PV installations."
+            );
+        }
+
+        PVProfileLoader.generateAndRegister(
+                profilePointerRegistry,
+                PVSite.cabauw(),
+                solarIrradiance,
+                orientations
+        );
     }
 
     private static void loadParties(Parties parties, Zero_Loader luxLoader) {

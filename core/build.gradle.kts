@@ -38,6 +38,17 @@ val anylogicJarDependencies by configurations.creating {
     isCanBeResolved = true
 }
 
+/**
+ * The interpreter that generate_pv_profiles.py runs in, which has to have pvlib installed.
+ * See core/src/main/resources/pv/requirements.txt.
+ *
+ * Set luxPythonExecutable in gradle.properties. Without it the loader falls back to `python`
+ * on the PATH, which on Windows is usually the Microsoft Store stub rather than a real
+ * interpreter. Forwarded explicitly because Gradle runs tests and applications in a forked JVM,
+ * which does not inherit the system properties of the Gradle daemon.
+ */
+val luxPythonExecutable = providers.gradleProperty("luxPythonExecutable")
+
 dependencies {
     implementation(project(":luxdeps"))
     implementation("org.slf4j:slf4j-api:2.0.18")
@@ -100,12 +111,15 @@ tasks.register<JavaExec>("exportScenario") {
     classpath = sourceSets.main.get().runtimeClasspath
     maxHeapSize = "8g"
     systemProperty("scenario", (project.findProperty("scenario") ?: "") as String)
+    luxPythonExecutable.orNull?.let { systemProperty("lux.pythonExecutable", it) }
 }
 
 tasks.test {
     useJUnitPlatform()
     // The decorated congestion ESDL files are ~68 MB of XML and do not fit in 2g once EMF has parsed them.
     maxHeapSize = "8g"
+    // Loading an ESDL that describes PV generates its production profiles with pvlib.
+    luxPythonExecutable.orNull?.let { systemProperty("lux.pythonExecutable", it) }
     testLogging {
         events("passed", "skipped", "failed")
         showStandardStreams = true

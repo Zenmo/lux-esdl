@@ -39,6 +39,8 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
 
     private final EConnection entryPoint;
 
+    private final ProfilePointerRegistry profilePointerRegistry;
+
     private final Set<Port> visitedPorts = new HashSet<>();
     private final Set<EnergyAsset> processedAssets = new HashSet<>();
 
@@ -53,6 +55,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
         this.energyModel = luxLoader.energyModel;
         this.electricityDemandLoader = new ElectricityDemandLoader(luxLoader, profilePointerRegistry);
         this.mobilityDemandLoader = new MobilityDemandLoader(luxLoader);
+        this.profilePointerRegistry = profilePointerRegistry;
         // prevent exiting the grid connection while searching through the cables
         this.entryPoint = entryPoint;
     }
@@ -160,7 +163,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     @Override
     public SwitchStatus casePVInstallation(PVInstallation pvInstallation) {
         if (this.processedAssets.add(pvInstallation)) {
-            PVLoader.loadPVInstallation(pvInstallation, luxGridConnection, luxLoader);
+            PVLoader.loadPVInstallation(pvInstallation, luxGridConnection, luxLoader, profilePointerRegistry);
         }
         return DONE;
     }

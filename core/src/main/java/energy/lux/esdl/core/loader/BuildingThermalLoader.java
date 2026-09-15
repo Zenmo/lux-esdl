@@ -34,7 +34,9 @@ public class BuildingThermalLoader {
 
     private static final double hoursPerYear = 8760;
 
-    private static final double joulesPerKilowattHour = 3.6e6;
+    private static final double litresPerCubicMetre = 1000;
+
+    private static final double wattsPerKilowatt = 1000;
 
     /**
      * Correction factor because f_addBuildingHeatModel seems quite far off from the yearly heat demand.
@@ -42,11 +44,14 @@ public class BuildingThermalLoader {
     private static final double heatDemandCorrectionFactor = 1.35;
 
     /**
-     * Hot tap water is assumed to be drawn at 60 degrees from a supply of 10 degrees.
-     * The ESDL states neither temperature, and LUX has no hot water setpoint to take it from,
-     * so this is the one assumption behind converting the profiles from water to energy.
+     * How far the drawn water has to be heated: from a supply of 15 degrees to 55 degrees at
+     * the tap, agreed with the people who produce the profiles.
+     * <p>
+     * The ESDL states a water flow and no temperature at all, and LUX has no hot water setpoint
+     * to take one from, so this is the single assumption that turns the profiles into energy.
+     * Everything else in the conversion is physics, and the energy scales linearly with it.
      */
-    private static final double hotWaterTemperatureRise_K = 50.0;
+    private static final double hotWaterTemperatureRise_K = 55.0 - 15.0;
 
     private static final double fallbackHotWaterDemand_kWhpa = 545.0;
 
@@ -145,24 +150,29 @@ public class BuildingThermalLoader {
     }
 
     /**
-     * The hot tap water profiles hold cubic metres of water drawn per timestep, so they are
-     * turned into thermal power with the density and heat capacity of water that LUX itself
-     * uses, over {@link #hotWaterTemperatureRise_K}.
+     * The hot tap water profiles hold the water drawn in litres per second, averaged over the
+     * timestep. A flow is already a rate, so it becomes thermal power without any reference to
+     * how long a timestep is:
+     * <pre>
+     * kW = l/s  x  kg/l  x  J/kgK  x  K  /  (W per kW)
+     * </pre>
+     * with the density and heat capacity of water that LUX itself carries, over
+     * {@link #hotWaterTemperatureRise_K}. That comes out at 167.1 kW per l/s, so a 10 l/min
+     * shower draws about 28 kW while it runs.
      */
     private ArrayTimeSeries readHotWaterProfileAsKilowatt(GenericProfile profile) {
         var timeSeries = this.bareProfileReader.readProfile(profile);
-        var stepHours = DateTimeUtil.durationToHours(timeSeries.getStep());
 
         var averagesData = luxLoader.energyModel.avgc_data;
-        var kilowattPerCubicMetrePerStep =
-                averagesData.p_waterDensity_kgpm3
+        var kilowattPerLitrePerSecond =
+                averagesData.p_waterDensity_kgpm3 / litresPerCubicMetre
                         * averagesData.p_waterHeatCapacity_JpkgK
                         * hotWaterTemperatureRise_K
-                        / (joulesPerKilowattHour * stepHours);
+                        / wattsPerKilowatt;
 
         var values = timeSeries.copyValuesArray();
         for (int i = 0; i < values.length; i++) {
-            values[i] *= kilowattPerCubicMetrePerStep;
+            values[i] *= kilowattPerLitrePerSecond;
         }
 
         return (ArrayTimeSeries) timeSeries.toBuilder()

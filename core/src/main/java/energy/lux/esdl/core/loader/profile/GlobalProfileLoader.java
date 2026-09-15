@@ -107,13 +107,27 @@ public class GlobalProfileLoader {
         luxLoader.energyModel.pp_dayAheadElectricityPricing_eurpMWh = priceProfilePointer;
     }
 
-    public void loadSolarIrradiance(
+    /**
+     * The irradiance is not a profile that LUX evaluates on its own. It is the input the PV
+     * production profiles are modelled from, so it is handed back to the caller rather than
+     * registered with the engine.
+     * <p>
+     * Reading it like any other bare profile resamples it to the LUX time step, so the panels
+     * are modelled at the resolution the simulation runs at rather than the ten minutes the
+     * congestion scenario files state. Averaging the irradiance before transposing it to the
+     * plane of the panels rather than after costs far less than the orientation is worth.
+     *
+     * @return global horizontal irradiance in W/m2, or null when the ESDL states none
+     */
+    public ArrayTimeSeries readSolarIrradiance(
             EnvironmentalProfiles environmentalProfiles
     ) {
         var solarIrradianceProfile = environmentalProfiles.getSolarIrradianceProfile();
         if (solarIrradianceProfile == null) {
-            return;
+            logger.info("The ESDL states no solar irradiance, PV profiles cannot be generated from it");
+            return null;
         }
-        logger.warn("Solar irradiance not loaded, don't know how to convert it to the LUX format");
+
+        return this.bareProfileReader.readProfile(solarIrradianceProfile);
     }
 }
