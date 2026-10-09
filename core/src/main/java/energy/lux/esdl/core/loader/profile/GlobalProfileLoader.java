@@ -9,8 +9,8 @@ import com.zenmo.timeseries.untyped.ArrayTimeSeries;
 import com.zenmo.timeseries.untyped.TimeSeries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zero_engine.OL_ProfileUnits;
-import zerointerfaceloader.Zero_Loader;
+import energy.lux.engine.optionlists.OL_ProfileUnits;
+import energy.lux.esdl.core.LuxModelBuilder;
 
 import java.time.Year;
 
@@ -20,18 +20,18 @@ import java.time.Year;
 public class GlobalProfileLoader {
     private static final Logger logger = LoggerFactory.getLogger(GlobalProfileLoader.class);
 
-    private final Zero_Loader luxLoader;
+    private final LuxModelBuilder luxModelBuilder;
 
     private final ProfilePointerFactory profilePointerFactory;
 
     private final BareProfileReader bareProfileReader;
 
     public GlobalProfileLoader(
-            Zero_Loader luxLoader
+            LuxModelBuilder luxModelBuilder
     ) {
-        this.luxLoader = luxLoader;
+        this.luxModelBuilder = luxModelBuilder;
 
-        var energyModel = luxLoader.energyModel;
+        var energyModel = luxModelBuilder.energyModel;
         var timeParameters = energyModel.p_timeParameters;
 
         this.profilePointerFactory = new ProfilePointerFactory(energyModel);
@@ -61,7 +61,7 @@ public class GlobalProfileLoader {
                 OL_ProfileUnits.TEMPERATURE_DEGC
         );
 
-        luxLoader.energyModel.pp_ambientTemperature_degC = temperatureProfilePointer;
+        luxModelBuilder.energyModel.pp_ambientTemperature_degC = temperatureProfilePointer;
 
         return outsideTemperature_degC;
     }
@@ -103,7 +103,7 @@ public class GlobalProfileLoader {
                 "esdl_day_ahead_electricity_pricing_eur_per_mwh",
                 OL_ProfileUnits.PRICE_EURPMWH
         );
-        luxLoader.energyModel.pp_dayAheadElectricityPricing_eurpMWh = priceProfilePointer;
+        luxModelBuilder.energyModel.pp_dayAheadElectricityPricing_eurpMWh = priceProfilePointer;
     }
 
     /**

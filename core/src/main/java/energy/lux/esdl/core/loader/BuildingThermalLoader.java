@@ -15,15 +15,15 @@ import esdl.HeatDemandTypeEnum;
 import esdl.HeatingDemand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zero_engine.GridConnection;
-import zero_engine.J_EAProfile;
-import zero_engine.J_HeatingPreferences;
-import zero_engine.OL_AssetFlowCategories;
-import zero_engine.OL_EnergyCarriers;
-import zero_engine.OL_GridConnectionEnergyLabel;
-import zero_engine.OL_GridConnectionInsulationLabel;
-import zero_engine.OL_ProfileUnits;
-import zerointerfaceloader.Zero_Loader;
+import energy.lux.engine.gridconnections.GridConnection;
+import energy.lux.engine.energyassets.J_EAProfile;
+import energy.lux.engine.dataclasses.J_HeatingPreferences;
+import energy.lux.engine.optionlists.OL_AssetFlowCategories;
+import energy.lux.engine.optionlists.OL_EnergyCarriers;
+import energy.lux.engine.optionlists.OL_GridConnectionEnergyLabel;
+import energy.lux.engine.optionlists.OL_GridConnectionInsulationLabel;
+import energy.lux.engine.optionlists.OL_ProfileUnits;
+import energy.lux.esdl.core.LuxModelBuilder;
 
 import java.time.Year;
 
@@ -39,15 +39,15 @@ public class BuildingThermalLoader {
     private static final double fallbackHotWaterDemand_kWhpa = 545.0;
     private static final int fallbackNumberOfResidents = 2;
 
-    private final Zero_Loader luxLoader;
+    private final LuxModelBuilder luxModelBuilder;
     private final ProfilePointerRegistry profilePointerRegistry;
     private final BareProfileReader bareProfileReader;
 
-    public BuildingThermalLoader(Zero_Loader luxLoader, ProfilePointerRegistry profilePointerRegistry) {
-        this.luxLoader = luxLoader;
+    public BuildingThermalLoader(LuxModelBuilder luxModelBuilder, ProfilePointerRegistry profilePointerRegistry) {
+        this.luxModelBuilder = luxModelBuilder;
         this.profilePointerRegistry = profilePointerRegistry;
 
-        var timeParameters = luxLoader.energyModel.p_timeParameters;
+        var timeParameters = luxModelBuilder.energyModel.p_timeParameters;
         this.bareProfileReader = new BareProfileReader(
                 DateTimeUtil.hoursToDuration(timeParameters.getTimeStep_h()),
                 new BareProfileChecker(Year.of(timeParameters.getStartYear()))
@@ -84,8 +84,8 @@ public class BuildingThermalLoader {
                 ? null
                 : spaceHeatingDemand_kWhpa / heatDemandCorrectionFactor;
 
-        J_HeatingPreferences heatingPreferences = new J_HeatingPreferences(); //luxLoader.f_getHouseHeatingPreferences();
-        luxLoader.f_addBuildingHeatModel(luxGridConnection, floorAreaM2, correctedHeatDemand_kWhpa, heatingPreferences);
+        J_HeatingPreferences heatingPreferences = new J_HeatingPreferences(); //luxModelBuilder.newHouseHeatingPreferences();
+        luxModelBuilder.addBuildingHeatModel(luxGridConnection, floorAreaM2, correctedHeatDemand_kWhpa, heatingPreferences);
     }
 
     private Double findAnnualSpaceHeatingDemand_kWhpa(AbstractBuilding building) {
@@ -106,7 +106,7 @@ public class BuildingThermalLoader {
         var heatingDemand = HeatingDemandFinder.findHeatingDemand(building, HeatDemandTypeEnum.HOT_TAPWATER);
         var profile = heatingDemand == null ? null : Util.findFirstProfile(heatingDemand);
         if (profile == null) {
-            luxLoader.f_addHotWaterDemand(luxGridConnection, fallbackHotWaterDemand_kWhpa, fallbackNumberOfResidents);
+            luxModelBuilder.addHotWaterDemand(luxGridConnection, fallbackHotWaterDemand_kWhpa, fallbackNumberOfResidents);
             return;
         }
 
@@ -122,7 +122,7 @@ public class BuildingThermalLoader {
                 OL_EnergyCarriers.HEAT,
                 profilePointer,
                 OL_AssetFlowCategories.hotWaterConsumption_kW,
-                luxLoader.energyModel.p_timeParameters
+                luxModelBuilder.energyModel.p_timeParameters
         );
     }
 
@@ -132,10 +132,10 @@ public class BuildingThermalLoader {
     private ArrayTimeSeries readHotWaterProfileAsKilowatt(GenericProfile profile) {
         var timeSeries = this.bareProfileReader.readProfile(profile);
 
-        var averagesData = luxLoader.energyModel.avgc_data;
+        var averagesData = luxModelBuilder.energyModel.avgc_data;
         var kilowattPerLitrePerSecond =
-                averagesData.p_waterDensity_kgpm3 / litresPerCubicMetre
-                        * averagesData.p_waterHeatCapacity_JpkgK
+                averagesData.waterDensity_kgpm3() / litresPerCubicMetre
+                        * averagesData.waterHeatCapacity_JpkgK()
                         * hotWaterTemperatureRise_K
                         / wattsPerKilowatt;
 

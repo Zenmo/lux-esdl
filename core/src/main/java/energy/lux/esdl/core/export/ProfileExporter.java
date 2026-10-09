@@ -3,10 +3,10 @@ package energy.lux.esdl.core.export;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zero_engine.EnergyModel;
-import zero_engine.I_EnergyData;
-import zero_engine.OL_AssetFlowCategories;
-import zero_engine.OL_EnergyCarriers;
+import energy.lux.engine.EnergyModel;
+import energy.lux.engine.I_EnergyData;
+import energy.lux.engine.optionlists.OL_AssetFlowCategories;
+import energy.lux.engine.optionlists.OL_EnergyCarriers;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import static energy.lux.esdl.core.util.DateTimeUtil.luxTimeZone;
  * the AnyLogic project rather than of the engine. This reads the same accumulators that the UI
  * reads, straight off {@link I_EnergyData#getRapidRunData}, so a scope here means the same thing
  * it means in the UI: an {@link EnergyModel} is the whole region, a
- * {@link zero_engine.GridConnection} is one house.
+ * {@link energy.lux.engine.gridconnections.GridConnection} is one house.
  */
 public class ProfileExporter {
     private static final Logger logger = LoggerFactory.getLogger(ProfileExporter.class);
@@ -71,8 +71,8 @@ public class ProfileExporter {
      * the total electricity balance.
      */
     private Map<String, double[]> collectElectricityColumns(I_EnergyData scope) {
-        var columns = new LinkedHashMap<String, double[]>();
         var rapidRunData = scope.getRapidRunData();
+        var columns = new LinkedHashMap<String, double[]>();
         if (rapidRunData == null || !rapidRunData.activeEnergyCarriers.contains(OL_EnergyCarriers.ELECTRICITY)) {
             return columns;
         }

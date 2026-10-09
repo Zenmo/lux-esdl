@@ -9,7 +9,7 @@ public class Bu31VeelFlexTimeSeriesTest {
         var javaUrl = getClass().getResource("/BU31_veelflex_vTimeSeries.esdl");
         var esdl = ESDLReader.readResource(javaUrl);
 
-        var luxLoader = LuxModelFactory.createEnergyModel();
-        RootIterator.loadEsdlIntoLux(esdl, luxLoader);
+        var luxModelBuilder = LuxModelFactory.createEnergyModel();
+        RootIterator.loadEsdlIntoLux(esdl, luxModelBuilder);
     }
 }

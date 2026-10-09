@@ -14,9 +14,9 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zero_engine.EnergyModel;
-import zero_engine.J_ISIE_Aggregator_EMS;
-import zerointerfaceloader.Zero_Loader;
+import energy.lux.engine.EnergyModel;
+import energy.lux.engine.managementclasses.aggregatormanagements.aggregatorenergymanagements.J_ISIE_Aggregator_EMS;
+import energy.lux.esdl.core.LuxModelBuilder;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -48,13 +48,13 @@ public class RootIterator {
 
     public static void loadEsdlIntoLux(
             EnergySystem esdlEnergySystem,
-            Zero_Loader luxLoader
+            LuxModelBuilder luxModelBuilder
     ) {
         Measures measures = esdlEnergySystem.getMeasures();
 
-        var weather = loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), luxLoader);
-        loadParties(esdlEnergySystem.getParties(), luxLoader);
-        loadServices(esdlEnergySystem.getServices(), luxLoader, readTimeOfUseTariff(measures));
+        var weather = loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), luxModelBuilder);
+        loadParties(esdlEnergySystem.getParties(), luxModelBuilder);
+        loadServices(esdlEnergySystem.getServices(), luxModelBuilder, readTimeOfUseTariff(measures));
 
         var instance = single(esdlEnergySystem.getInstance(), Instance.class.getName());
 
@@ -65,17 +65,17 @@ public class RootIterator {
 
         // One registry for the whole file so that a profile shared by several grid connections
         // is only handed to the LUX engine once.
-        var profilePointerRegistry = new ProfilePointerRegistry(luxLoader.energyModel);
+        var profilePointerRegistry = new ProfilePointerRegistry(luxModelBuilder.energyModel);
 
         // Before the traversal, so that loading a PV installation is only a lookup.
         generatePVProfiles(area, profilePointerRegistry, weather);
 
-        AreaIterator.loadArea(area, luxLoader, profilePointerRegistry);
+        AreaIterator.loadArea(area, luxModelBuilder, profilePointerRegistry);
 
         // After the traversal, which is where the aggregators it acts on are created.
-        loadLocalDynamicMeasure(measures, luxLoader.energyModel);
+        loadLocalDynamicMeasure(measures, luxModelBuilder.energyModel);
 
-        verifyNumberOfGridConnections(area, luxLoader.energyModel);
+        verifyNumberOfGridConnections(area, luxModelBuilder.energyModel);
     }
 
     /**
@@ -202,13 +202,13 @@ public class RootIterator {
      */
     private static Weather loadEnvironmentalProfiles(
             EnergySystemInformation info,
-            Zero_Loader luxLoader
+            LuxModelBuilder luxModelBuilder
     ) {
         if (info == null) return Weather.none();
         EnvironmentalProfiles environmentalProfiles = info.getEnvironmentalProfiles();
         if (environmentalProfiles == null) return Weather.none();
 
-        var profileLoader = new GlobalProfileLoader(luxLoader);
+        var profileLoader = new GlobalProfileLoader(luxModelBuilder);
         var outsideTemperature_degC = profileLoader.loadOutsideTemperature(environmentalProfiles);
         var globalHorizontalIrradiance_wpm2 = profileLoader.readSolarIrradiance(environmentalProfiles);
 
@@ -265,7 +265,7 @@ public class RootIterator {
         );
     }
 
-    private static void loadParties(Parties parties, Zero_Loader luxLoader) {
+    private static void loadParties(Parties parties, LuxModelBuilder luxModelBuilder) {
         if (parties == null) return;
         for (Party party : parties.getParty()) {
             // TODO: handle party (e.g. DSO)
@@ -379,13 +379,13 @@ public class RootIterator {
 
     private static void loadServices(
             Services services,
-            Zero_Loader luxLoader,
+            LuxModelBuilder luxModelBuilder,
             TimeOfUseTariff timeOfUseTariff
     ) {
         if (services == null) return;
         for (Service service : services.getService()) {
             if (service instanceof EnergyMarket energyMarket) {
-                var profileLoader = new GlobalProfileLoader(luxLoader);
+                var profileLoader = new GlobalProfileLoader(luxModelBuilder);
                 profileLoader.loadDayAheadElectricityPricing(energyMarket, timeOfUseTariff);
             } else {
                 logger.warn("Loading ESDL service type {} not implemented", service.getClass());

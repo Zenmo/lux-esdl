@@ -1,9 +1,14 @@
 package energy.lux.esdl.core;
 
 import energy.lux.esdl.core.iterator.RootIterator;
+import energy.lux.engine.energyassets.J_EABuilding;
+import energy.lux.engine.energyassets.J_EAConsumption;
+import energy.lux.engine.energyassets.J_EAConversionHeatPump;
+import energy.lux.engine.energyassets.J_EAProduction;
+import energy.lux.engine.energyassets.J_EAStorageElectric;
+import energy.lux.engine.optionlists.OL_EnergyCarriers;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import zero_engine.*;
 
 import static energy.lux.esdl.core.TestUtil.findGridConnectionById;
 import static energy.lux.esdl.core.TestUtil.runLux;
@@ -16,10 +21,10 @@ public class Bu31WeinigFlexTest {
         var javaUrl = getClass().getResource("/decorated_BU31_weinigflex_test_updated.esdl");
         var esdl = ESDLReader.readResource(javaUrl);
 
-        var luxLoader = LuxModelFactory.createEnergyModel();
-        RootIterator.loadEsdlIntoLux(esdl, luxLoader);
+        var luxModelBuilder = LuxModelFactory.createEnergyModel();
+        RootIterator.loadEsdlIntoLux(esdl, luxModelBuilder);
 
-        var luxEngine = luxLoader.energyModel;
+        var luxEngine = luxModelBuilder.energyModel;
 
         // random grid connection
         var gridConnection = findGridConnectionById(luxEngine, "1aae283c-bd71-4b74-9a6d-5f31ffd3bf61");

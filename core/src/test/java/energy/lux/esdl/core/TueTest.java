@@ -3,7 +3,7 @@ package energy.lux.esdl.core;
 import energy.lux.esdl.core.iterator.RootIterator;
 import energy.lux.esdl.core.util.DateTimeUtil;
 import org.junit.jupiter.api.Test;
-import zero_engine.OL_EnergyCarriers;
+import energy.lux.engine.optionlists.OL_EnergyCarriers;
 
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -30,10 +30,10 @@ public class TueTest {
         var esdl = ESDLReader.readResource(javaUrl);
         assertNotNull(esdl);
 
-        var luxLoader = LuxModelFactory.createEnergyModel();
-        RootIterator.loadEsdlIntoLux(esdl, luxLoader);
+        var luxModelBuilder = LuxModelFactory.createEnergyModel();
+        RootIterator.loadEsdlIntoLux(esdl, luxModelBuilder);
 
-        var luxEngine = luxLoader.energyModel;
+        var luxEngine = luxModelBuilder.energyModel;
 
         var timeZone = ZoneId.of("Europe/Amsterdam");
         var timestampToCheck = LocalDateTime.parse("2020-08-11T01:30:00.000000").atZone(timeZone);
@@ -89,13 +89,13 @@ public class TueTest {
 
         // Sanity checks
         var demandDataSet = luxEngine.v_liveData.dsm_liveDemand_kW.get(OL_EnergyCarriers.ELECTRICITY);
-        assertThat(demandDataSet.getYMean()).isBetween(0.1, 10.0);
-        assertThat(demandDataSet.getYMax()).isBetween(1.0, 40.0);
+        assertThat(TestUtil.yMean(demandDataSet)).isBetween(0.1, 10.0);
+        assertThat(TestUtil.yMax(demandDataSet)).isBetween(1.0, 40.0);
 
         var supplyDataSet = luxEngine.v_liveData.dsm_liveSupply_kW.get(OL_EnergyCarriers.ELECTRICITY);
         // 32 m2 of solar = 6 kWp
-        assertThat(supplyDataSet.getYMean()).isBetween(0.001, 1.0);
-        assertThat(supplyDataSet.getYMax()).isBetween(0.01, 3.0);
+        assertThat(TestUtil.yMean(supplyDataSet)).isBetween(0.001, 1.0);
+        assertThat(TestUtil.yMax(supplyDataSet)).isBetween(0.01, 3.0);
 
         luxEngine.f_runRapidSimulation();
     }

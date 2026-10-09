@@ -4,9 +4,9 @@ import com.zenmo.timeseries.untyped.ArrayTimeSeries;
 import energy.lux.esdl.core.EsdlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zero_engine.EnergyModel;
-import zero_engine.J_ProfilePointer;
-import zero_engine.OL_ProfileUnits;
+import energy.lux.engine.EnergyModel;
+import energy.lux.engine.J_ProfilePointer;
+import energy.lux.engine.optionlists.OL_ProfileUnits;
 
 import java.time.Year;
 

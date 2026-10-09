@@ -1,8 +1,8 @@
 package energy.lux.esdl.core;
 
 import org.junit.jupiter.api.Test;
-import zero_engine.OL_EnergyCarriers;
-import zero_engine.OL_PVOrientation;
+import energy.lux.engine.optionlists.OL_EnergyCarriers;
+import energy.lux.engine.optionlists.OL_PVOrientation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,18 +30,24 @@ public class EnergyModelTest {
         var energyModel = loader.energyModel;
 
         var gridNode = energyModel.add_pop_gridNodes();
+        gridNode.energyModel = energyModel;
+        gridNode.onCreate();
         gridNode.p_gridNodeID = "gridNode_1";
         gridNode.p_energyCarrier = OL_EnergyCarriers.ELECTRICITY;
 
         var house = energyModel.add_Houses();
+        house.energyModel = energyModel;
+        house.onCreate();
         house.p_gridConnectionID = "house_1";
-        house.set_p_parentNodeElectric(gridNode);
-        house.set_p_parentNodeElectricID(gridNode.p_gridNodeID);
+        house.p_parentNodeElectric = gridNode;
+        house.p_parentNodeElectricID = gridNode.p_gridNodeID;
 
         var owner = energyModel.add_pop_connectionOwners();
+        owner.energyModel = energyModel;
+        owner.onCreate();
         house.p_ownerID = owner.p_actorID = house.p_gridConnectionID + "_owner";
 
-        loader.f_addPVProductionAsset(house, "prosumer panels", 17.0, OL_PVOrientation.SOUTH);
+        loader.addPVProductionAsset(house, "prosumer panels", 17.0, OL_PVOrientation.SOUTH);
 
         energyModel.f_initializeEngine();
         // run for 24 hours
@@ -59,10 +65,10 @@ public class EnergyModelTest {
 
         // we have some PV generation on the 1st of january
         var supplyDataSet = energyModel.v_liveData.dsm_liveSupply_kW.get(OL_EnergyCarriers.ELECTRICITY);
-        assertTrue(supplyDataSet.getYMax() > 0.2);
+        assertTrue(TestUtil.yMax(supplyDataSet) > 0.2);
 
         // but no demand because we did not add any consumption assets
         var demandDataSet = energyModel.v_liveData.dsm_liveDemand_kW.get(OL_EnergyCarriers.ELECTRICITY);
-        assertEquals(0.0, demandDataSet.getYMax());
+        assertEquals(0.0, TestUtil.yMax(demandDataSet));
     }
 }

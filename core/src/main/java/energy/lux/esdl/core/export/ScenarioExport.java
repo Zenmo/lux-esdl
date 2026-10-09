@@ -14,8 +14,8 @@ import esdl.PVInstallation;
 import org.eclipse.emf.ecore.EObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zero_engine.EnergyModel;
-import zero_engine.GridConnection;
+import energy.lux.engine.EnergyModel;
+import energy.lux.engine.gridconnections.GridConnection;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -105,10 +105,10 @@ public class ScenarioExport {
         logger.info("Scenario {}: reading {}", scenario, esdlFile.toAbsolutePath());
 
         EnergySystem esdl = ESDLReader.readResource(esdlFile.toAbsolutePath().toString());
-        var luxLoader = LuxModelFactory.createEnergyModel();
-        RootIterator.loadEsdlIntoLux(esdl, luxLoader);
+        var luxModelBuilder = LuxModelFactory.createEnergyModel();
+        RootIterator.loadEsdlIntoLux(esdl, luxModelBuilder);
 
-        var energyModel = luxLoader.energyModel;
+        var energyModel = luxModelBuilder.energyModel;
 
         logger.info("Running the simulated year");
         energyModel.f_initializeEngine();

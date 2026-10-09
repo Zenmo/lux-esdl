@@ -10,9 +10,9 @@ import esdl.Port;
 import esdl.ProfileElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zero_engine.J_ActivityTrackerTrips;
-import zero_engine.J_ActivityTrackerTrips.TripRecord;
-import zerointerfaceloader.Zero_Loader;
+import energy.lux.engine.activitytrackers.J_ActivityTrackerTrips;
+import energy.lux.engine.activitytrackers.J_ActivityTrackerTrips.TripRecord;
+import energy.lux.esdl.core.LuxModelBuilder;
 
 import java.time.Year;
 import java.util.ArrayList;
@@ -36,13 +36,13 @@ public class MobilityDemandLoader {
 
     private static final double hoursPerYear = 8760;
 
-    private final Zero_Loader luxLoader;
+    private final LuxModelBuilder luxModelBuilder;
 
     private final Year simulationYear;
 
-    public MobilityDemandLoader(Zero_Loader luxLoader) {
-        this.luxLoader = luxLoader;
-        this.simulationYear = Year.of(luxLoader.energyModel.p_timeParameters.getStartYear());
+    public MobilityDemandLoader(LuxModelBuilder luxModelBuilder) {
+        this.luxModelBuilder = luxModelBuilder;
+        this.simulationYear = Year.of(luxModelBuilder.energyModel.p_timeParameters.getStartYear());
     }
 
     /**
@@ -69,7 +69,7 @@ public class MobilityDemandLoader {
         var sessions = readChargingSessions(profile);
         var trips = toTrips(sessions, energyConsumptionOfACar_kWhpkm());
 
-        return new J_ActivityTrackerTrips(luxLoader.energyModel.p_timeParameters, trips);
+        return new J_ActivityTrackerTrips(luxModelBuilder.energyModel.p_timeParameters, trips);
     }
 
     private static MobilityDemand findMobilityDemand(EVChargingStation chargingStation) {
@@ -162,7 +162,7 @@ public class MobilityDemandLoader {
      * into distance here and distance back into energy in the engine cancel out.
      */
     private double energyConsumptionOfACar_kWhpkm() {
-        return luxLoader.avgc_data.p_avgEVEnergyConsumptionCar_kWhpkm;
+        return luxModelBuilder.averagesData.avgEVEnergyConsumptionCar_kWhpkm();
     }
 
     private double hoursSinceStartOfSimulationYear(java.util.Date timestamp) {

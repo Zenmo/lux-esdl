@@ -1,7 +1,7 @@
 package energy.lux.esdl.core.export;
 
-import zero_engine.OL_AssetFlowCategories;
-import zero_engine.OL_EnergyCarriers;
+import energy.lux.engine.optionlists.OL_AssetFlowCategories;
+import energy.lux.engine.optionlists.OL_EnergyCarriers;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -13,7 +13,7 @@ import java.util.Map;
  * These are copied from UI_Results, where they are built in the same function that builds the
  * chart colours. They live in the project interface of the AnyLogic model, which a headless run
  * never creates: {@code Zero_Loader.f_createInterface} throws unless a project supplies its own
- * interface, and the LUX_ProjectTemplate one is in the alp rather than in luxdeps. Copying the
+ * interface, and the LUX_ProjectTemplate one is in the alp. Copying the
  * two tables is what makes a headless export land on the same columns as the manual one.
  * <p>
  * If the labels in UI_Results change, these go stale silently. They are short enough to compare

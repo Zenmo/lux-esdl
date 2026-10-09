@@ -10,8 +10,12 @@ import esdl.*;
 import org.eclipse.emf.common.util.EList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zero_engine.*;
-import zerointerfaceloader.Zero_Loader;
+import energy.lux.engine.actors.EnergyCoop;
+import energy.lux.engine.EnergyModel;
+import energy.lux.engine.gridconnections.GridConnection;
+import energy.lux.engine.GridNode;
+import energy.lux.engine.managementclasses.aggregatormanagements.aggregatorenergymanagements.J_ISIE_Aggregator_EMS;
+import energy.lux.esdl.core.LuxModelBuilder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,11 +25,11 @@ import java.util.Set;
 public class AreaIterator {
     private static final Logger logger = LoggerFactory.getLogger(AreaIterator.class);
 
-    public static void loadArea(Area area, Zero_Loader luxLoader, ProfilePointerRegistry profilePointerRegistry) {
+    public static void loadArea(Area area, LuxModelBuilder luxModelBuilder, ProfilePointerRegistry profilePointerRegistry) {
         // assumption: import asset is the root of the area network
         var importAsset = findImportAsset(area);
-        var rootGridNode = GridNodeLoader.loadImportAsset(importAsset, luxLoader.energyModel);
-        processNetworkAsset(importAsset, luxLoader, rootGridNode, new HashSet<>(), profilePointerRegistry);
+        var rootGridNode = GridNodeLoader.loadImportAsset(importAsset, luxModelBuilder.energyModel);
+        processNetworkAsset(importAsset, luxModelBuilder, rootGridNode, new HashSet<>(), profilePointerRegistry);
 
         for (Area ignored : area.getArea()) {
             throw new NotImplemented("Nested areas are not supported yet");
@@ -37,12 +41,12 @@ public class AreaIterator {
      */
     private static void processEntryPort(
             Port entryPort,
-            Zero_Loader luxLoader,
+            LuxModelBuilder luxModelBuilder,
             GridNode gridNode,
             Set<EnergyAsset> visitedAssets,
             ProfilePointerRegistry profilePointerRegistry
     ) {
-        processNetworkAsset(entryPort.getEnergyasset(), luxLoader, gridNode, visitedAssets, profilePointerRegistry);
+        processNetworkAsset(entryPort.getEnergyasset(), luxModelBuilder, gridNode, visitedAssets, profilePointerRegistry);
     }
 
     /**
@@ -50,7 +54,7 @@ public class AreaIterator {
      */
     private static void processExitPorts(
             EList<Port> exitPorts,
-            Zero_Loader luxLoader,
+            LuxModelBuilder luxModelBuilder,
             GridNode gridNode,
             Set<EnergyAsset> visitedAssets,
             ProfilePointerRegistry profilePointerRegistry
@@ -58,13 +62,13 @@ public class AreaIterator {
         for (Port port : exitPorts) {
             if (port instanceof OutPort outPort) {
                 for (InPort connectedInPort : outPort.getConnectedTo()) {
-                    processEntryPort(connectedInPort, luxLoader, gridNode, visitedAssets, profilePointerRegistry);
+                    processEntryPort(connectedInPort, luxModelBuilder, gridNode, visitedAssets, profilePointerRegistry);
                 }
             }
 
             if (port instanceof InPort inPort) {
                 for (OutPort connectedOutPort : inPort.getConnectedTo()) {
-                    processEntryPort(connectedOutPort, luxLoader, gridNode, visitedAssets, profilePointerRegistry);
+                    processEntryPort(connectedOutPort, luxModelBuilder, gridNode, visitedAssets, profilePointerRegistry);
                 }
             }
         }
@@ -72,7 +76,7 @@ public class AreaIterator {
 
     private static void processNetworkAsset(
             EnergyAsset asset,
-            Zero_Loader luxLoader,
+            LuxModelBuilder luxModelBuilder,
             GridNode currentGridNode,
             Set<EnergyAsset> visitedAssets,
             ProfilePointerRegistry profilePointerRegistry
@@ -83,18 +87,18 @@ public class AreaIterator {
         visitedAssets.add(asset);
 
         if (asset instanceof Import) {
-            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets, profilePointerRegistry);
+            processExitPorts(asset.getPort(), luxModelBuilder, currentGridNode, visitedAssets, profilePointerRegistry);
         } else if (asset instanceof ElectricityCable) {
-            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets, profilePointerRegistry);
+            processExitPorts(asset.getPort(), luxModelBuilder, currentGridNode, visitedAssets, profilePointerRegistry);
         } else if (asset instanceof Joint) {
-            processExitPorts(asset.getPort(), luxLoader, currentGridNode, visitedAssets, profilePointerRegistry);
+            processExitPorts(asset.getPort(), luxModelBuilder, currentGridNode, visitedAssets, profilePointerRegistry);
         } else if (asset instanceof Transformer transformer) {
-            var childGridNode = GridNodeLoader.loadTransformer(transformer, luxLoader.energyModel, currentGridNode);
-            processExitPorts(asset.getPort(), luxLoader, childGridNode, visitedAssets, profilePointerRegistry);
+            var childGridNode = GridNodeLoader.loadTransformer(transformer, luxModelBuilder.energyModel, currentGridNode);
+            processExitPorts(asset.getPort(), luxModelBuilder, childGridNode, visitedAssets, profilePointerRegistry);
             // Create EnergyCoop for the GridNode. This Coop represents the aggregator that manages external setpoints of EV & Battery assets.
-            addEnergyCoopToGridNode(luxLoader, childGridNode);
+            addEnergyCoopToGridNode(luxModelBuilder, childGridNode);
         } else if (asset instanceof EConnection eConnection) {
-            GridConnectionLoader.loadGridConnection(eConnection, luxLoader, currentGridNode, profilePointerRegistry);
+            GridConnectionLoader.loadGridConnection(eConnection, luxModelBuilder, currentGridNode, profilePointerRegistry);
             // Do not traverse further
         } else {
             throw new NotImplemented(
@@ -126,15 +130,15 @@ public class AreaIterator {
         }
     }
 
-    private static void addEnergyCoopToGridNode(Zero_Loader luxLoader, GridNode gridNode) {
-        EnergyModel energyModel = luxLoader.energyModel;
+    private static void addEnergyCoopToGridNode(LuxModelBuilder luxModelBuilder, GridNode gridNode) {
+        EnergyModel energyModel = luxModelBuilder.energyModel;
         ArrayList<GridConnection> gridConnectionList = new ArrayList<GridConnection>();
         for (GridConnection gc : energyModel.c_gridConnections) {
             if (gc.p_parentNodeElectricID.equals(gridNode.p_gridNodeID)) {
                 gridConnectionList.add(gc);
             }
         }
-        EnergyCoop energyCoop = energyModel.f_addEnergyCoop(gridConnectionList, energyModel.p_timeParameters);
+        EnergyCoop energyCoop = energyModel.f_addEnergyCoop(gridConnectionList, energyModel.p_timeParameters, gridNode.p_gridNodeID);
         J_ISIE_Aggregator_EMS ems = new J_ISIE_Aggregator_EMS(energyCoop, energyModel.p_timeParameters);
         energyCoop.f_setAggregatorEnergyManagement(ems);
     }

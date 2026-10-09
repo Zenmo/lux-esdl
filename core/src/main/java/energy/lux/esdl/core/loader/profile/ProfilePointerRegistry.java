@@ -4,9 +4,9 @@ import com.zenmo.timeseries.untyped.ArrayTimeSeries;
 import esdl.GenericProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zero_engine.EnergyModel;
-import zero_engine.J_ProfilePointer;
-import zero_engine.OL_ProfileUnits;
+import energy.lux.engine.EnergyModel;
+import energy.lux.engine.J_ProfilePointer;
+import energy.lux.engine.optionlists.OL_ProfileUnits;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +57,7 @@ public class ProfilePointerRegistry {
         // The LUX engine registers profiles of its own, and the model-wide profiles have
         // already been added by the time this registry is built. Their names are taken too.
         for (var existingProfile : luxModel.c_profiles) {
-            usedNames.add(existingProfile.name);
+            usedNames.add(existingProfile.getName());
         }
     }
 

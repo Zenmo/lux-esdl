@@ -1,9 +1,9 @@
 package energy.lux.esdl.core.loader;
 
 import esdl.Battery;
-import zero_engine.GridConnection;
-import zero_engine.OL_EnergyAssetType;
-import zerointerfaceloader.Zero_Loader;
+import energy.lux.engine.gridconnections.GridConnection;
+import energy.lux.engine.optionlists.OL_EnergyAssetType;
+import energy.lux.esdl.core.LuxModelBuilder;
 
 import java.util.stream.DoubleStream;
 
@@ -15,8 +15,8 @@ public class HomeBatteryLoader {
      */
     private static double defaultC = 1.0;
 
-    public static void loadBattery(Battery esdlBattery, GridConnection luxGridConnection, Zero_Loader luxLoader) {
-        luxLoader.f_addStorage(
+    public static void loadBattery(Battery esdlBattery, GridConnection luxGridConnection, LuxModelBuilder luxModelBuilder) {
+        luxModelBuilder.addStorage(
                 luxGridConnection,
                 getChargeRateKw(esdlBattery),
                 capacityKwh(esdlBattery),
