@@ -37,7 +37,7 @@ public class ScenarioExport {
     /**
      * The scenario to run. This is the only line to change.
      */
-    private static final Scenario defaultScenario = Scenario.TIME_OF_USE_TARIFF;
+    private static final Scenario defaultScenario = Scenario.NO_TIME_OF_USE_AND_NO_CONGESTION;
 
     /**
      * Edit {@link #defaultScenario} above, or pass -Pscenario=NAME to run one without editing.
@@ -70,16 +70,28 @@ public class ScenarioExport {
      * time of use tariff and whether the local dynamic measure is active, and the reader sets
      * the congestion factor of the aggregators from that.
      * <p>
-     * The two decorated_test_congestion files carry the same non-zero tariff and differ only in
-     * the local dynamic measure, so neither of them can describe an area without any signal at
-     * all. Only the newest generation of files states a tariff of zero, and it describes a
-     * different area, so {@link #NO_CONGESTION_SIGNAL} is not directly comparable to the two
-     * below it.
+     * The files below are one generation of the same area and state nothing else that differs,
+     * so their exports are directly comparable: the first charges neither signal, the second
+     * only the time of use tariff, the third only the local dynamic measure.
+     * <p>
+     * The _FIXED_CONTRACT trio repeats those three with every EConnection described as a
+     * fixed_contract rather than a dynamic_contract. That description is what
+     * GridConnectionLoader reads to decide whether the aggregator manages a house, so in those
+     * three no house is managed and neither signal has anything to steer.
      */
     public enum Scenario {
-        NO_CONGESTION_SIGNAL("decorated_corrected_BU31_veelflex_test_updated_tou0_nolocalcongestion.esdl"),
-        TIME_OF_USE_TARIFF("decorated_test_congestion_false.esdl"),
-        DYNAMIC_CONGESTION_TARIFF("decorated_test_congestion_true.esdl");
+        NO_TIME_OF_USE_AND_NO_CONGESTION("no_time_of_use_and_no_congestion.esdl"),
+        TIME_OF_USE_WITHOUT_CONGESTION("with_time_of_use_but_without_congestion.esdl"),
+        CONGESTION_WITHOUT_TIME_OF_USE("no_time_of_use_but_with_congestion.esdl"),
+        NO_TIME_OF_USE_AND_NO_CONGESTION_FIXED_CONTRACT("no_time_of_use_and_no_congestion_fixed_contract.esdl"),
+        TIME_OF_USE_WITHOUT_CONGESTION_FIXED_CONTRACT("with_time_of_use_but_without_congestion_fixed_contract.esdl"),
+        CONGESTION_WITHOUT_TIME_OF_USE_FIXED_CONTRACT("no_time_of_use_but_with_congestion_fixed_contract.esdl"),
+        NO_SIGNALS_AND_NO_DYNAMIC_CONTRACT("decorated_test_notou_no_congestion_nodynamic_normalized.esdl"),
+        CORRECTED_NO_SIGNALS_NO_DYNAMIC_CONTRACT("corrected_decorated_test_notou_nocongestion_nodynamic_normalized.esdl"),
+        CORRECTED_TIME_OF_USE_WITHOUT_CONGESTION("corrected_decorated_test_tou_nocongestion_dynamic_normalized.esdl"),
+        CORRECTED_TIME_OF_USE_WITH_CONGESTION("corrected_decorated_test_tou_congestion_dynamic_normalized.esdl"),
+        DECORATED_CONGESTION_FALSE("decorated_test_congestion_false.esdl"),
+        DECORATED_CONGESTION_TRUE("decorated_test_congestion_true.esdl");
 
         private final String esdlFileName;
 

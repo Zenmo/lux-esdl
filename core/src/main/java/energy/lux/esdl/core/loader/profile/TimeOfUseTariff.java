@@ -25,7 +25,10 @@ public class TimeOfUseTariff {
     private static final int monthsPerYear = 12;
     private static final int hoursPerDay = 24;
     private static final Duration expectedElementDuration = Duration.ofHours(1);
-    private static final double tariffHeight_eurpMWh = 200.0;
+    /**
+     * What one unit of tariff weight is worth, in EUR/MWh. 600 EUR/MWh is 60 cents/kWh.
+     */
+    private static final double tariffHeight_eurpMWh = 600.0;
     private final double[][] weightByMonthAndHour;
 
     private TimeOfUseTariff(double[][] weightByMonthAndHour) {

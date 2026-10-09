@@ -33,7 +33,16 @@ public class RootIterator {
     private static final Logger logger = LoggerFactory.getLogger(RootIterator.class);
 
     private static final String timeOfUseTariffMeasureName = "tou_tariff";
-    private static final String localDynamicMeasureName = "congestion management active";
+    /**
+     * The ESDL renamed this measure from spaces to underscores in September 2026 and both
+     * spellings are in circulation, so both are accepted. Reading only one of them is not a
+     * harmless miss: an unrecognised name is indistinguishable from an absent measure, so a file
+     * that switches the measure on would be read as switching it off.
+     */
+    private static final List<String> localDynamicMeasureNames = List.of(
+            "congestion management active",
+            "congestion_management_active"
+    );
     private static final double localDynamicCongestionFactor_eurpMWhpkW = 1000.0;
     private static final Duration shortestUsableIrradiance = Duration.ofDays(364);
 
@@ -307,12 +316,12 @@ public class RootIterator {
     }
 
     private static boolean isLocalDynamicMeasureActive(Measures measures) {
-        var measure = measures == null ? null : findMeasure(measures, localDynamicMeasureName);
+        var measure = measures == null ? null : findFirstMeasure(measures, localDynamicMeasureNames);
         if (measure == null) {
             logger.warn(
-                    "The ESDL states no '{}' measure, so the local dynamic measure is read as"
-                            + " inactive and the aggregators price no congestion",
-                    localDynamicMeasureName
+                    "The ESDL states none of the measures {}, so the local dynamic measure is read"
+                            + " as inactive and the aggregators price no congestion",
+                    localDynamicMeasureNames
             );
             return false;
         }
@@ -343,6 +352,19 @@ public class RootIterator {
     private static CostInformation findCostInformation(Measures measures, String measureName) {
         var measure = findMeasure(measures, measureName);
         return measure == null ? null : measure.getCostInformation();
+    }
+
+    /**
+     * @return the first measure carrying any of these names, or null when the ESDL has none of them.
+     */
+    private static Measure findFirstMeasure(Measures measures, List<String> measureNames) {
+        for (String measureName : measureNames) {
+            var measure = findMeasure(measures, measureName);
+            if (measure != null) {
+                return measure;
+            }
+        }
+        return null;
     }
 
     private static Measure findMeasure(Measures measures, String measureName) {

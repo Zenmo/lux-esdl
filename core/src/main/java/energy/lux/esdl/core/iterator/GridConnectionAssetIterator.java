@@ -28,6 +28,42 @@ import static energy.lux.esdl.core.loader.SwitchStatus.DONE;
 public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     private static final Logger logger = LoggerFactory.getLogger(GridConnectionAssetIterator.class);
 
+    /**
+     * Stands in for the thermal power of a HybridHeatPump that the ESDL does not rate, so that a
+     * file which omits heatPumpThermalPower does not silently get a heat pump of zero power.
+     * Chosen to match what the files that do state it use.
+     */
+    private static final double assumedHybridHeatPumpThermalPower_kW = 6.0;
+
+    /**
+     * The heat output the gas burner of a hybrid is given, in kW.
+     * <p>
+     * The ESDL rates only the heat pump half of a HybridHeatPump, so nothing in the file says how
+     * big the burner is. It carries the peaks the heat pump cannot follow, and the hot water draws
+     * in these files reach about 48 kW, so it is rated above that. Deliberately generous rather
+     * than realistic: an oversized burner only lifts a ceiling, it never produces more heat than
+     * the house asks for, so it costs nothing in energy.
+     */
+    private static final double hybridGasBurnerHeatCapacity_kW = 50.0;
+
+    /**
+     * Converts the thermal rating the ESDL states into the electric capacity the engine wants.
+     * <p>
+     * ESDL states heatPumpThermalPower, the heat the pump delivers, while J_EAConversionHeatPump
+     * is built from the electricity it draws and derives its own COP from an empirical curve that
+     * moves with the ambient temperature. There is no single COP to divide by, so this stands in
+     * for the design point. It is the divisor Zero_Loader.f_addHeatAsset uses for a hybrid.
+     */
+    private static final double hybridHeatPumpDesignCOP = 3.0;
+
+    /**
+     * A hybrid draws its heat from the outside air, so it has no source asset feeding it, and its
+     * efficiency is not reduced below freezing. Both are what f_addHeatAsset assumes.
+     */
+    private static final double hybridHeatPumpSourceAssetHeatPower_kW = 0.0;
+
+    private static final double hybridHeatPumpBelowZeroEtaReductionFactor = 1.0;
+
     private final GridConnection luxGridConnection;
 
     private final Zero_Loader luxLoader;
@@ -183,13 +219,79 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     @Override
     public SwitchStatus caseHybridHeatPump(HybridHeatPump hybridHeatPump) {
         if (this.processedAssets.add(hybridHeatPump)) {
-            var maxThermalPowerKw = hybridHeatPump.getHeatPumpThermalPower() * 0.001;
-            var heatingPreferences = luxLoader.f_getHouseHeatingPreferences();
-            luxLoader.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.HYBRID_HEATPUMP, maxThermalPowerKw, heatingPreferences);
+            addHybridHeatingAssets(readHybridHeatPumpThermalPower_kW(hybridHeatPump));
             I_HeatingManagement heatingManagement = new J_HeatingManagementPIcontrolHybridHeatpump(luxGridConnection, energyModel.p_timeParameters, OL_GridConnectionHeatingType.HYBRID_HEATPUMP);
             luxGridConnection.f_setHeatingManagement(heatingManagement);
         }
         return DONE;
+    }
+
+    /**
+     * Build the heat pump and the gas burner of a hybrid directly, instead of through
+     * Zero_Loader.f_addHeatAsset.
+     * <p>
+     * That method derives both halves from a single number: the heat pump gets a third of it and
+     * the burner all of it. With the 6 kW these files state, the burner ends up at 6 kW too, so
+     * the pair tops out near 11 kW of heat while the hot water draws reach 48 kW. The house then
+     * cannot meet its demand and the engine reports a heat unbalance in every timestep it falls
+     * short.
+     * <p>
+     * A hybrid house cannot fall back on a hot water buffer either, because
+     * J_HeatingManagementPIcontrolHybridHeatpump only accepts one alongside solar thermal, which
+     * these houses do not have. That is deliberate in the engine, so the burner has to carry the
+     * peaks by itself and is rated for them here.
+     * <p>
+     * Everything besides the two capacities is what f_addHeatAsset would have used.
+     */
+    private void addHybridHeatingAssets(double heatPumpThermalPower_kW) {
+        var averagesData = luxLoader.avgc_data;
+
+        var heatPumpElectricCapacity_kW = Math.max(
+                averagesData.p_minHeatpumpElectricCapacity_kW,
+                heatPumpThermalPower_kW / hybridHeatPumpDesignCOP
+        );
+
+        // The constructor registers the heat pump with the grid connection, which also puts it in
+        // EnergyModel.c_ambientDependentAssets, so its COP follows the outside air by itself.
+        new J_EAConversionHeatPump(
+                luxGridConnection,
+                heatPumpElectricCapacity_kW,
+                averagesData.p_avgEfficiencyHeatpump_fr,
+                energyModel.p_timeParameters,
+                averagesData.p_avgOutputTemperatureHybridHeatpump_degC,
+                energyModel.pp_ambientTemperature_degC.getCurrentValue(),
+                hybridHeatPumpSourceAssetHeatPower_kW,
+                hybridHeatPumpBelowZeroEtaReductionFactor,
+                OL_AmbientTempType.AMBIENT_AIR
+        );
+
+        // The burner registers itself the same way.
+        new J_EAConversionGasBurner(
+                luxGridConnection,
+                Math.max(averagesData.p_minGasBurnerOutputCapacity_kW, hybridGasBurnerHeatCapacity_kW),
+                averagesData.p_avgEfficiencyGasBurner_fr,
+                energyModel.p_timeParameters,
+                averagesData.p_avgOutputTemperatureGasBurner_degC
+        );
+    }
+
+    /**
+     * @return the thermal power the ESDL states, or {@link #assumedHybridHeatPumpThermalPower_kW}
+     *         when it states none.
+     */
+    private static double readHybridHeatPumpThermalPower_kW(HybridHeatPump hybridHeatPump) {
+        var statedThermalPower_kW = hybridHeatPump.getHeatPumpThermalPower() * 0.001;
+        if (statedThermalPower_kW > 0) {
+            return statedThermalPower_kW;
+        }
+
+        logger.warn(
+                "Hybrid heat pump {} states no thermal power, assuming {} kW so that its house"
+                        + " can meet its heat demand. Its electricity use is a placeholder.",
+                hybridHeatPump.getName(),
+                assumedHybridHeatPumpThermalPower_kW
+        );
+        return assumedHybridHeatPumpThermalPower_kW;
     }
 
     /**
