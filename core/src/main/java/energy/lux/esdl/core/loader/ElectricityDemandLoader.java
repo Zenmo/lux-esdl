@@ -185,7 +185,10 @@ public class ElectricityDemandLoader {
                 .build();
     }
 
-    private static Double parseAnnualDemandKwh(String demandName) {
+    /**
+     * The yearly total that a demand states in its name, like "Total: 3958.0 kwh", or null when it states none.
+     */
+    public static Double parseAnnualDemandKwh(String demandName) {
         if (demandName == null) {
             return null;
         }

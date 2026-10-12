@@ -115,6 +115,21 @@ tasks.register<JavaExec>("exportScenario") {
     luxPythonExecutable.orNull?.let { systemProperty("lux.pythonExecutable", it) }
 }
 
+// Turns the electricity profiles of an ESDL into the normalized shape that the loader reads.
+// ./gradlew normalizeEsdl -PesdlIn=<input.esdl> -PesdlOut=<output.esdl>   (absolute paths)
+tasks.register<JavaExec>("normalizeEsdl") {
+    group = "application"
+    description = "Normalize the electricity demand profiles of an ESDL file."
+    mainClass.set("energy.lux.esdl.core.tools.NormalizeEsdl")
+    classpath = sourceSets.main.get().runtimeClasspath
+    maxHeapSize = "8g"
+    val inputFile = project.findProperty("esdlIn") as String?
+    val outputFile = project.findProperty("esdlOut") as String?
+    if (inputFile != null && outputFile != null) {
+        args(inputFile, outputFile)
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
     workingDir = lux2Directory
