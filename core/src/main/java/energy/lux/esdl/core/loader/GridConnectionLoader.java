@@ -8,6 +8,7 @@ import esdl.OutPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.EnergyModel;
+import energy.lux.loader.EnergyAssetCreator;
 import energy.lux.engine.gridconnections.GridConnection;
 import energy.lux.engine.GridNode;
 import energy.lux.engine.managementclasses.assetmanagements.chargingmanagements.I_ChargingManagement;
@@ -22,10 +23,12 @@ import energy.lux.engine.dataclasses.J_HeatingPreferences;
 import energy.lux.engine.optionlists.OL_EnergyAssetType;
 import energy.lux.engine.optionlists.OL_GridConnectionHeatingType;
 import energy.lux.engine.actors.ConnectionOwner;
-import energy.lux.esdl.core.LuxModelBuilder;
 
 
 public class GridConnectionLoader {
+    // Temporary: the LUX loader sizes the heat assets.
+    private static final EnergyAssetCreator assetCreator = new EnergyAssetCreator();
+
     private static final Logger logger = LoggerFactory.getLogger(GridConnectionLoader.class);
 
     /**
@@ -42,18 +45,18 @@ public class GridConnectionLoader {
 
     public static GridConnection loadGridConnection(
             EConnection eConnection,
-            LuxModelBuilder luxModelBuilder,
+            EnergyModel energyModel,
             GridNode parentGridNode,
             ProfilePointerRegistry profilePointerRegistry
     ) {
-        var gridConnection = instantiateGridConnection(eConnection, luxModelBuilder, parentGridNode);
-        loadBuilding(eConnection, luxModelBuilder, gridConnection, profilePointerRegistry);
+        var gridConnection = instantiateGridConnection(eConnection, energyModel, parentGridNode);
+        loadBuilding(eConnection, energyModel, gridConnection, profilePointerRegistry);
 
-        var gcSwitch = new GridConnectionAssetIterator(gridConnection, luxModelBuilder, eConnection, profilePointerRegistry);
+        var gcSwitch = new GridConnectionAssetIterator(gridConnection, energyModel, eConnection, profilePointerRegistry);
         loadAssetsOfGridConnection(eConnection, gcSwitch);
-        checkHeatingAsset(eConnection, luxModelBuilder, gridConnection);
-        addHotWaterBuffer(luxModelBuilder, gridConnection);
-        addCustomAssetManagements(eConnection, luxModelBuilder, gridConnection);
+        checkHeatingAsset(eConnection, energyModel, gridConnection);
+        addHotWaterBuffer(energyModel, gridConnection);
+        addCustomAssetManagements(eConnection, energyModel, gridConnection);
         return gridConnection;
     }
 
@@ -91,9 +94,8 @@ public class GridConnectionLoader {
     }
 
     private static GridConnection instantiateGridConnection(
-            EConnection eConnection, LuxModelBuilder luxModelBuilder, GridNode parentGridNode
+            EConnection eConnection, EnergyModel energyModel, GridNode parentGridNode
     ) {
-        EnergyModel energyModel = luxModelBuilder.energyModel;
         var gridConnection = energyModel.add_pop_gridConnections();
         gridConnection.energyModel = energyModel;
         gridConnection.onCreate();
@@ -111,23 +113,22 @@ public class GridConnectionLoader {
 
     private static void loadBuilding(
             EConnection eConnection,
-            LuxModelBuilder luxModelBuilder,
+            EnergyModel energyModel,
             GridConnection luxGridConnection,
             ProfilePointerRegistry profilePointerRegistry
     ) {
         var building = eConnection.getContainingBuilding();
         if (building != null) {
-            new BuildingThermalLoader(luxModelBuilder, profilePointerRegistry)
+            new BuildingThermalLoader(energyModel, profilePointerRegistry)
                     .loadBuilding(building, luxGridConnection);
         }
         // It seems valid to have a grid connection without a building, no warning necessary.
     }
 
-    private static void addCustomAssetManagements(EConnection eConnection, LuxModelBuilder luxModelBuilder, GridConnection luxGridConnection) {
+    private static void addCustomAssetManagements(EConnection eConnection, EnergyModel energyModel, GridConnection luxGridConnection) {
         // All houses have already gotten heating management PI Control
         // For other assets houses with a dynamic contract have their assets managed by the aggregator on the parent GridNode
         // Houses without a dynamic contract have the default SIMPLE charging & SELF CONSUMPTION battery algorithms.
-        EnergyModel energyModel = luxModelBuilder.energyModel;
         if (eConnection.getDescription().contains("dynamic_contract")) { // TODO: Make this check more robust?
             I_ChargingManagement chargingManagement = new J_ChargingManagementExternalSetpoint(luxGridConnection, energyModel.p_timeParameters);
             luxGridConnection.f_setChargingManagement(chargingManagement);
@@ -150,7 +151,7 @@ public class GridConnectionLoader {
      * only management here proven to drive a buffer. Houses that fell back to a gas burner keep
      * the management f_addHeatAsset chose for them and are left alone.
      */
-    private static void addHotWaterBuffer(LuxModelBuilder luxModelBuilder, GridConnection luxGridConnection) {
+    private static void addHotWaterBuffer(EnergyModel energyModel, GridConnection luxGridConnection) {
         var hotWaterAsset = luxGridConnection.p_DHWAsset;
         if (hotWaterAsset == null) {
             // The PI control refuses a buffer that has no hot water demand to hold water for.
@@ -173,7 +174,7 @@ public class GridConnectionLoader {
         // rate it for the peak. f_updateFlexAssetFlows takes the flow as a fraction of this.
         var power_kW = hotWaterAsset.getPeakConsumptionPower_kW();
 
-        createHotWaterBuffer(luxModelBuilder, luxGridConnection, power_kW, capacity_kWh);
+        createHotWaterBuffer(energyModel, luxGridConnection, power_kW, capacity_kWh);
 
         logger.debug(
                 "Hot water buffer of {} kWh at {} kW for grid connection {}, heat pump delivers {} kW",
@@ -193,12 +194,12 @@ public class GridConnectionLoader {
      * starts from a full buffer as well.
      */
     private static void createHotWaterBuffer(
-            LuxModelBuilder luxModelBuilder,
+            EnergyModel energyModel,
             GridConnection luxGridConnection,
             double power_kW,
             double capacity_kWh
     ) {
-        var averagesData = luxModelBuilder.energyModel.avgc_data;
+        var averagesData = energyModel.avgc_data;
         var minTemperature_degC = averagesData.avgMinHeatBufferTemperature_degC();
         var maxTemperature_degC = averagesData.avgMaxHeatBufferTemperature_degC();
 
@@ -212,7 +213,7 @@ public class GridConnectionLoader {
                 OL_EnergyAssetType.STORAGE_HEAT,
                 power_kW,
                 lossFactor_WpK,
-                luxModelBuilder.energyModel.p_timeParameters,
+                energyModel.p_timeParameters,
                 maxTemperature_degC,
                 minTemperature_degC,
                 maxTemperature_degC,
@@ -246,13 +247,13 @@ public class GridConnectionLoader {
         return worstShortfall_kWh;
     }
 
-    private static void checkHeatingAsset(EConnection eConnection, LuxModelBuilder luxModelBuilder, GridConnection luxGridConnection) {
+    private static void checkHeatingAsset(EConnection eConnection, EnergyModel energyModel, GridConnection luxGridConnection) {
         // Some houses, like beca94a3-5a38-4a62-ad76-43c7948f9fc7 in BU31_veelflex.esdl, have no heating asset.
         // We give these houses a gas burner
         if (luxGridConnection.c_heatingAssets.isEmpty()) {
             double outputPower_kW = 10;
-            J_HeatingPreferences heatingPreferences = luxModelBuilder.newHouseHeatingPreferences();
-            luxModelBuilder.addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.GAS_BURNER, outputPower_kW, heatingPreferences);
+            assetCreator.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.GAS_BURNER, outputPower_kW, energyModel, energyModel.avgc_data);
+            luxGridConnection.f_addHeatManagement(OL_GridConnectionHeatingType.GAS_BURNER, false, new J_HeatingPreferences());
         }
     }
 }

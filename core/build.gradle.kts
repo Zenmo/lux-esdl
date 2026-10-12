@@ -67,8 +67,9 @@ repositories {
  */
 val luxPythonExecutable = providers.gradleProperty("luxPythonExecutable")
 
-// The LUX Loader reads its default profiles and averages from here.
-val luxGenericDataDirectory = rootDir.resolve("../lux2/backend/Loader/data").canonicalPath
+// The LUX Loader finds its default profiles and averages relative to the working directory,
+// so the tests and the export run from the lux2 checkout.
+val lux2Directory = rootDir.resolve("../lux2")
 
 dependencies {
     implementation("energy.lux:Engine:local")
@@ -107,14 +108,16 @@ tasks.register<JavaExec>("exportScenario") {
     mainClass.set("energy.lux.esdl.core.export.ScenarioExport")
     classpath = sourceSets.main.get().runtimeClasspath
     maxHeapSize = "8g"
+    workingDir = lux2Directory
+    systemProperty("lux.esdlDirectory", rootDir.resolve("esdl-app/data_ProjectTemplate").canonicalPath)
+    systemProperty("lux.exportDirectory", layout.buildDirectory.dir("exports").get().asFile.path)
     systemProperty("scenario", (project.findProperty("scenario") ?: "") as String)
-    systemProperty("lux.genericDataDir", luxGenericDataDirectory)
     luxPythonExecutable.orNull?.let { systemProperty("lux.pythonExecutable", it) }
 }
 
 tasks.test {
     useJUnitPlatform()
-    systemProperty("lux.genericDataDir", luxGenericDataDirectory)
+    workingDir = lux2Directory
     // The decorated congestion ESDL files are ~68 MB of XML and do not fit in 2g once EMF has parsed them.
     maxHeapSize = "8g"
     // Loading an ESDL that describes PV generates its production profiles with pvlib.

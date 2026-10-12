@@ -14,6 +14,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.EnergyModel;
+import energy.lux.engine.energyassets.J_EAEV;
+import energy.lux.loader.EnergyAssetCreator;
 import energy.lux.engine.gridconnections.GridConnection;
 import energy.lux.engine.managementclasses.assetmanagements.heatingmanagements.I_HeatingManagement;
 import energy.lux.engine.energyassets.J_EAConversionGasBurner;
@@ -24,7 +26,6 @@ import energy.lux.engine.optionlists.OL_AmbientTempType;
 import energy.lux.engine.optionlists.OL_ChargingAttitude;
 import energy.lux.engine.optionlists.OL_GridConnectionHeatingType;
 import energy.lux.engine.optionlists.OL_VehicleType;
-import energy.lux.esdl.core.LuxModelBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -74,10 +75,14 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
 
     private static final double hybridHeatPumpBelowZeroEtaReductionFactor = 1.0;
 
+    private static final double initialStateOfChargeOfACar_fr = 1.0;
+
     private final GridConnection luxGridConnection;
 
-    private final LuxModelBuilder luxModelBuilder;
     private final EnergyModel energyModel;
+
+    // Temporary: the LUX loader sizes the heat assets.
+    private final EnergyAssetCreator assetCreator = new EnergyAssetCreator();
 
     private final ElectricityDemandLoader electricityDemandLoader;
 
@@ -92,15 +97,14 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
 
     public GridConnectionAssetIterator(
             GridConnection luxGridConnection,
-            LuxModelBuilder luxModelBuilder,
+            EnergyModel energyModel,
             EConnection entryPoint,
             ProfilePointerRegistry profilePointerRegistry
     ) {
         this.luxGridConnection = luxGridConnection;
-        this.luxModelBuilder = luxModelBuilder;
-        this.energyModel = luxModelBuilder.energyModel;
-        this.electricityDemandLoader = new ElectricityDemandLoader(luxModelBuilder, profilePointerRegistry);
-        this.mobilityDemandLoader = new MobilityDemandLoader(luxModelBuilder);
+        this.energyModel = energyModel;
+        this.electricityDemandLoader = new ElectricityDemandLoader(energyModel, profilePointerRegistry);
+        this.mobilityDemandLoader = new MobilityDemandLoader(energyModel);
         this.profilePointerRegistry = profilePointerRegistry;
         // prevent exiting the grid connection while searching through the cables
         this.entryPoint = entryPoint;
@@ -126,7 +130,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
 
     public SwitchStatus caseBattery(Battery battery) {
         if (this.processedAssets.add(battery)) {
-            HomeBatteryLoader.loadBattery(battery, luxGridConnection, luxModelBuilder);
+            HomeBatteryLoader.loadBattery(battery, luxGridConnection, energyModel);
         }
         return DONE;
     }
@@ -209,7 +213,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     @Override
     public SwitchStatus casePVInstallation(PVInstallation pvInstallation) {
         if (this.processedAssets.add(pvInstallation)) {
-            PVLoader.loadPVInstallation(pvInstallation, luxGridConnection, luxModelBuilder, profilePointerRegistry);
+            PVLoader.loadPVInstallation(pvInstallation, luxGridConnection, energyModel, profilePointerRegistry);
         }
         return DONE;
     }
@@ -218,8 +222,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     public SwitchStatus caseHeatPump(HeatPump heatPump) {
         if (this.processedAssets.add(heatPump)) {
             var maxThermalPowerKw = heatPump.getPower() * 0.001;
-            var heatingPreferences = luxModelBuilder.newHouseHeatingPreferences();
-            luxModelBuilder.addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, maxThermalPowerKw, heatingPreferences);
+            assetCreator.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, maxThermalPowerKw, energyModel, energyModel.avgc_data);
             I_HeatingManagement heatingManagement = new J_HeatingManagementPIcontrol(luxGridConnection, energyModel.p_timeParameters, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP);
             luxGridConnection.f_setHeatingManagement(heatingManagement);
         }
@@ -254,7 +257,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
      * Everything besides the two capacities is what f_addHeatAsset would have used.
      */
     private void addHybridHeatingAssets(double heatPumpThermalPower_kW) {
-        var averagesData = luxModelBuilder.averagesData;
+        var averagesData = energyModel.avgc_data;
 
         var heatPumpElectricCapacity_kW = Math.max(
                 averagesData.minHeatpumpElectricCapacity_kW(),
@@ -319,17 +322,28 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
             var tripTracker = mobilityDemandLoader.readTripTracker(evChargingStation);
 
             double consumedEnergy_kWh = evChargingStation.getFullLoadHours() * maxChargingPowerKw;
-            double traveledDistance_km = consumedEnergy_kWh / luxModelBuilder.averagesData.avgEVEnergyConsumptionCar_kWhpkm();
+            double traveledDistance_km = consumedEnergy_kWh / energyModel.avgc_data.avgEVEnergyConsumptionCar_kWhpkm();
 
-            luxModelBuilder.addElectricVehicle(
+            var averagesData = energyModel.avgc_data;
+            var electricVehicle = new J_EAEV(
                     luxGridConnection,
-                    OL_VehicleType.CAR,
-                    false,
-                    traveledDistance_km,
                     maxChargingPowerKw,
-                    OL_ChargingAttitude.SIMPLE,
+                    averagesData.avgEVStorageCar_kWh(),
+                    initialStateOfChargeOfACar_fr,
+                    energyModel.p_timeParameters,
+                    averagesData.avgEVEnergyConsumptionCar_kWhpkm(),
+                    1.0,
+                    OL_VehicleType.CAR,
                     tripTracker
             );
+            if (tripTracker == null) {
+                electricVehicle.getTripTracker().setAnnualDistance_km(traveledDistance_km);
+            }
+
+            // Houses that the aggregator manages get their management replaced afterwards.
+            if (luxGridConnection.f_getChargingManagement() == null) {
+                luxGridConnection.f_addChargingManagement(OL_ChargingAttitude.SIMPLE);
+            }
         }
         return DONE;
     }

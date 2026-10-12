@@ -10,7 +10,7 @@ import com.zenmo.timeseries.untyped.TimeSeries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.optionlists.OL_ProfileUnits;
-import energy.lux.esdl.core.LuxModelBuilder;
+import energy.lux.engine.EnergyModel;
 
 import java.time.Year;
 
@@ -20,18 +20,16 @@ import java.time.Year;
 public class GlobalProfileLoader {
     private static final Logger logger = LoggerFactory.getLogger(GlobalProfileLoader.class);
 
-    private final LuxModelBuilder luxModelBuilder;
+    private final EnergyModel energyModel;
 
     private final ProfilePointerFactory profilePointerFactory;
 
     private final BareProfileReader bareProfileReader;
 
     public GlobalProfileLoader(
-            LuxModelBuilder luxModelBuilder
+            EnergyModel energyModel
     ) {
-        this.luxModelBuilder = luxModelBuilder;
-
-        var energyModel = luxModelBuilder.energyModel;
+        this.energyModel = energyModel;
         var timeParameters = energyModel.p_timeParameters;
 
         this.profilePointerFactory = new ProfilePointerFactory(energyModel);
@@ -61,7 +59,7 @@ public class GlobalProfileLoader {
                 OL_ProfileUnits.TEMPERATURE_DEGC
         );
 
-        luxModelBuilder.energyModel.pp_ambientTemperature_degC = temperatureProfilePointer;
+        energyModel.pp_ambientTemperature_degC = temperatureProfilePointer;
 
         return outsideTemperature_degC;
     }
@@ -103,7 +101,7 @@ public class GlobalProfileLoader {
                 "esdl_day_ahead_electricity_pricing_eur_per_mwh",
                 OL_ProfileUnits.PRICE_EURPMWH
         );
-        luxModelBuilder.energyModel.pp_dayAheadElectricityPricing_eurpMWh = priceProfilePointer;
+        energyModel.pp_dayAheadElectricityPricing_eurpMWh = priceProfilePointer;
     }
 
     /**

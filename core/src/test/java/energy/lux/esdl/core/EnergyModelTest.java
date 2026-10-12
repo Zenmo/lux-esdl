@@ -3,6 +3,7 @@ package energy.lux.esdl.core;
 import org.junit.jupiter.api.Test;
 import energy.lux.engine.optionlists.OL_EnergyCarriers;
 import energy.lux.engine.optionlists.OL_PVOrientation;
+import energy.lux.loader.EnergyAssetCreator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,8 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class EnergyModelTest {
     @Test
     public void testEmptyEnergyModel() {
-        var loader = LuxModelFactory.createEnergyModel();
-        var energyModel = loader.energyModel;
+        var energyModel = LuxModelFactory.createEnergyModel();
         energyModel.f_initializeEngine();
 
         assertEquals(0, energyModel.v_timeStepsElapsed);
@@ -26,8 +26,7 @@ public class EnergyModelTest {
 
     @Test
     public void testEnergyModelWithResidentialPv() {
-        var loader = LuxModelFactory.createEnergyModel();
-        var energyModel = loader.energyModel;
+        var energyModel = LuxModelFactory.createEnergyModel();
 
         var gridNode = energyModel.add_pop_gridNodes();
         gridNode.energyModel = energyModel;
@@ -47,7 +46,7 @@ public class EnergyModelTest {
         owner.onCreate();
         house.p_ownerID = owner.p_actorID = house.p_gridConnectionID + "_owner";
 
-        loader.addPVProductionAsset(house, "prosumer panels", 17.0, OL_PVOrientation.SOUTH);
+        new EnergyAssetCreator().f_addPVProductionAsset(house, "prosumer panels", 17.0, OL_PVOrientation.SOUTH, energyModel);
 
         energyModel.f_initializeEngine();
         // run for 24 hours

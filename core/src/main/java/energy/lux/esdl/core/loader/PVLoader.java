@@ -1,5 +1,6 @@
 package energy.lux.esdl.core.loader;
 
+import energy.lux.esdl.core.EsdlException;
 import energy.lux.esdl.core.loader.profile.ProfilePointerRegistry;
 import energy.lux.esdl.core.loader.pv.PVOrientation;
 import energy.lux.esdl.core.util.Util;
@@ -8,11 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.gridconnections.GridConnection;
 import energy.lux.engine.energyassets.J_EAProduction;
-import energy.lux.engine.J_ProfilePointer;
 import energy.lux.engine.optionlists.OL_EnergyAssetType;
 import energy.lux.engine.optionlists.OL_EnergyCarriers;
-import energy.lux.engine.optionlists.OL_PVOrientation;
-import energy.lux.esdl.core.LuxModelBuilder;
+import energy.lux.engine.EnergyModel;
 
 /**
  * TODO: us AVGC values
@@ -29,7 +28,7 @@ public class PVLoader {
     public static void loadPVInstallation(
             PVInstallation pvInstallation,
             GridConnection luxGridConnection,
-            LuxModelBuilder luxModelBuilder,
+            EnergyModel energyModel,
             ProfilePointerRegistry profilePointerRegistry
     ) {
         var installationPowerKw = getInstallationPowerKw(pvInstallation);
@@ -38,58 +37,23 @@ public class PVLoader {
         var profilePointer = profilePointerRegistry.findProfilePointer(orientation.profileName());
 
         if (profilePointer == null) {
-            logger.warn(
-                    "No generated PV profile for {} of installation {}, falling back to the"
-                            + " default south profile of LUX",
+            throw new EsdlException(String.format(
+                    "No generated PV profile for %s of installation %s. The ESDL needs the irradiance to model it from.",
                     orientation,
                     pvInstallation.getName()
-            );
-            loadWithDefaultProfile(pvInstallation, luxGridConnection, luxModelBuilder, installationPowerKw);
-            return;
+            ));
         }
 
-        loadWithGeneratedProfile(pvInstallation, luxGridConnection, luxModelBuilder, profilePointer, installationPowerKw);
-    }
-
-    /**
-     * The profile was modelled for the tilt and azimuth that this installation states, so the
-     * orientation is already in the profile and the LUX orientation enum has nothing left to
-     * choose. That enum only names a south and an east-west profile, so it cannot express what
-     * the ESDL describes, and the asset is built directly instead of through
-     * {@code Zero_Loader.f_addPVProductionAsset}.
-     */
-    private static void loadWithGeneratedProfile(
-            PVInstallation pvInstallation,
-            GridConnection luxGridConnection,
-            LuxModelBuilder luxModelBuilder,
-            J_ProfilePointer profilePointer,
-            double installationPowerKw
-    ) {
+        // The profile was modelled for the tilt and azimuth that this installation states, so the orientation is
+        // already in it. The LUX orientation enum only names a south and an east-west profile.
         new J_EAProduction(
                 luxGridConnection,
                 OL_EnergyAssetType.PHOTOVOLTAIC,
                 pvInstallation.getName(),
                 OL_EnergyCarriers.ELECTRICITY,
                 installationPowerKw,
-                luxModelBuilder.energyModel.p_timeParameters,
+                energyModel.p_timeParameters,
                 profilePointer
-        );
-    }
-
-    /**
-     * Used for the older files, which describe PV but carry no irradiance to model it from.
-     */
-    private static void loadWithDefaultProfile(
-            PVInstallation pvInstallation,
-            GridConnection luxGridConnection,
-            LuxModelBuilder luxModelBuilder,
-            double installationPowerKw
-    ) {
-        luxModelBuilder.addPVProductionAsset(
-                luxGridConnection,
-                pvInstallation.getName(),
-                installationPowerKw,
-                OL_PVOrientation.SOUTH
         );
     }
 

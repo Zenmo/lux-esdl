@@ -10,11 +10,13 @@ import energy.lux.esdl.core.util.DateTimeUtil;
 import energy.lux.esdl.core.util.Util;
 import esdl.*;
 import energy.lux.engine.gridconnections.GridConnection;
+import energy.lux.engine.energyassets.J_EAConsumption;
 import energy.lux.engine.energyassets.J_EAProfile;
 import energy.lux.engine.optionlists.OL_AssetFlowCategories;
+import energy.lux.engine.optionlists.OL_EnergyAssetType;
 import energy.lux.engine.optionlists.OL_EnergyCarriers;
 import energy.lux.engine.optionlists.OL_ProfileUnits;
-import energy.lux.esdl.core.LuxModelBuilder;
+import energy.lux.engine.EnergyModel;
 
 import java.time.Year;
 import java.util.regex.Pattern;
@@ -37,20 +39,18 @@ public class ElectricityDemandLoader {
      */
     private static final double normalizedProfileTolerance = 0.01;
 
-    private final LuxModelBuilder luxModelBuilder;
+    private final EnergyModel energyModel;
 
     private final ProfilePointerRegistry profilePointerRegistry;
 
     private final BareProfileReader bareProfileReader;
 
     public ElectricityDemandLoader(
-            LuxModelBuilder luxModelBuilder,
+            EnergyModel energyModel,
             ProfilePointerRegistry profilePointerRegistry
     ) {
-        this.luxModelBuilder = luxModelBuilder;
+        this.energyModel = energyModel;
         this.profilePointerRegistry = profilePointerRegistry;
-
-        var energyModel = luxModelBuilder.energyModel;
         var timeParameters = energyModel.p_timeParameters;
 
         this.bareProfileReader = new BareProfileReader(
@@ -66,12 +66,6 @@ public class ElectricityDemandLoader {
         var profile = Util.findFirstProfile(demand);
         if (profile != null) {
             loadProfile(profile, demand, luxGridConnection);
-            return;
-        }
-
-        double annualDemandKwh = demand.getFullLoadHours() * demand.getPower() * 0.001;
-        if (annualDemandKwh != 0.0) {
-            luxModelBuilder.addElectricityDemandProfile(luxGridConnection, annualDemandKwh, 0.0, false, "default_house_electricity_demand_fr");
             return;
         }
 
@@ -115,12 +109,14 @@ public class ElectricityDemandLoader {
                 esdlProfile -> readNormalizedProfile(esdlProfile, demand)
         );
 
-        luxModelBuilder.addElectricityDemandProfile(
+        new J_EAConsumption(
                 luxGridConnection,
+                OL_EnergyAssetType.ELECTRICITY_DEMAND,
+                profilePointer.getName(),
                 annualDemandKwh,
-                null,
-                false,
-                profilePointer.getName()
+                OL_EnergyCarriers.ELECTRICITY,
+                energyModel.p_timeParameters,
+                profilePointer
         );
     }
 
@@ -163,13 +159,12 @@ public class ElectricityDemandLoader {
                 this::readProfileAsKilowatt
         );
 
-        var luxEngine = luxModelBuilder.energyModel;
         var demandAsset = new J_EAProfile(
                 luxGridConnection,
                 OL_EnergyCarriers.ELECTRICITY,
                 luxProfile,
                 OL_AssetFlowCategories.fixedConsumptionElectric_kW,
-                luxEngine.p_timeParameters
+                energyModel.p_timeParameters
         );
         demandAsset.setEnergyAssetName(demand.getName());
         return demandAsset;

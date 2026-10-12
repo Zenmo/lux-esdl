@@ -47,9 +47,9 @@ public class ScenarioExport {
             ? defaultScenario
             : Scenario.valueOf(System.getProperty("scenario"));
 
-    private static final Path esdlDirectory = Path.of("..", "esdl-app", "data_ProjectTemplate");
+    private static final Path esdlDirectory = Path.of(System.getProperty("lux.esdlDirectory", "../esdl-app/data_ProjectTemplate"));
 
-    private static final Path exportDirectory = Path.of("build", "exports");
+    private static final Path exportDirectory = Path.of(System.getProperty("lux.exportDirectory", "build/exports"));
 
     /**
      * The assets the exported house should have, so that its profiles show something.
@@ -105,10 +105,8 @@ public class ScenarioExport {
         logger.info("Scenario {}: reading {}", scenario, esdlFile.toAbsolutePath());
 
         EnergySystem esdl = ESDLReader.readResource(esdlFile.toAbsolutePath().toString());
-        var luxModelBuilder = LuxModelFactory.createEnergyModel();
-        RootIterator.loadEsdlIntoLux(esdl, luxModelBuilder);
-
-        var energyModel = luxModelBuilder.energyModel;
+        var energyModel = LuxModelFactory.createEnergyModel();
+        RootIterator.loadEsdlIntoLux(esdl, energyModel);
 
         logger.info("Running the simulated year");
         energyModel.f_initializeEngine();
