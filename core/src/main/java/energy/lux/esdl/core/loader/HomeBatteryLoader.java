@@ -36,17 +36,17 @@ public class HomeBatteryLoader {
     }
 
     /**
-     * The ESDL model annotates maxChargeRate and maxDischargeRate as Watts, but the files this
-     * loader reads state them in kW. The September 2025 generation gives an 18.8 kWh home battery
-     * a rate of 4.7, which is a four hour battery at 4.7 kW and a physically meaningless one at
-     * 4.7 W. The July files still stated Watts, in the thousands.
+     * The ESDL model annotates maxChargeRate and maxDischargeRate as Watts, and the current files
+     * follow that: isie.esdl gives a 16.8 kWh home battery a rate of 4190. The September 2025
+     * generation stated kW instead and is no longer supported, because the older files are history.
      * <p>
      * ESDL carries no unit on the attribute itself, so there is nothing in the file to check this
-     * against. Only the newer convention is supported, because the older files are history.
+     * against.
      */
     private static double getChargeRateKw(Battery esdlBattery) {
         return DoubleStream.of(esdlBattery.getMaxChargeRate(), esdlBattery.getMaxDischargeRate())
-                .filter(chargeRate_kW -> chargeRate_kW != 0.0)
+                .filter(chargeRate_W -> chargeRate_W != 0.0)
+                .map(chargeRate_W -> chargeRate_W * 0.001)
                 .average()
                 .orElseGet(() -> capacityKwh(esdlBattery) * defaultC);
     }

@@ -315,10 +315,8 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     @Override
     public SwitchStatus caseEVChargingStation(EVChargingStation evChargingStation) {
         if (this.processedAssets.add(evChargingStation)) {
-            // The congestion scenario files state this in kW, an 11 kW charger is power="11.0".
-            // The older files state watts, so those are now a thousand times too large.
-            // TODO: decide per file, or get the unit into the ESDL.
-            var maxChargingPowerKw = evChargingStation.getPower();
+            var maxChargingPower_W = evChargingStation.getPower();
+            var maxChargingPowerKw = maxChargingPower_W * 0.001;
             var tripTracker = mobilityDemandLoader.readTripTracker(evChargingStation);
 
             double consumedEnergy_kWh = evChargingStation.getFullLoadHours() * maxChargingPowerKw;
