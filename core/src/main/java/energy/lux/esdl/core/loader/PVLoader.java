@@ -57,20 +57,10 @@ public class PVLoader {
         );
     }
 
-    /**
-     * Prefer the installed power that the ESDL states.
-     * <p>
-     * Not every file has it: tue.esdl for instance only describes the roof, with a surface area
-     * and a panel efficiency, and falling through to a power of zero would silently leave those
-     * houses without any production.
-     */
     private static double getInstallationPowerKw(PVInstallation pvInstallation) {
-        // The congestion scenario files state this in kW: 5 to 9 kWp on 6 to 16 m2 of roof.
-        // The older files state watts, so those are now a thousand times too large.
-        // TODO: decide per file, or get the unit into the ESDL.
-        var installedPowerKw = pvInstallation.getPower();
-        if (installedPowerKw != 0.0) {
-            return installedPowerKw;
+        var installedPower_W = pvInstallation.getPower();
+        if (installedPower_W != 0.0) {
+            return installedPower_W * 0.001;
         }
 
         var estimatedPowerKw = estimatePowerKwFromSurfaceArea(pvInstallation);
