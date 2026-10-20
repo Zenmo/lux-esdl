@@ -78,6 +78,10 @@ public class ScenarioExport {
      * fixed_contract rather than a dynamic_contract. That description is what
      * GridConnectionLoader reads to decide whether the aggregator manages a house, so in those
      * three no house is managed and neither signal has anything to steer.
+     * <p>
+     * ISIE is the current generation, which the ISIE_in_LUX_2 project loads. It lives in that
+     * repository, so its path assumes the checkout sits next to lux-esdl, as lux2 does. The
+     * project adds its main sliders and BAG homes on top; this export runs the ESDL alone.
      */
     public enum Scenario {
         NO_TIME_OF_USE_AND_NO_CONGESTION("no_time_of_use_and_no_congestion.esdl"),
@@ -91,7 +95,8 @@ public class ScenarioExport {
         CORRECTED_TIME_OF_USE_WITHOUT_CONGESTION("corrected_decorated_test_tou_nocongestion_dynamic_normalized.esdl"),
         CORRECTED_TIME_OF_USE_WITH_CONGESTION("corrected_decorated_test_tou_congestion_dynamic_normalized.esdl"),
         DECORATED_CONGESTION_FALSE("decorated_test_congestion_false.esdl"),
-        DECORATED_CONGESTION_TRUE("decorated_test_congestion_true.esdl");
+        DECORATED_CONGESTION_TRUE("decorated_test_congestion_true.esdl"),
+        ISIE("../../../ISIE_in_LUX_2/backend/data/isie.esdl");
 
         private final String esdlFileName;
 
@@ -101,7 +106,7 @@ public class ScenarioExport {
     }
 
     public static void main(String[] args) throws Exception {
-        var esdlFile = esdlDirectory.resolve(scenario.esdlFileName);
+        var esdlFile = esdlDirectory.resolve(scenario.esdlFileName).normalize();
         logger.info("Scenario {}: reading {}", scenario, esdlFile.toAbsolutePath());
 
         EnergySystem esdl = ESDLReader.readResource(esdlFile.toAbsolutePath().toString());
