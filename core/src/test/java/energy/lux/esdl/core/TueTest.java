@@ -59,7 +59,7 @@ public class TueTest {
         var transformerGridNode = TestUtil.findGridNodeById(luxEngine, "d2411d31-08fd-4965-bc85-78a1fb4b3b8d");
         assertNotNull(transformerGridNode, "Transformer grid node not loaded");
 
-        assertEquals(2, luxEngine.pop_gridConnections.size());
+        assertEquals(2, luxEngine.Houses.size());
         var connectionHome1 = TestUtil.findGridConnectionById(luxEngine, "5c19dcff-b004-4644-99b9-f42d15a34f3a");
         assertNotNull(connectionHome1, "ConnectionHome1 not found");
         assertEquals(transformerGridNode.p_gridNodeID, connectionHome1.p_parentNodeElectricID);

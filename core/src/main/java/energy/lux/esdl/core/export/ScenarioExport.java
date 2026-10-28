@@ -180,7 +180,7 @@ public class ScenarioExport {
 
         var wantedId = bestConnection.getId();
         return CollectionUtil.findSingle(
-                energyModel.pop_gridConnections,
+                energyModel.c_gridConnections,
                 gridConnection -> Objects.equals(gridConnection.p_gridConnectionID, wantedId)
         );
     }

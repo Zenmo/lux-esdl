@@ -36,7 +36,7 @@ public class TestUtil {
 
     static GridConnection findGridConnectionById(EnergyModel energyModel, String gridConnectionId) {
         return findSingle(
-                energyModel.pop_gridConnections,
+                energyModel.c_gridConnections,
                 gc -> Objects.equals(gc.p_gridConnectionID, gridConnectionId)
         );
     }

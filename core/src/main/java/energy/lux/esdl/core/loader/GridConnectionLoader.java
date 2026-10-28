@@ -96,7 +96,7 @@ public class GridConnectionLoader {
     private static GridConnection instantiateGridConnection(
             EConnection eConnection, EnergyModel energyModel, GridNode parentGridNode
     ) {
-        var gridConnection = energyModel.add_pop_gridConnections();
+        var gridConnection = addGridConnectionOfType(eConnection, energyModel);
         gridConnection.energyModel = energyModel;
         gridConnection.onCreate();
         gridConnection.p_gridConnectionID = eConnection.getId();
@@ -109,6 +109,24 @@ public class GridConnectionLoader {
         owner.p_actorID = ownerID;
         owner.p_detailedCompany = true;
         return gridConnection;
+    }
+
+    private static GridConnection addGridConnectionOfType(EConnection eConnection, EnergyModel energyModel) {
+        if (isHouse(eConnection)) {
+            return energyModel.add_Houses();
+        }
+        logger.warn("Grid connection {} is not recognized as a house, loading it as a generic grid connection", eConnection.getName());
+        return energyModel.add_pop_gridConnections();
+    }
+
+    /**
+     * The ESDL has no field that says what kind of grid connection an EConnection is. The files
+     * made so far only hold houses, and they name every connection "ConnectionHome...", so the
+     * name is the only hint there is for now.
+     */
+    private static boolean isHouse(EConnection eConnection) {
+        var name = eConnection.getName();
+        return name != null && name.toLowerCase().contains("home");
     }
 
     private static void loadBuilding(
