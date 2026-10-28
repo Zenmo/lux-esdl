@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.EnergyModel;
 import energy.lux.loader.EnergyAssetCreator;
+import energy.lux.engine.gridconnections.GCHouse;
 import energy.lux.engine.gridconnections.GridConnection;
 import energy.lux.engine.GridNode;
 import energy.lux.engine.managementclasses.assetmanagements.chargingmanagements.I_ChargingManagement;
@@ -54,6 +55,7 @@ public class GridConnectionLoader {
 
         var gcSwitch = new GridConnectionAssetIterator(gridConnection, energyModel, eConnection, profilePointerRegistry);
         loadAssetsOfGridConnection(eConnection, gcSwitch);
+        setDrivewayOfHouse(gridConnection);
         checkHeatingAsset(eConnection, energyModel, gridConnection);
         addHotWaterBuffer(energyModel, gridConnection);
         addCustomAssetManagements(eConnection, energyModel, gridConnection);
@@ -117,6 +119,17 @@ public class GridConnectionLoader {
         }
         logger.warn("Grid connection {} is not recognized as a house, loading it as a generic grid connection", eConnection.getName());
         return energyModel.add_pop_gridConnections();
+    }
+
+    /**
+     * The ESDL does not say whether a house has its own driveway. A house with an EV in the ESDL
+     * charges it at home, so it is assumed to park on its own driveway. LUX uses p_eigenOprit to
+     * decide which cars the household private parking sliders act on.
+     */
+    private static void setDrivewayOfHouse(GridConnection gridConnection) {
+        if (gridConnection instanceof GCHouse house && !house.c_electricVehicles.isEmpty()) {
+            house.p_eigenOprit = true;
+        }
     }
 
     /**
