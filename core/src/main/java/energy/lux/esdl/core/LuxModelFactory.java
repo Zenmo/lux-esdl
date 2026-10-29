@@ -59,7 +59,7 @@ public class LuxModelFactory {
                 simulationProject.time_step_h(),
                 simulationProject.start_year(),
                 simulationProject.run_start_time_h(),
-                simulationProject.run_end_time_h(),
+                simulationProject.run_start_time_h() + simulationProject.sim_duration_h(),
                 simulationProject.summer_week_number(),
                 simulationProject.winter_week_number()
         );
