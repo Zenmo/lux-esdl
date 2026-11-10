@@ -45,6 +45,9 @@ public class RootIterator {
             "congestion_management_active"
     );
     private static final double localDynamicCongestionFactor_eurpMWhpkW = 1000.0;
+    // The 6 A minimum current of a charger, on the one phase EVs charge on and the three they discharge on.
+    private static final double evMinimumChargePower_kW = 1.4;
+    private static final double evMinimumDischargePower_kW = 4.1;
     private static final Duration shortestUsableIrradiance = Duration.ofDays(364);
 
     /**
@@ -82,6 +85,7 @@ public class RootIterator {
 
         // After the traversal, which is where the aggregators it acts on are created.
         loadLocalDynamicMeasure(measures, energyModel);
+        setEVMinimumPowers(energyModel);
 
         verifyNumberOfGridConnections(area, energyModel);
     }
@@ -354,6 +358,26 @@ public class RootIterator {
                 "Set the congestion factor of {} aggregators to {} EUR/MWh/kW",
                 aggregators,
                 congestionFactor_eurpMWhpkW
+        );
+    }
+
+    /**
+     * The ESDL says nothing about the chargers, so these minimums hold for every aggregator and EV.
+     */
+    private static void setEVMinimumPowers(EnergyModel luxEngine) {
+        var aggregators = 0;
+        for (var energyCoop : luxEngine.pop_energyCoops) {
+            if (energyCoop.f_getAggregatorEnergyManagement() instanceof J_ISIE_Aggregator_EMS aggregator) {
+                aggregator.setEVMinimumPowers(evMinimumChargePower_kW, evMinimumDischargePower_kW);
+                aggregators++;
+            }
+        }
+
+        logger.info(
+                "Set the EV minimum powers of {} aggregators to {} kW charging and {} kW discharging",
+                aggregators,
+                evMinimumChargePower_kW,
+                evMinimumDischargePower_kW
         );
     }
 
