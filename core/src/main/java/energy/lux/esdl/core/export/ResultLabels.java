@@ -44,7 +44,18 @@ public class ResultLabels {
     );
 
     /**
-     * Mirrors {@code UI_Results.lm_assetFlowLabels}.
+     * The asset flows of the heat export. The UI has no heat export, so these are not mirrored
+     * from it; the electricity of the heat pumps is repeated here so the sheet stands on its own.
+     */
+    public static final EnumSet<OL_AssetFlowCategories> heatAssetFlows = EnumSet.of(
+            OL_AssetFlowCategories.spaceHeating_kW,
+            OL_AssetFlowCategories.hotWaterConsumption_kW,
+            OL_AssetFlowCategories.heatPumpElectricityConsumption_kW
+    );
+
+    /**
+     * Mirrors {@code UI_Results.lm_assetFlowLabels}, plus the two heat demands, which the UI
+     * export does not label.
      */
     private static final Map<OL_AssetFlowCategories, String> assetFlowLabels = buildAssetFlowLabels();
 
@@ -67,6 +78,8 @@ public class ResultLabels {
         labels.put(OL_AssetFlowCategories.dieselGeneratorProductionElectric_kW, "Elektr. opwek diesel gen.");
         labels.put(OL_AssetFlowCategories.methaneGeneratorProductionElectric_kW, "Elektr. opwek gas gen.");
         labels.put(OL_AssetFlowCategories.hydrogenFuelCellProductionElectric_kW, "Elektr. opwek H2 fuelcell");
+        labels.put(OL_AssetFlowCategories.spaceHeating_kW, "Warmtevraag ruimteverwarming");
+        labels.put(OL_AssetFlowCategories.hotWaterConsumption_kW, "Warmtevraag warm tapwater");
         return labels;
     }
 

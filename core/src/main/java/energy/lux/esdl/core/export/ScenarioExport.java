@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.EnergyModel;
 import energy.lux.engine.gridconnections.GridConnection;
+import energy.lux.engine.managementclasses.aggregatormanagements.aggregatorenergymanagements.J_ISIE_Aggregator_EMS;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Run one scenario headlessly and export its electricity profiles, replacing the round trip
@@ -133,7 +135,59 @@ public class ScenarioExport {
                 exportDirectory.resolve(exportFileName("totaal_gebied"))
         );
 
+        exporter.writeHeatProfiles(
+                exportHouse,
+                sheetNameOf(exportHouse),
+                exportDirectory.resolve(exportFileName("woning_warmte"))
+        );
+        exporter.writeHeatProfiles(
+                energyModel,
+                "Totaal van gebied",
+                exportDirectory.resolve(exportFileName("totaal_gebied_warmte"))
+        );
+
+        logAggregatorChecks(energyModel);
         logger.info("Exports written to {}", exportDirectory.toAbsolutePath());
+    }
+
+    /**
+     * The checks the ISIE aggregators keep on how well the houses followed their plans, summed
+     * over all aggregators. They count the rapid run that just ended.
+     */
+    private static void logAggregatorChecks(EnergyModel energyModel) {
+        var aggregators = findIsieAggregators(energyModel);
+        if (aggregators.isEmpty()) {
+            logger.info("No ISIE aggregators, so no aggregator checks to report");
+            return;
+        }
+        logger.info(
+                "EV departures below target: {} of {}; V2G timesteps below floor: {} of {}",
+                sumOf(aggregators, J_ISIE_Aggregator_EMS::getLastRapidRunDeparturesBelowTarget),
+                sumOf(aggregators, J_ISIE_Aggregator_EMS::getLastRapidRunDeparturesChecked),
+                sumOf(aggregators, J_ISIE_Aggregator_EMS::getLastRapidRunTimeStepsBelowFloor),
+                sumOf(aggregators, J_ISIE_Aggregator_EMS::getLastRapidRunTimeStepsCheckedAgainstFloor)
+        );
+        logger.info(
+                "Heat: unmet in plans {} kWh; house timesteps with a changed setpoint {} of {}; comfort deficit {} K·h",
+                sumOf(aggregators, J_ISIE_Aggregator_EMS::getLastRapidRunPlannedUnmetHeat_kWh),
+                sumOf(aggregators, J_ISIE_Aggregator_EMS::getLastRapidRunHeatingTimeStepsWithChangedSetpoints),
+                sumOf(aggregators, J_ISIE_Aggregator_EMS::getLastRapidRunHeatingTimeStepsChecked),
+                sumOf(aggregators, J_ISIE_Aggregator_EMS::getLastRapidRunComfortDeficit_Kh)
+        );
+    }
+
+    private static List<J_ISIE_Aggregator_EMS> findIsieAggregators(EnergyModel energyModel) {
+        var aggregators = new ArrayList<J_ISIE_Aggregator_EMS>();
+        for (var energyCoop : energyModel.pop_energyCoops) {
+            if (energyCoop.f_getAggregatorEnergyManagement() instanceof J_ISIE_Aggregator_EMS aggregator) {
+                aggregators.add(aggregator);
+            }
+        }
+        return aggregators;
+    }
+
+    private static double sumOf(List<J_ISIE_Aggregator_EMS> aggregators, ToDoubleFunction<J_ISIE_Aggregator_EMS> counter) {
+        return aggregators.stream().mapToDouble(counter).sum();
     }
 
     /**

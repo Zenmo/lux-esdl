@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.EnergyModel;
 import energy.lux.engine.I_EnergyData;
+import energy.lux.engine.dataclasses.J_RapidRunData;
 import energy.lux.engine.optionlists.OL_AssetFlowCategories;
 import energy.lux.engine.optionlists.OL_EnergyCarriers;
 
@@ -97,6 +98,68 @@ public class ProfileExporter {
         columns.put(totalName, totalBalance.getTimeSeries_kW().clone());
 
         return columns;
+    }
+
+    /**
+     * The heat side of a scope, which the UI export does not offer: the two heat demands, the
+     * electricity of the heat pumps, the gas the hybrids burn and the heat balance, which stays at
+     * 0 while every heat flow finds an asset that takes it.
+     */
+    public void writeHeatProfiles(I_EnergyData scope, String sheetName, Path destination) {
+        var rapidRunData = scope.getRapidRunData();
+        if (rapidRunData == null) {
+            throw new IllegalStateException(
+                    "No results for " + sheetName + ". Was the rapid simulation run before exporting?"
+            );
+        }
+
+        var columns = new LinkedHashMap<String, double[]>();
+        for (OL_AssetFlowCategories assetFlow : ResultLabels.heatAssetFlows) {
+            addAssetFlowColumn(columns, rapidRunData, assetFlow);
+        }
+        addTotalBalanceColumn(columns, rapidRunData, OL_EnergyCarriers.METHANE);
+        addTotalBalanceColumn(columns, rapidRunData, OL_EnergyCarriers.HEAT);
+        if (columns.isEmpty()) {
+            logger.warn("{} has no heat flows, so no heat profiles are written", sheetName);
+            return;
+        }
+
+        writeWorkbook(columns, sheetName, destination);
+        logger.info("Wrote {} heat columns of {} to {}", columns.size(), sheetName, destination);
+    }
+
+    private void addAssetFlowColumn(
+            Map<String, double[]> columns,
+            J_RapidRunData rapidRunData,
+            OL_AssetFlowCategories assetFlow
+    ) {
+        if (!rapidRunData.assetsMetaData.activeAssetFlows.contains(assetFlow)) {
+            return;
+        }
+        var accumulator = rapidRunData.am_assetFlowsAccumulators_kW.get(assetFlow);
+        var name = ResultLabels.profileTypeName(accumulator.getSignalResolution_h(), timeStep_h())
+                + ResultLabels.assetFlowLabel(assetFlow)
+                + " profiel [" + unit + "]";
+        columns.put(name, accumulator.getTimeSeries_kW().clone());
+    }
+
+    private void addTotalBalanceColumn(
+            Map<String, double[]> columns,
+            J_RapidRunData rapidRunData,
+            OL_EnergyCarriers energyCarrier
+    ) {
+        if (!rapidRunData.activeEnergyCarriers.contains(energyCarrier)) {
+            return;
+        }
+        var totalBalance = rapidRunData.am_totalBalanceAccumulators_kW.get(energyCarrier);
+        var name = ResultLabels.profileTypeName(totalBalance.getSignalResolution_h(), timeStep_h())
+                + ResultLabels.energyCarrierName(energyCarrier)
+                + " profiel [" + unit + "]";
+        columns.put(name, totalBalance.getTimeSeries_kW().clone());
+    }
+
+    private double timeStep_h() {
+        return energyModel.p_timeParameters.getTimeStep_h();
     }
 
     private void writeWorkbook(Map<String, double[]> columns, String sheetName, Path destination) {

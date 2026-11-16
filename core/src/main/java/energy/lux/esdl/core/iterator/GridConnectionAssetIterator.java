@@ -2,11 +2,17 @@ package energy.lux.esdl.core.iterator;
 
 import energy.lux.esdl.core.NotImplemented;
 import energy.lux.esdl.core.util.Util;
+import energy.lux.esdl.core.loader.BuildingThermalLoader;
+import energy.lux.esdl.core.loader.ChargePointSettings;
 import energy.lux.esdl.core.loader.ElectricityDemandLoader;
+import energy.lux.esdl.core.loader.GridConnectionLoader;
+import energy.lux.esdl.core.loader.HeatingChain;
+import energy.lux.esdl.core.loader.HeatingChainFinder;
 import energy.lux.esdl.core.loader.HomeBatteryLoader;
 import energy.lux.esdl.core.loader.MobilityDemandLoader;
 import energy.lux.esdl.core.loader.PVLoader;
 import energy.lux.esdl.core.loader.SwitchStatus;
+import energy.lux.esdl.core.loader.WaterBufferLoader;
 import energy.lux.esdl.core.loader.profile.ProfilePointerRegistry;
 import esdl.*;
 import esdl.util.EsdlSwitch;
@@ -15,19 +21,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.EnergyModel;
 import energy.lux.engine.energyassets.J_EAEV;
-import energy.lux.loader.EnergyAssetCreator;
+import energy.lux.engine.energyassets.J_EAProfile;
+import energy.lux.engine.energyassets.J_EAStorageHeat;
 import energy.lux.engine.gridconnections.GridConnection;
-import energy.lux.engine.managementclasses.assetmanagements.heatingmanagements.I_HeatingManagement;
 import energy.lux.engine.energyassets.J_EAConversionGasBurner;
 import energy.lux.engine.energyassets.J_EAConversionHeatPump;
-import energy.lux.engine.managementclasses.assetmanagements.heatingmanagements.J_HeatingManagementPIcontrol;
-import energy.lux.engine.managementclasses.assetmanagements.heatingmanagements.J_HeatingManagementPIcontrolHybridHeatpump;
+import energy.lux.engine.managementclasses.assetmanagements.heatingmanagements.J_HeatingManagementISIE;
 import energy.lux.engine.optionlists.OL_AmbientTempType;
 import energy.lux.engine.optionlists.OL_ChargingAttitude;
 import energy.lux.engine.optionlists.OL_GridConnectionHeatingType;
 import energy.lux.engine.optionlists.OL_VehicleType;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static energy.lux.esdl.core.loader.SwitchStatus.DONE;
@@ -47,13 +54,13 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     private static final double assumedHybridHeatPumpThermalPower_kW = 6.0;
 
     /**
-     * The heat output the gas burner of a hybrid is given, in kW.
+     * The heat output the gas burner of a hybrid is given, in kW, when the ESDL states no
+     * gasHeaterThermalPower.
      * <p>
-     * The ESDL rates only the heat pump half of a HybridHeatPump, so nothing in the file says how
-     * big the burner is. It carries the peaks the heat pump cannot follow, and the hot water draws
-     * in these files reach about 48 kW, so it is rated above that. Deliberately generous rather
-     * than realistic: an oversized burner only lifts a ceiling, it never produces more heat than
-     * the house asks for, so it costs nothing in energy.
+     * The burner carries the hot water draws, which in these files reach about 48 kW, so it is
+     * rated above that. Deliberately generous rather than realistic: an oversized burner only
+     * lifts a ceiling, it never produces more heat than the house asks for, so it costs nothing
+     * in energy.
      */
     private static final double hybridGasBurnerHeatCapacity_kW = 50.0;
 
@@ -62,18 +69,18 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
      * <p>
      * ESDL states heatPumpThermalPower, the heat the pump delivers, while J_EAConversionHeatPump
      * is built from the electricity it draws and derives its own COP from an empirical curve that
-     * moves with the ambient temperature. There is no single COP to divide by, so this stands in
-     * for the design point. It is the divisor Zero_Loader.f_addHeatAsset uses for a hybrid.
+     * moves with the ambient temperature. The ESDL gives a hybrid no COP to divide by, so this
+     * stands in for the design point. It is the divisor Zero_Loader.f_addHeatAsset uses for a hybrid.
      */
     private static final double hybridHeatPumpDesignCOP = 3.0;
 
     /**
-     * A hybrid draws its heat from the outside air, so it has no source asset feeding it, and its
-     * efficiency is not reduced below freezing. Both are what f_addHeatAsset assumes.
+     * The heat pumps draw their heat from the outside air, so they have no source asset feeding
+     * them, and their efficiency is not reduced below freezing. Both are what f_addHeatAsset assumes.
      */
-    private static final double hybridHeatPumpSourceAssetHeatPower_kW = 0.0;
+    private static final double heatPumpSourceAssetHeatPower_kW = 0.0;
 
-    private static final double hybridHeatPumpBelowZeroEtaReductionFactor = 1.0;
+    private static final double heatPumpBelowZeroEtaReductionFactor = 1.0;
 
     private static final double initialStateOfChargeOfACar_fr = 1.0;
 
@@ -81,8 +88,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
 
     private final EnergyModel energyModel;
 
-    // Temporary: the LUX loader sizes the heat assets.
-    private final EnergyAssetCreator assetCreator = new EnergyAssetCreator();
+    private final BuildingThermalLoader buildingThermalLoader;
 
     private final ElectricityDemandLoader electricityDemandLoader;
 
@@ -103,6 +109,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     ) {
         this.luxGridConnection = luxGridConnection;
         this.energyModel = energyModel;
+        this.buildingThermalLoader = new BuildingThermalLoader(energyModel, profilePointerRegistry);
         this.electricityDemandLoader = new ElectricityDemandLoader(energyModel, profilePointerRegistry);
         this.mobilityDemandLoader = new MobilityDemandLoader(energyModel);
         this.profilePointerRegistry = profilePointerRegistry;
@@ -182,22 +189,34 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     }
 
     /**
-     * Heat demand is not loaded yet: space heating becomes a yearly total for the RC model and
-     * hot water becomes a profile asset, both still to be implemented.
+     * A heat demand is loaded by the heat pump that feeds it, see {@link #loadHeatPumpHeating}.
+     * One that no heat pump feeds is not loaded.
      * <p>
      * The older ESDL files carry HeatingDemand assets without any profile, so only warn when
      * data is actually being dropped.
      */
     @Override
     public SwitchStatus caseHeatingDemand(HeatingDemand heatingDemand) {
-        if (this.processedAssets.add(heatingDemand) && hasProfile(heatingDemand)) {
+        if (this.processedAssets.add(heatingDemand)
+                && hasProfile(heatingDemand)
+                && !HeatingChainFinder.isReachedByHeatPump(heatingDemand)) {
             logger.warn(
-                    "Dropping the profile of {} HeatingDemand {} on grid connection {}, loading it is not implemented",
+                    "Dropping the profile of {} HeatingDemand {} on grid connection {}: no heat pump feeds it,"
+                            + " and loading it without one is not implemented",
                     heatingDemand.getType(),
                     heatingDemand.getName(),
                     luxGridConnection.p_gridConnectionID
             );
         }
+        return DONE;
+    }
+
+    /**
+     * Built by the heat pump that fills it, see {@link #loadHeatPumpHeating}, because the
+     * buffer is sized on that heat pump.
+     */
+    @Override
+    public SwitchStatus caseWaterBuffer(WaterBuffer waterBuffer) {
         return DONE;
     }
 
@@ -221,10 +240,12 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     @Override
     public SwitchStatus caseHeatPump(HeatPump heatPump) {
         if (this.processedAssets.add(heatPump)) {
-            var maxThermalPowerKw = heatPump.getPower() * 0.001;
-            assetCreator.f_addHeatAsset(luxGridConnection, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP, maxThermalPowerKw, energyModel, energyModel.avgc_data);
-            I_HeatingManagement heatingManagement = new J_HeatingManagementPIcontrol(luxGridConnection, energyModel.p_timeParameters, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP);
-            luxGridConnection.f_setHeatingManagement(heatingManagement);
+            var chains = HeatingChainFinder.findHeatPumpChains(heatPump);
+            var luxHeatPump = addHeatPump(
+                    readHeatPumpElectricCapacity_kW(heatPump),
+                    energyModel.avgc_data.avgOutputTemperatureElectricHeatpump_degC()
+            );
+            loadHeatPumpHeating(heatPump, chains, luxHeatPump, null, OL_GridConnectionHeatingType.ELECTRIC_HEATPUMP);
         }
         return DONE;
     }
@@ -232,60 +253,190 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
     @Override
     public SwitchStatus caseHybridHeatPump(HybridHeatPump hybridHeatPump) {
         if (this.processedAssets.add(hybridHeatPump)) {
-            addHybridHeatingAssets(readHybridHeatPumpThermalPower_kW(hybridHeatPump));
-            I_HeatingManagement heatingManagement = new J_HeatingManagementPIcontrolHybridHeatpump(luxGridConnection, energyModel.p_timeParameters, OL_GridConnectionHeatingType.HYBRID_HEATPUMP);
-            luxGridConnection.f_setHeatingManagement(heatingManagement);
+            var chains = HeatingChainFinder.findHybridHeatPumpChains(hybridHeatPump);
+            var luxHeatPump = addHeatPump(
+                    hybridHeatPumpElectricCapacity_kW(readHybridHeatPumpThermalPower_kW(hybridHeatPump)),
+                    energyModel.avgc_data.avgOutputTemperatureHybridHeatpump_degC()
+            );
+            var gasBurner = addGasBurner(readGasBurnerHeatCapacity_kW(hybridHeatPump));
+            loadHeatPumpHeating(hybridHeatPump, chains, luxHeatPump, gasBurner, OL_GridConnectionHeatingType.HYBRID_HEATPUMP);
         }
         return DONE;
     }
 
     /**
-     * Build the heat pump and the gas burner of a hybrid directly, instead of through
-     * Zero_Loader.f_addHeatAsset.
+     * Build the heat stores and the demand profiles behind the heat pump, and hand them to the
+     * heating management by role: the grid connection holds three heat stores but knows only one.
      * <p>
-     * That method derives both halves from a single number: the heat pump gets a third of it and
-     * the burner all of it. With the 6 kW these files state, the burner ends up at 6 kW too, so
-     * the pair tops out near 11 kW of heat while the hot water draws reach 48 kW. The house then
-     * cannot meet its demand and the engine reports a heat unbalance in every timestep it falls
-     * short.
-     * <p>
-     * A hybrid house cannot fall back on a hot water buffer either, because
-     * J_HeatingManagementPIcontrolHybridHeatpump only accepts one alongside solar thermal, which
-     * these houses do not have. That is deliberate in the engine, so the burner has to carry the
-     * peaks by itself and is rated for them here.
-     * <p>
-     * Everything besides the two capacities is what f_addHeatAsset would have used.
+     * A house without a dynamic contract gets the same management, which the aggregator does not
+     * plan. With no setpoints it heats just in time.
      */
-    private void addHybridHeatingAssets(double heatPumpThermalPower_kW) {
-        var averagesData = energyModel.avgc_data;
+    private void loadHeatPumpHeating(
+            EnergyAsset esdlHeatPump,
+            List<HeatingChain> chains,
+            J_EAConversionHeatPump heatPump,
+            J_EAConversionGasBurner gasBurner,
+            OL_GridConnectionHeatingType heatingType
+    ) {
+        var highestHeatOutput_kW = highestHeatOutput_kW(heatPump);
+        var hotWaterChain = HeatingChainFinder.findChainOfType(chains, HeatDemandTypeEnum.HOT_TAPWATER);
+        var spaceHeatingChain = HeatingChainFinder.findChainOfType(chains, HeatDemandTypeEnum.SPACE_HEATING);
 
-        var heatPumpElectricCapacity_kW = Math.max(
-                averagesData.minHeatpumpElectricCapacity_kW(),
+        var hotWaterDemand = addHotWaterDemand(esdlHeatPump, hotWaterChain);
+        var spaceHeatingDemand = buildingThermalLoader.addSpaceHeatingDemand(spaceHeatingChain.demand(), luxGridConnection);
+        var spaceHeatingCapacityHeat_kW = storeCapacityHeat_kW(highestHeatOutput_kW, spaceHeatingDemand);
+
+        var heatingManagement = new J_HeatingManagementISIE(
+                luxGridConnection,
+                energyModel.p_timeParameters,
+                heatingType,
+                heatPump,
+                gasBurner,
+                addHotWaterBuffer(hotWaterChain, hotWaterDemand, highestHeatOutput_kW),
+                WaterBufferLoader.loadWaterBuffer(spaceHeatingChain.buffer(), luxGridConnection, energyModel, spaceHeatingCapacityHeat_kW),
+                buildingThermalLoader.addHeatBattery(
+                        findBuilding(esdlHeatPump),
+                        spaceHeatingChain.demand(),
+                        luxGridConnection,
+                        spaceHeatingCapacityHeat_kW
+                ),
+                hotWaterDemand,
+                spaceHeatingDemand
+        );
+        heatingManagement.setPlannedByAggregator(GridConnectionLoader.hasDynamicContract(entryPoint));
+        luxGridConnection.f_setHeatingManagement(heatingManagement);
+    }
+
+    /**
+     * @return null when the heat pump feeds no hot water demand, which only a hybrid may do
+     */
+    private J_EAProfile addHotWaterDemand(EnergyAsset esdlHeatPump, HeatingChain hotWaterChain) {
+        if (hotWaterChain == null) {
+            logger.warn(
+                    "Heat pump {} feeds no hot water demand, so grid connection {} uses no hot water",
+                    Util.printItem(esdlHeatPump),
+                    luxGridConnection.p_gridConnectionID
+            );
+            return null;
+        }
+        return buildingThermalLoader.addHotWaterDemand(hotWaterChain.demand(), luxGridConnection);
+    }
+
+    /**
+     * @return null for a hybrid, whose gas burner heats the hot water as it is drawn
+     */
+    private J_EAStorageHeat addHotWaterBuffer(HeatingChain hotWaterChain, J_EAProfile hotWaterDemand, double highestHeatOutput_kW) {
+        if (hotWaterChain == null || hotWaterChain.buffer() == null) {
+            return null;
+        }
+        return WaterBufferLoader.loadWaterBuffer(
+                hotWaterChain.buffer(),
+                luxGridConnection,
+                energyModel,
+                storeCapacityHeat_kW(highestHeatOutput_kW, hotWaterDemand)
+        );
+    }
+
+    /**
+     * LUX caps the flow in or out of a store at its capacityHeat_kW. A store must take what the
+     * heat pump makes on its warmest hour and give what its demand draws at the peak, or the heat
+     * of the grid connection does not balance. The rated thermal power of the ESDL is not enough:
+     * it holds at the design COP only.
+     */
+    private static double storeCapacityHeat_kW(double highestHeatOutput_kW, J_EAProfile demand) {
+        return Math.max(highestHeatOutput_kW, demand.getPeakConsumptionPower_kW());
+    }
+
+    /**
+     * @return the heat the heat pump makes at the COP of the warmest hour of the year
+     */
+    private double highestHeatOutput_kW(J_EAConversionHeatPump heatPump) {
+        var warmestAmbientTemperature_degC = Arrays.stream(energyModel.pp_ambientTemperature_degC.getAllValues())
+                .max()
+                .orElseThrow();
+        return heatPump.getInputCapacity_kW()
+                * heatPump.calculateCOP(heatPump.getOutputTemperature_degC(), warmestAmbientTemperature_degC);
+    }
+
+    private static GenericBuilding findBuilding(EnergyAsset esdlHeatPump) {
+        var building = esdlHeatPump.getContainingBuilding();
+        if (building instanceof GenericBuilding genericBuilding) {
+            return genericBuilding;
+        }
+        throw new NotImplemented(
+                "Heat pump " + Util.printItem(esdlHeatPump) + " is not in a GenericBuilding but in " + building
+        );
+    }
+
+    /**
+     * The ESDL states the heat the heat pump delivers as power, the engine wants the electricity
+     * it draws. The ESDL COP is the design point; the engine derives its own COP per timestep
+     * from the outside air.
+     */
+    private static double readHeatPumpElectricCapacity_kW(HeatPump heatPump) {
+        Util.throwIfZero(heatPump.getPower(), heatPump, "power");
+        Util.throwIfZero(heatPump.getCOP(), heatPump, "COP");
+        return heatPump.getPower() * 0.001 / heatPump.getCOP();
+    }
+
+    /**
+     * The ESDL gives no COP for a hybrid, so the thermal power is divided by the design COP.
+     */
+    private double hybridHeatPumpElectricCapacity_kW(double heatPumpThermalPower_kW) {
+        return Math.max(
+                energyModel.avgc_data.minHeatpumpElectricCapacity_kW(),
                 heatPumpThermalPower_kW / hybridHeatPumpDesignCOP
         );
+    }
 
+    /**
+     * Built directly instead of through EnergyAssetCreator.f_addHeatAsset, which takes the
+     * thermal power the ESDL states for the electric capacity. Everything besides the capacity
+     * is what f_addHeatAsset would have used.
+     */
+    private J_EAConversionHeatPump addHeatPump(double electricCapacity_kW, double outputTemperature_degC) {
+        var averagesData = energyModel.avgc_data;
         // The constructor registers the heat pump with the grid connection, which also puts it in
         // EnergyModel.c_ambientDependentAssets, so its COP follows the outside air by itself.
-        new J_EAConversionHeatPump(
+        return new J_EAConversionHeatPump(
                 luxGridConnection,
-                heatPumpElectricCapacity_kW,
+                electricCapacity_kW,
                 averagesData.avgEfficiencyHeatpump_fr(),
                 energyModel.p_timeParameters,
-                averagesData.avgOutputTemperatureHybridHeatpump_degC(),
+                outputTemperature_degC,
                 energyModel.pp_ambientTemperature_degC.getCurrentValue(),
-                hybridHeatPumpSourceAssetHeatPower_kW,
-                hybridHeatPumpBelowZeroEtaReductionFactor,
+                heatPumpSourceAssetHeatPower_kW,
+                heatPumpBelowZeroEtaReductionFactor,
                 OL_AmbientTempType.AMBIENT_AIR
         );
+    }
 
-        // The burner registers itself the same way.
-        new J_EAConversionGasBurner(
+    /**
+     * Built directly rather than through f_addHeatAsset, which would derive the burner of a
+     * hybrid from the thermal power of its heat pump.
+     */
+    private J_EAConversionGasBurner addGasBurner(double heatCapacity_kW) {
+        var averagesData = energyModel.avgc_data;
+        // The burner registers itself with the grid connection.
+        return new J_EAConversionGasBurner(
                 luxGridConnection,
-                Math.max(averagesData.minGasBurnerOutputCapacity_kW(), hybridGasBurnerHeatCapacity_kW),
+                heatCapacity_kW,
                 averagesData.avgEfficiencyGasBurner_fr(),
                 energyModel.p_timeParameters,
                 averagesData.avgOutputTemperatureGasBurner_degC()
         );
+    }
+
+    /**
+     * @return the thermal power of the gas heater the ESDL states, or
+     *         {@link #hybridGasBurnerHeatCapacity_kW} when it states none.
+     */
+    private double readGasBurnerHeatCapacity_kW(HybridHeatPump hybridHeatPump) {
+        var statedThermalPower_kW = hybridHeatPump.getGasHeaterThermalPower() * 0.001;
+        if (statedThermalPower_kW > 0) {
+            return statedThermalPower_kW;
+        }
+        return Math.max(energyModel.avgc_data.minGasBurnerOutputCapacity_kW(), hybridGasBurnerHeatCapacity_kW);
     }
 
     /**
@@ -326,7 +477,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
             var electricVehicle = new J_EAEV(
                     luxGridConnection,
                     maxChargingPowerKw,
-                    averagesData.avgEVStorageCar_kWh(),
+                    readBatteryCapacity_kWh(evChargingStation),
                     initialStateOfChargeOfACar_fr,
                     energyModel.p_timeParameters,
                     averagesData.avgEVEnergyConsumptionCar_kWhpkm(),
@@ -334,6 +485,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
                     OL_VehicleType.CAR,
                     tripTracker
             );
+            ChargePointSettings.read(evChargingStation).setChargingEfficienciesOf(electricVehicle);
             if (tripTracker == null) {
                 electricVehicle.getTripTracker().setAnnualDistance_km(traveledDistance_km);
             }
@@ -344,6 +496,18 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
             }
         }
         return DONE;
+    }
+
+    /**
+     * @return the battery the description of the charge point states, or the average car battery
+     *         of LUX when it states none.
+     */
+    private double readBatteryCapacity_kWh(EVChargingStation evChargingStation) {
+        var statedCapacity_kWh = ChargePointSettings.read(evChargingStation).batteryCapacity_kWh();
+        if (statedCapacity_kWh == null) {
+            return energyModel.avgc_data.avgEVStorageCar_kWh();
+        }
+        return statedCapacity_kWh;
     }
 
     @Override

@@ -3,6 +3,7 @@ package energy.lux.esdl.core.iterator;
 import energy.lux.esdl.core.ESDLReader;
 import energy.lux.esdl.core.EsdlException;
 import energy.lux.esdl.core.NotImplemented;
+import energy.lux.esdl.core.loader.ChargePointSettings;
 import energy.lux.esdl.core.loader.profile.GlobalProfileLoader;
 import energy.lux.esdl.core.loader.profile.ProfilePointerRegistry;
 import energy.lux.esdl.core.loader.profile.TimeOfUseTariff;
@@ -24,6 +25,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static energy.lux.esdl.core.util.CollectionUtil.single;
 
@@ -46,8 +50,15 @@ public class RootIterator {
     );
     private static final double localDynamicCongestionFactor_eurpMWhpkW = 1000.0;
     // The 6 A minimum current of a charger, on the one phase EVs charge on and the three they discharge on.
+    // The charge minimum is only used when the charge points state none.
     private static final double evMinimumChargePower_kW = 1.4;
     private static final double evMinimumDischargePower_kW = 4.1;
+    /**
+     * Below this COP the aggregator gives the heat pump of a hybrid no room in its plan and the
+     * gas burner heats. The ESDL states nothing on it; 3.0 is the value of the old forecast and
+     * probably high, to be tuned.
+     */
+    private static final double hybridHeatPumpCOPSwitch_r = 3.0;
     private static final Duration shortestUsableIrradiance = Duration.ofDays(364);
 
     /**
@@ -85,7 +96,8 @@ public class RootIterator {
 
         // After the traversal, which is where the aggregators it acts on are created.
         loadLocalDynamicMeasure(measures, energyModel);
-        setEVMinimumPowers(energyModel);
+        setChargePointSettings(area, energyModel);
+        setHybridHeatPumpCOPSwitch(energyModel);
 
         verifyNumberOfGridConnections(area, energyModel);
     }
@@ -362,22 +374,73 @@ public class RootIterator {
     }
 
     /**
-     * The ESDL says nothing about the chargers, so these minimums hold for every aggregator and EV.
+     * The aggregator plans every EV with one minimum charge power and one V2G floor, so the charge
+     * points have to agree on them. The charge minimum falls back to {@link #evMinimumChargePower_kW}
+     * when no charge point states one. The ESDL states no discharge minimum, so that one is always
+     * {@link #evMinimumDischargePower_kW}.
      */
-    private static void setEVMinimumPowers(EnergyModel luxEngine) {
+    private static void setChargePointSettings(Area area, EnergyModel luxEngine) {
+        var allSettings = ChargePointSettings.readAll(area);
+
+        var statedChargePower_kW = agreedSetting(allSettings, ChargePointSettings::minimumChargePower_kW, "minimum charge power");
+        var chargePower_kW = statedChargePower_kW == null ? evMinimumChargePower_kW : statedChargePower_kW;
+        var v2gMinimumStateOfCharge_fr = agreedSetting(allSettings, ChargePointSettings::v2gMinimumStateOfCharge_fr, "V2G minimum state of charge");
+
         var aggregators = 0;
         for (var energyCoop : luxEngine.pop_energyCoops) {
             if (energyCoop.f_getAggregatorEnergyManagement() instanceof J_ISIE_Aggregator_EMS aggregator) {
-                aggregator.setEVMinimumPowers(evMinimumChargePower_kW, evMinimumDischargePower_kW);
+                aggregator.setEVMinimumPowers(chargePower_kW, evMinimumDischargePower_kW);
+                if (v2gMinimumStateOfCharge_fr != null) {
+                    aggregator.setV2GMinimumStateOfCharge_fr(v2gMinimumStateOfCharge_fr);
+                }
                 aggregators++;
             }
         }
 
         logger.info(
-                "Set the EV minimum powers of {} aggregators to {} kW charging and {} kW discharging",
+                "Set the EVs of {} aggregators to minimum {} kW charging and {} kW discharging, V2G floor {}",
                 aggregators,
-                evMinimumChargePower_kW,
-                evMinimumDischargePower_kW
+                chargePower_kW,
+                evMinimumDischargePower_kW,
+                v2gMinimumStateOfCharge_fr == null ? "not stated" : v2gMinimumStateOfCharge_fr
+        );
+    }
+
+    /**
+     * @return the value all charge points that state the setting agree on, or null when none states it.
+     */
+    private static Double agreedSetting(
+            List<ChargePointSettings> allSettings,
+            Function<ChargePointSettings, Double> setting,
+            String settingName
+    ) {
+        var values = allSettings.stream()
+                .map(setting)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (values.size() > 1) {
+            throw new EsdlException(String.format(
+                    "The charge points state different values for the %s, %s, but LUX plans every EV with one",
+                    settingName,
+                    values
+            ));
+        }
+        return values.isEmpty() ? null : values.iterator().next();
+    }
+
+    private static void setHybridHeatPumpCOPSwitch(EnergyModel luxEngine) {
+        var aggregators = 0;
+        for (var energyCoop : luxEngine.pop_energyCoops) {
+            if (energyCoop.f_getAggregatorEnergyManagement() instanceof J_ISIE_Aggregator_EMS aggregator) {
+                aggregator.setHybridHeatPumpCOPSwitch(hybridHeatPumpCOPSwitch_r);
+                aggregators++;
+            }
+        }
+
+        logger.info(
+                "Set the hybrid heat pump COP switch of {} aggregators to {}",
+                aggregators,
+                hybridHeatPumpCOPSwitch_r
         );
     }
 

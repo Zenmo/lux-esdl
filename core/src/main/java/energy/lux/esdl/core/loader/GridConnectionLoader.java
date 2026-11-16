@@ -4,6 +4,7 @@ import energy.lux.esdl.core.iterator.GridConnectionAssetIterator;
 import energy.lux.esdl.core.loader.profile.ProfilePointerRegistry;
 import esdl.Asset;
 import esdl.EConnection;
+import esdl.EVChargingStation;
 import esdl.OutPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import energy.lux.engine.managementclasses.assetmanagements.chargingmanagements.
 import energy.lux.engine.managementclasses.assetmanagements.batterymanagements.I_BatteryManagement;
 import energy.lux.engine.managementclasses.assetmanagements.chargingmanagements.J_ChargingManagementExternalSetpoint;
 import energy.lux.engine.managementclasses.assetmanagements.batterymanagements.J_BatteryManagementExternalSetpoint;
+import energy.lux.engine.managementclasses.assetmanagements.heatingmanagements.J_HeatingManagementISIE;
 import energy.lux.engine.energyassets.J_EAConversionHeatPump;
 import energy.lux.engine.energyassets.J_EAProfile;
 import energy.lux.engine.energyassets.J_EAStorageHeat;
@@ -59,7 +61,40 @@ public class GridConnectionLoader {
         checkHeatingAsset(eConnection, energyModel, gridConnection);
         addHotWaterBuffer(energyModel, gridConnection);
         addCustomAssetManagements(eConnection, energyModel, gridConnection);
+        activateV2G(eConnection, gridConnection);
         return gridConnection;
+    }
+
+    /**
+     * The EVs and charge points of LUX are V2G capable by default; what switches V2G on is the
+     * charging management, and only the external setpoint one that the aggregator steers can.
+     * A house whose charge point states V2G without a dynamic contract keeps charging only.
+     */
+    private static void activateV2G(EConnection eConnection, GridConnection luxGridConnection) {
+        if (!statesV2G(eConnection)) {
+            return;
+        }
+        if (luxGridConnection.f_getChargingManagement() instanceof J_ChargingManagementExternalSetpoint chargingManagement) {
+            chargingManagement.setV2GActive(true);
+            return;
+        }
+        logger.warn(
+                "The charge point of grid connection {} states V2G, but the house has no dynamic contract, so its EV only charges",
+                eConnection.getName()
+        );
+    }
+
+    private static boolean statesV2G(EConnection eConnection) {
+        var building = eConnection.getContainingBuilding();
+        if (building == null) {
+            return false;
+        }
+        for (Asset asset : building.getAsset()) {
+            if (asset instanceof EVChargingStation chargingStation && ChargePointSettings.read(chargingStation).statesV2G()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -156,11 +191,21 @@ public class GridConnectionLoader {
         // It seems valid to have a grid connection without a building, no warning necessary.
     }
 
+    /**
+     * Whether the aggregator on the parent GridNode manages the assets of this house. The ESDL
+     * has no field for the contract, so the decorator writes it into the description.
+     */
+    public static boolean hasDynamicContract(EConnection eConnection) {
+        var description = eConnection.getDescription();
+        return description != null && description.contains("dynamic_contract"); // TODO: Make this check more robust?
+    }
+
     private static void addCustomAssetManagements(EConnection eConnection, EnergyModel energyModel, GridConnection luxGridConnection) {
-        // All houses have already gotten heating management PI Control
+        // Heating already has its management: houses with a heat pump get J_HeatingManagementISIE, planned by the
+        // aggregator only with a dynamic contract.
         // For other assets houses with a dynamic contract have their assets managed by the aggregator on the parent GridNode
         // Houses without a dynamic contract have the default SIMPLE charging & SELF CONSUMPTION battery algorithms.
-        if (eConnection.getDescription().contains("dynamic_contract")) { // TODO: Make this check more robust?
+        if (hasDynamicContract(eConnection)) {
             I_ChargingManagement chargingManagement = new J_ChargingManagementExternalSetpoint(luxGridConnection, energyModel.p_timeParameters);
             luxGridConnection.f_setChargingManagement(chargingManagement);
             I_BatteryManagement batteryManagement = new J_BatteryManagementExternalSetpoint(luxGridConnection, energyModel.p_timeParameters);
@@ -177,12 +222,16 @@ public class GridConnectionLoader {
      * up short and the run pauses. A real house of that kind has a cylinder, which is what
      * p_heatBuffer models, and the PI control already knows how to charge and discharge one.
      * <p>
-     * Only houses with an electric heat pump get a buffer. They are the ones that get
-     * J_HeatingManagementPIcontrol from {@link GridConnectionAssetIterator}, and that is the
-     * only management here proven to drive a buffer. Houses that fell back to a gas burner keep
-     * the management f_addHeatAsset chose for them and are left alone.
+     * Only houses with an electric heat pump on J_HeatingManagementPIcontrol get a buffer, the
+     * only management here proven to drive one. Houses that fell back to a gas burner keep the
+     * management f_addHeatAsset chose for them and are left alone. Houses on
+     * J_HeatingManagementISIE have the buffers of the ESDL already.
      */
     private static void addHotWaterBuffer(EnergyModel energyModel, GridConnection luxGridConnection) {
+        if (luxGridConnection.f_getHeatingManagement() instanceof J_HeatingManagementISIE) {
+            return;
+        }
+
         var hotWaterAsset = luxGridConnection.p_DHWAsset;
         if (hotWaterAsset == null) {
             // The PI control refuses a buffer that has no hot water demand to hold water for.
