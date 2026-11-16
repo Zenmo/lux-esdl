@@ -98,7 +98,10 @@ public class ScenarioExport {
         CORRECTED_TIME_OF_USE_WITH_CONGESTION("corrected_decorated_test_tou_congestion_dynamic_normalized.esdl"),
         DECORATED_CONGESTION_FALSE("decorated_test_congestion_false.esdl"),
         DECORATED_CONGESTION_TRUE("decorated_test_congestion_true.esdl"),
-        ISIE("../../../ISIE_in_LUX_2/backend/data/isie.esdl");
+        ISIE("../../../ISIE_in_LUX_2/backend/data/isie.esdl"),
+        // One house of ISIE with PV, an EV and a grafted battery, cut out by ISIE_in_LUX_2/tools/single_house_esdl.py.
+        ISIE_SINGLE_HEAT_PUMP("../../../ISIE_in_LUX_2/backend/data/isie_single_heat_pump.esdl"),
+        ISIE_SINGLE_HYBRID_HEAT_PUMP("../../../ISIE_in_LUX_2/backend/data/isie_single_hybrid_heat_pump.esdl");
 
         private final String esdlFileName;
 
