@@ -9,14 +9,17 @@ import esdl.ProfileElement;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An hourly price signal that is charged on top of the day-ahead market price.
  * LUX has no notion of a time of use tariff, so the reader folds it into the day-ahead price
  * profile before the engine ever sees it.
- * The ESDL states the tariff for the first day of every month, hour by hour. That is how the
- * seasonal variation is expressed: every day of a month repeats the tariff of that month's
- * first day.
+ * The ESDL states the tariff for the first day of every month, in blocks of whole hours. That is
+ * how the seasonal variation is expressed: every day of a month repeats the tariff of that
+ * month's first day. A block without a value has weight 0: EMF does not write a value equal to
+ * its default.
  * The values in the file are weights between 0 and 1. What one unit of weight is worth is still
  * an open policy question and is not expected to be settled before 2028, so
  * tariffHeight_eurpMWh stands in for it.
@@ -24,7 +27,7 @@ import java.time.ZonedDateTime;
 public class TimeOfUseTariff {
     private static final int monthsPerYear = 12;
     private static final int hoursPerDay = 24;
-    private static final Duration expectedElementDuration = Duration.ofHours(1);
+    private static final Duration hour = Duration.ofHours(1);
     /**
      * What one unit of tariff weight is worth, in EUR/MWh. 600 EUR/MWh is 60 cents/kWh.
      */
@@ -40,14 +43,14 @@ public class TimeOfUseTariff {
         var isFilled = new boolean[monthsPerYear][hoursPerDay];
 
         for (ProfileElement element : profile.getElement()) {
-            assertElementCoversOneHour(element);
+            for (Instant hourStart : hoursCoveredBy(element)) {
+                var from = toLuxZone(hourStart);
+                var month = from.getMonthValue() - 1;
+                var hourOfDay = from.getHour();
 
-            var from = toLuxZone(element.getFrom().toInstant());
-            var month = from.getMonthValue() - 1;
-            var hour = from.getHour();
-
-            weightByMonthAndHour[month][hour] = element.getValue();
-            isFilled[month][hour] = true;
+                weightByMonthAndHour[month][hourOfDay] = element.getValue();
+                isFilled[month][hourOfDay] = true;
+            }
         }
 
         assertEveryHourIsFilled(isFilled);
@@ -87,12 +90,26 @@ public class TimeOfUseTariff {
         return instant.atZone(DateTimeUtil.luxTimeZone);
     }
 
-    private static void assertElementCoversOneHour(ProfileElement element) {
-        var duration = Duration.between(element.getFrom().toInstant(), element.getTo().toInstant());
-        if (!duration.equals(expectedElementDuration)) {
-            throw new EsdlException(
-                    "Time of use tariff is expected to be hourly, but an element covers " + duration
-            );
+    private static List<Instant> hoursCoveredBy(ProfileElement element) {
+        var from = element.getFrom().toInstant();
+        var to = element.getTo().toInstant();
+        assertCoversWholeHours(from, to);
+        var hourStarts = new ArrayList<Instant>();
+        for (var hourStart = from; hourStart.isBefore(to); hourStart = hourStart.plus(hour)) {
+            hourStarts.add(hourStart);
+        }
+        return hourStarts;
+    }
+
+    private static void assertCoversWholeHours(Instant from, Instant to) {
+        var duration = Duration.between(from, to);
+        var startsOnTheHour = from.getEpochSecond() % hour.toSeconds() == 0 && from.getNano() == 0;
+        if (!startsOnTheHour || duration.isNegative() || duration.isZero() || duration.toSeconds() % hour.toSeconds() != 0) {
+            throw new EsdlException(String.format(
+                    "Time of use tariff is expected in blocks of whole hours, but an element runs from %s to %s",
+                    from,
+                    to
+            ));
         }
     }
 

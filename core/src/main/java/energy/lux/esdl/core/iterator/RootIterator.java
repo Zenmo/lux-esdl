@@ -4,6 +4,8 @@ import energy.lux.esdl.core.ESDLReader;
 import energy.lux.esdl.core.EsdlException;
 import energy.lux.esdl.core.NotImplemented;
 import energy.lux.esdl.core.loader.ChargePointSettings;
+import energy.lux.esdl.core.loader.marketfeedback.MarketFeedbackWeightsLoader;
+import energy.lux.esdl.core.loader.marketfeedback.RepresentedArchetype;
 import energy.lux.esdl.core.loader.profile.GlobalProfileLoader;
 import energy.lux.esdl.core.loader.profile.ProfilePointerRegistry;
 import energy.lux.esdl.core.loader.profile.TimeOfUseTariff;
@@ -37,7 +39,8 @@ import static energy.lux.esdl.core.util.CollectionUtil.single;
 public class RootIterator {
     private static final Logger logger = LoggerFactory.getLogger(RootIterator.class);
 
-    private static final String timeOfUseTariffMeasureName = "tou_tariff";
+    // Called "tou_tariff" until the November 2026 generation; an older file now reads as charging no tariff.
+    private static final String timeOfUseTariffMeasureName = "time of use";
     /**
      * The ESDL renamed this measure from spaces to underscores in September 2026 and both
      * spellings are in circulation, so both are accepted. Reading only one of them is not a
@@ -72,6 +75,18 @@ public class RootIterator {
             EnergySystem esdlEnergySystem,
             EnergyModel energyModel
     ) {
+        loadEsdlIntoLux(esdlEnergySystem, energyModel, null);
+    }
+
+    /**
+     * @param representedArchetype the part of the country the ESDL stands for, which sets how much its aggregators
+     *                             move the price; null to keep the national constants of the aggregator
+     */
+    public static void loadEsdlIntoLux(
+            EnergySystem esdlEnergySystem,
+            EnergyModel energyModel,
+            RepresentedArchetype representedArchetype
+    ) {
         Measures measures = esdlEnergySystem.getMeasures();
 
         var weather = loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), energyModel);
@@ -98,6 +113,8 @@ public class RootIterator {
         loadLocalDynamicMeasure(measures, energyModel);
         setChargePointSettings(area, energyModel);
         setHybridHeatPumpCOPSwitch(energyModel);
+        // After the charge point settings, which switch V2G on.
+        MarketFeedbackWeightsLoader.setMarketFeedbackWeights(energyModel, representedArchetype);
 
         verifyNumberOfGridConnections(area, energyModel);
     }

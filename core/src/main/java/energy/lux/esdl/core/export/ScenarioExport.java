@@ -3,6 +3,7 @@ package energy.lux.esdl.core.export;
 import energy.lux.esdl.core.ESDLReader;
 import energy.lux.esdl.core.LuxModelFactory;
 import energy.lux.esdl.core.iterator.RootIterator;
+import energy.lux.esdl.core.loader.marketfeedback.RepresentedArchetype;
 import energy.lux.esdl.core.util.CollectionUtil;
 import esdl.Asset;
 import esdl.Battery;
@@ -101,12 +102,31 @@ public class ScenarioExport {
         ISIE("../../../ISIE_in_LUX_2/backend/data/isie.esdl"),
         // One house of ISIE with PV, an EV and a grafted battery, cut out by ISIE_in_LUX_2/tools/single_house_esdl.py.
         ISIE_SINGLE_HEAT_PUMP("../../../ISIE_in_LUX_2/backend/data/isie_single_heat_pump.esdl"),
-        ISIE_SINGLE_HYBRID_HEAT_PUMP("../../../ISIE_in_LUX_2/backend/data/isie_single_hybrid_heat_pump.esdl");
+        ISIE_SINGLE_HYBRID_HEAT_PUMP("../../../ISIE_in_LUX_2/backend/data/isie_single_hybrid_heat_pump.esdl"),
+        // Scenarios of the ISIE model comparison, with normalised electricity profiles. They live in the ISIE repository.
+        // 11 and 12 have dynamic contracts. Their heat pumps and PV match archetype 1woDH; that they stand for the km
+        // stock family with the high adoption level is a guess, as the files do not say.
+        ISIE_SCENARIO_10("../../../ISIE/Scenarios/Scenarios Modelvergelijking/scenario_10_normalised.esdl"),
+        ISIE_SCENARIO_11(
+                "../../../ISIE/Scenarios/Scenarios Modelvergelijking/scenario_11_normalised.esdl",
+                new RepresentedArchetype("km", "1woDH", 0.8)
+        ),
+        ISIE_SCENARIO_12(
+                "../../../ISIE/Scenarios/Scenarios Modelvergelijking/scenario_12_normalised.esdl",
+                new RepresentedArchetype("km", "1woDH", 0.8)
+        );
 
         private final String esdlFileName;
+        // Null when the ESDL stands for the whole country, as the national constants of the aggregator assume.
+        private final RepresentedArchetype representedArchetype;
 
         Scenario(String esdlFileName) {
+            this(esdlFileName, null);
+        }
+
+        Scenario(String esdlFileName, RepresentedArchetype representedArchetype) {
             this.esdlFileName = esdlFileName;
+            this.representedArchetype = representedArchetype;
         }
     }
 
@@ -116,7 +136,7 @@ public class ScenarioExport {
 
         EnergySystem esdl = ESDLReader.readResource(esdlFile.toAbsolutePath().toString());
         var energyModel = LuxModelFactory.createEnergyModel();
-        RootIterator.loadEsdlIntoLux(esdl, energyModel);
+        RootIterator.loadEsdlIntoLux(esdl, energyModel, scenario.representedArchetype);
 
         logger.info("Running the simulated year");
         energyModel.f_initializeEngine();
