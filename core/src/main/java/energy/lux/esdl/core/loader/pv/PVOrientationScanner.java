@@ -7,7 +7,9 @@ import esdl.PVInstallation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -22,7 +24,9 @@ public class PVOrientationScanner {
 
     public static Set<PVOrientation> scanOrientations(Area area) {
         var orientations = new LinkedHashSet<PVOrientation>();
-        collectFromArea(area, orientations);
+        for (var pvInstallation : findPVInstallations(area)) {
+            orientations.add(PVOrientation.of(pvInstallation));
+        }
 
         logger.info(
                 "Found {} distinct PV orientation(s) in the ESDL",
@@ -32,26 +36,32 @@ public class PVOrientationScanner {
         return orientations;
     }
 
+    public static List<PVInstallation> findPVInstallations(Area area) {
+        var pvInstallations = new ArrayList<PVInstallation>();
+        collectFromArea(area, pvInstallations);
+        return pvInstallations;
+    }
+
     // Current ESDL files only have PVInstallations inside Buildings, for completeness we also walk through the area.
-    private static void collectFromArea(Area area, Set<PVOrientation> orientations) {
+    private static void collectFromArea(Area area, List<PVInstallation> pvInstallations) {
         for (Asset asset : area.getAsset()) {
-            collectFromAsset(asset, orientations);
+            collectFromAsset(asset, pvInstallations);
         }
 
         for (Area nestedArea : area.getArea()) {
-            collectFromArea(nestedArea, orientations);
+            collectFromArea(nestedArea, pvInstallations);
         }
     }
 
-    private static void collectFromAsset(Asset asset, Set<PVOrientation> orientations) {
+    private static void collectFromAsset(Asset asset, List<PVInstallation> pvInstallations) {
         if (asset instanceof PVInstallation pvInstallation) {
-            orientations.add(PVOrientation.of(pvInstallation));
+            pvInstallations.add(pvInstallation);
             return;
         }
 
         if (asset instanceof AbstractBuilding building) {
             for (Asset containedAsset : building.getAsset()) {
-                collectFromAsset(containedAsset, orientations);
+                collectFromAsset(containedAsset, pvInstallations);
             }
         }
     }

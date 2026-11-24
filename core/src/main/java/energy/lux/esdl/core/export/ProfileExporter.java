@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import energy.lux.engine.EnergyModel;
 import energy.lux.engine.I_EnergyData;
 import energy.lux.engine.dataclasses.J_RapidRunData;
+import energy.lux.engine.gridconnections.GridConnection;
 import energy.lux.engine.optionlists.OL_AssetFlowCategories;
 import energy.lux.engine.optionlists.OL_EnergyCarriers;
 
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static energy.lux.esdl.core.util.DateTimeUtil.luxTimeZone;
@@ -117,6 +119,7 @@ public class ProfileExporter {
         for (OL_AssetFlowCategories assetFlow : ResultLabels.heatAssetFlows) {
             addAssetFlowColumn(columns, rapidRunData, assetFlow);
         }
+        addHeatPumpElectricityByHeatingTypeColumns(columns, scope, rapidRunData);
         addTotalBalanceColumn(columns, rapidRunData, OL_EnergyCarriers.METHANE);
         addTotalBalanceColumn(columns, rapidRunData, OL_EnergyCarriers.HEAT);
         if (columns.isEmpty()) {
@@ -141,6 +144,109 @@ public class ProfileExporter {
                 + ResultLabels.assetFlowLabel(assetFlow)
                 + " profiel [" + unit + "]";
         columns.put(name, accumulator.getTimeSeries_kW().clone());
+    }
+
+    /**
+     * The heat pump electricity of the scope, split into houses with an all-electric heat pump and
+     * houses with a hybrid one.
+     * <p>
+     * The engine models a hybrid heat pump as the same heat pump asset as an all-electric one, next
+     * to a gas burner, so the asset flow totals of a scope cannot tell them apart. Other models
+     * report the two separately, and the ISIE model comparison compares them with and without
+     * the hybrids. Every grid connection keeps its own asset flows over the rapid run, and its
+     * heating type says which kind of heat pump it has, so the split is a sum over the grid
+     * connections of the scope. The two columns add up to the heat pump electricity column.
+     */
+    private void addHeatPumpElectricityByHeatingTypeColumns(
+            Map<String, double[]> columns,
+            I_EnergyData scope,
+            J_RapidRunData scopeRapidRunData
+    ) {
+        var heatPumpFlow = OL_AssetFlowCategories.heatPumpElectricityConsumption_kW;
+        if (!scopeRapidRunData.assetsMetaData.activeAssetFlows.contains(heatPumpFlow)) {
+            return;
+        }
+        var scopeAccumulator = scopeRapidRunData.am_assetFlowsAccumulators_kW.get(heatPumpFlow);
+        var numberOfTimeSteps = scopeAccumulator.getTimeSeries_kW().length;
+        var allElectric_kW = new double[numberOfTimeSteps];
+        var hybrid_kW = new double[numberOfTimeSteps];
+
+        for (GridConnection gridConnection : gridConnectionsOf(scope)) {
+            var heatPumpElectricity_kW = heatPumpElectricityOf(gridConnection, numberOfTimeSteps);
+            if (heatPumpElectricity_kW == null) {
+                continue;
+            }
+            switch (gridConnection.f_getCurrentHeatingType()) {
+                case ELECTRIC_HEATPUMP -> addTo(allElectric_kW, heatPumpElectricity_kW);
+                case HYBRID_HEATPUMP -> addTo(hybrid_kW, heatPumpElectricity_kW);
+                default -> throw new IllegalStateException(
+                        "Grid connection " + gridConnection.p_gridConnectionID + " has heat pump electricity, but"
+                                + " heating type " + gridConnection.f_getCurrentHeatingType()
+                                + ", which is neither an all-electric nor a hybrid heat pump"
+                );
+            }
+        }
+
+        var profileTypeName = ResultLabels.profileTypeName(scopeAccumulator.getSignalResolution_h(), timeStep_h());
+        var label = ResultLabels.assetFlowLabel(heatPumpFlow);
+        columns.put(profileTypeName + label + " all-electric warmtepompen profiel [" + unit + "]", allElectric_kW);
+        columns.put(profileTypeName + label + " hybride warmtepompen profiel [" + unit + "]", hybrid_kW);
+        logSplitMismatch(scopeAccumulator.getTimeSeries_kW(), allElectric_kW, hybrid_kW);
+    }
+
+    private static List<GridConnection> gridConnectionsOf(I_EnergyData scope) {
+        if (scope instanceof EnergyModel energyModel) {
+            return energyModel.c_gridConnections;
+        }
+        if (scope instanceof GridConnection gridConnection) {
+            return List.of(gridConnection);
+        }
+        throw new IllegalArgumentException(
+                "Cannot split the heat pump electricity of a " + scope.getClass().getSimpleName()
+        );
+    }
+
+    /**
+     * @return null when the grid connection has no heat pump.
+     */
+    private static double[] heatPumpElectricityOf(GridConnection gridConnection, int numberOfTimeSteps) {
+        var rapidRunData = gridConnection.getRapidRunData();
+        var heatPumpFlow = OL_AssetFlowCategories.heatPumpElectricityConsumption_kW;
+        if (rapidRunData == null || !rapidRunData.assetsMetaData.activeAssetFlows.contains(heatPumpFlow)) {
+            return null;
+        }
+        var heatPumpElectricity_kW = rapidRunData.am_assetFlowsAccumulators_kW.get(heatPumpFlow).getTimeSeries_kW();
+        if (heatPumpElectricity_kW.length != numberOfTimeSteps) {
+            throw new IllegalStateException(
+                    "Grid connection " + gridConnection.p_gridConnectionID + " has " + heatPumpElectricity_kW.length
+                            + " heat pump time steps, its scope has " + numberOfTimeSteps
+            );
+        }
+        return heatPumpElectricity_kW;
+    }
+
+    private static void addTo(double[] sum, double[] values) {
+        for (int i = 0; i < sum.length; i++) {
+            sum[i] += values[i];
+        }
+    }
+
+    /**
+     * A mismatch means the scope holds heat pumps outside its grid connections, such as those of
+     * sub grid connections, which the split does not reach.
+     */
+    private static void logSplitMismatch(double[] total_kW, double[] allElectric_kW, double[] hybrid_kW) {
+        var largestDifference_kW = 0.0;
+        for (int i = 0; i < total_kW.length; i++) {
+            var difference_kW = Math.abs(total_kW[i] - allElectric_kW[i] - hybrid_kW[i]);
+            largestDifference_kW = Math.max(largestDifference_kW, difference_kW);
+        }
+        if (largestDifference_kW > 1e-6) {
+            logger.warn(
+                    "The heat pump electricity split misses up to {} kW of the heat pump electricity total",
+                    largestDifference_kW
+            );
+        }
     }
 
     private void addTotalBalanceColumn(

@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
+import com.zenmo.timeseries.untyped.ArrayTimeSeriesImpl;
 import energy.lux.esdl.core.EsdlException;
 import esdl.DateTimeProfile;
 import esdl.EsdlFactory;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -39,6 +41,17 @@ public class TimeOfUseTariffTest {
         var tariff = TimeOfUseTariff.fromProfile(scenarioProfile());
 
         assertThat(tariff.tariff_eurpMWh(LocalDateTime.of(2050, 6, 15, 13, 0).atZone(amsterdam))).isZero();
+    }
+
+    @Test
+    void theTariffComesOnTheTimestepsOfThePricesWithoutThem() {
+        var tariff = TimeOfUseTariff.fromProfile(scenarioProfile());
+        // 19:00 and 20:00 UTC in June: the 0.7 block. 10:00 UTC: no tariff.
+        var prices_eurpMWh = new ArrayTimeSeriesImpl(utc(2050, 6, 15, 19, 0), Duration.ofHours(1), new double[] {100, 100});
+        var middayPrices_eurpMWh = new ArrayTimeSeriesImpl(utc(2050, 6, 15, 10, 0), Duration.ofHours(1), new double[] {100});
+
+        assertThat(tariff.onTimestepsOf(prices_eurpMWh).copyValuesArray()).containsExactly(new double[] {420, 420}, within(1e-9));
+        assertThat(tariff.onTimestepsOf(middayPrices_eurpMWh).copyValuesArray()).containsExactly(0.0);
     }
 
     @Test

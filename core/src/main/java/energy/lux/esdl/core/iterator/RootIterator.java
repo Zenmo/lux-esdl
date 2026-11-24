@@ -13,12 +13,14 @@ import energy.lux.esdl.core.loader.profile.Weather;
 import energy.lux.esdl.core.loader.pv.PVOrientationScanner;
 import energy.lux.esdl.core.loader.pv.PVProfileLoader;
 import energy.lux.esdl.core.loader.pv.PVSite;
+import com.zenmo.timeseries.untyped.ArrayTimeSeries;
 import esdl.*;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.EnergyModel;
+import energy.lux.engine.J_ProfilePointer;
 import energy.lux.engine.managementclasses.aggregatormanagements.aggregatorenergymanagements.J_ISIE_Aggregator_EMS;
 
 import java.nio.file.Path;
@@ -91,7 +93,7 @@ public class RootIterator {
 
         var weather = loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), energyModel);
         loadParties(esdlEnergySystem.getParties(), energyModel);
-        loadServices(esdlEnergySystem.getServices(), energyModel, readTimeOfUseTariff(measures));
+        var timeOfUseTariffProfile = loadServices(esdlEnergySystem.getServices(), energyModel, readTimeOfUseTariff(measures));
 
         var instance = single(esdlEnergySystem.getInstance(), Instance.class.getName());
 
@@ -111,6 +113,7 @@ public class RootIterator {
 
         // After the traversal, which is where the aggregators it acts on are created.
         loadLocalDynamicMeasure(measures, energyModel);
+        setTimeOfUseTariff(energyModel, timeOfUseTariffProfile);
         setChargePointSettings(area, energyModel);
         setHybridHeatPumpCOPSwitch(energyModel);
         // After the charge point settings, which switch V2G on.
@@ -300,7 +303,7 @@ public class RootIterator {
 
         PVProfileLoader.generateAndRegister(
                 profilePointerRegistry,
-                PVSite.cabauw(),
+                PVSite.readFrom(PVOrientationScanner.findPVInstallations(area)),
                 weather,
                 orientations
         );
@@ -489,19 +492,55 @@ public class RootIterator {
         return null;
     }
 
-    private static void loadServices(
+    /**
+     * @return the profile of the time of use tariff, on the timesteps of the day-ahead prices, or null when the ESDL
+     *         states no tariff or no prices
+     */
+    private static J_ProfilePointer loadServices(
             Services services,
             EnergyModel energyModel,
             TimeOfUseTariff timeOfUseTariff
     ) {
-        if (services == null) return;
-        for (Service service : services.getService()) {
-            if (service instanceof EnergyMarket energyMarket) {
-                var profileLoader = new GlobalProfileLoader(energyModel);
-                profileLoader.loadDayAheadElectricityPricing(energyMarket, timeOfUseTariff);
-            } else {
-                logger.warn("Loading ESDL service type {} not implemented", service.getClass());
+        ArrayTimeSeries dayAheadPrices_eurpMWh = null;
+        if (services != null) {
+            for (Service service : services.getService()) {
+                if (service instanceof EnergyMarket energyMarket) {
+                    var profileLoader = new GlobalProfileLoader(energyModel);
+                    dayAheadPrices_eurpMWh = profileLoader.loadDayAheadElectricityPricing(energyMarket);
+                } else {
+                    logger.warn("Loading ESDL service type {} not implemented", service.getClass());
+                }
             }
         }
+        if (timeOfUseTariff == null) {
+            return null;
+        }
+        if (dayAheadPrices_eurpMWh == null) {
+            logger.warn("The ESDL states a time of use tariff but no day-ahead prices, so the tariff is not charged");
+            return null;
+        }
+        return new GlobalProfileLoader(energyModel).loadTimeOfUseTariff(timeOfUseTariff, dayAheadPrices_eurpMWh);
+    }
+
+    /**
+     * Only the ISIE aggregators charge the tariff. The loader steers no other asset on the price, so a house that no
+     * aggregator plans does not respond to the tariff either way.
+     */
+    private static void setTimeOfUseTariff(EnergyModel luxEngine, J_ProfilePointer timeOfUseTariffProfile) {
+        if (timeOfUseTariffProfile == null) {
+            return;
+        }
+        var aggregators = 0;
+        for (var energyCoop : luxEngine.pop_energyCoops) {
+            if (energyCoop.f_getAggregatorEnergyManagement() instanceof J_ISIE_Aggregator_EMS aggregator) {
+                aggregator.setTimeOfUseTariff(timeOfUseTariffProfile);
+                aggregators++;
+            }
+        }
+        if (aggregators == 0) {
+            logger.warn("The ESDL states a time of use tariff, but there is no ISIE aggregator to charge it");
+            return;
+        }
+        logger.info("Set the time of use tariff of {} aggregators", aggregators);
     }
 }

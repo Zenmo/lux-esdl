@@ -114,7 +114,11 @@ public class ScenarioExport {
         ISIE_SCENARIO_12(
                 "../../../ISIE/Scenarios/Scenarios Modelvergelijking/scenario_12_normalised.esdl",
                 new RepresentedArchetype("km", "1woDH", 0.8)
-        );
+        ),
+        // 11 and 12 without a represented archetype, so their aggregators get the market feedback of the national
+        // fleet: the planned fleet of the file stands for all flex assets in the country.
+        ISIE_SCENARIO_11_NATIONAL_FLEET("../../../ISIE/Scenarios/Scenarios Modelvergelijking/scenario_11_normalised.esdl"),
+        ISIE_SCENARIO_12_NATIONAL_FLEET("../../../ISIE/Scenarios/Scenarios Modelvergelijking/scenario_12_normalised.esdl");
 
         private final String esdlFileName;
         // Null when the ESDL stands for the whole country, as the national constants of the aggregator assume.

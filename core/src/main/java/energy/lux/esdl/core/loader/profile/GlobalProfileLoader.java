@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import energy.lux.engine.optionlists.OL_ProfileUnits;
 import energy.lux.engine.EnergyModel;
+import energy.lux.engine.J_ProfilePointer;
 
 import java.time.Year;
 
@@ -66,27 +67,16 @@ public class GlobalProfileLoader {
 
     /**
      * TODO: This assumes that only electricity prices are given.
+     *
+     * @return the day-ahead prices, or null when the market states none
      */
-    public void loadDayAheadElectricityPricing(
-            EnergyMarket energyMarket,
-            TimeOfUseTariff timeOfUseTariff
-    ) {
+    public ArrayTimeSeries loadDayAheadElectricityPricing(EnergyMarket energyMarket) {
         var marketPrice = energyMarket.getMarketPrice();
         if (marketPrice == null) {
-            return;
+            return null;
         }
 
         var priceTimeSeries = this.bareProfileReader.readProfile(marketPrice);
-
-        // LUX has no time of use tariff of its own, so it is charged by raising the price
-        // that the engine sees. Do this before the range check so it covers the final prices.
-        if (timeOfUseTariff != null) {
-            priceTimeSeries = timeOfUseTariff.addTo(priceTimeSeries);
-            logger.info(
-                    "Added a time of use tariff of up to {} EUR/MWh to the day-ahead electricity price",
-                    timeOfUseTariff.peakTariff_eurpMWh()
-            );
-        }
 
         for (var value : priceTimeSeries.copyValuesArray()) {
             if (value < -1000 || value > 10_000) {
@@ -102,6 +92,24 @@ public class GlobalProfileLoader {
                 OL_ProfileUnits.PRICE_EURPMWH
         );
         energyModel.pp_dayAheadElectricityPricing_eurpMWh = priceProfilePointer;
+        return priceTimeSeries;
+    }
+
+    /**
+     * The tariff gets its own profile, on the timesteps of the day-ahead prices, and is not added to them: a house
+     * pays it only on what it takes from the grid.
+     */
+    public J_ProfilePointer loadTimeOfUseTariff(TimeOfUseTariff timeOfUseTariff, ArrayTimeSeries dayAheadPrices_eurpMWh) {
+        var tariffTimeSeries = timeOfUseTariff.onTimestepsOf(dayAheadPrices_eurpMWh);
+        logger.info(
+                "Loaded a time of use tariff of up to {} EUR/MWh, charged only on what houses take from the grid",
+                timeOfUseTariff.peakTariff_eurpMWh()
+        );
+        return this.profilePointerFactory.timeSeriesToProfilePointer(
+                tariffTimeSeries,
+                "esdl_time_of_use_tariff_eur_per_mwh",
+                OL_ProfileUnits.PRICE_EURPMWH
+        );
     }
 
     /**

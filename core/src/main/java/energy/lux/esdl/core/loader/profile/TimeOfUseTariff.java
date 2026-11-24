@@ -13,9 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An hourly price signal that is charged on top of the day-ahead market price.
- * LUX has no notion of a time of use tariff, so the reader folds it into the day-ahead price
- * profile before the engine ever sees it.
+ * An hourly grid operator tariff that a house pays on top of the day-ahead market price, but only
+ * on what it takes from the grid: feeding in earns none of it. So it is not folded into the
+ * day-ahead price, which would let V2G and batteries trade on it. LUX itself has no notion of
+ * it; the ISIE aggregators are given it as a profile of its own.
  * The ESDL states the tariff for the first day of every month, in blocks of whole hours. That is
  * how the seasonal variation is expressed: every day of a month repeats the tariff of that
  * month's first day. A block without a value has weight 0: EMF does not write a value equal to
@@ -58,13 +59,16 @@ public class TimeOfUseTariff {
         return new TimeOfUseTariff(weightByMonthAndHour);
     }
 
-    public ArrayTimeSeries addTo(ArrayTimeSeries dayAheadPrices_eurpMWh) {
+    /**
+     * The tariff on the same timesteps as the given series, so the two line up in the engine.
+     */
+    public ArrayTimeSeries onTimestepsOf(ArrayTimeSeries dayAheadPrices_eurpMWh) {
         var start = Instant.from(dayAheadPrices_eurpMWh.getStart());
         var stepSeconds = Math.round(DateTimeUtil.durationToHours(dayAheadPrices_eurpMWh.getStep()) * 3600);
 
-        var values = dayAheadPrices_eurpMWh.copyValuesArray();
+        var values = new double[dayAheadPrices_eurpMWh.copyValuesArray().length];
         for (int i = 0; i < values.length; i++) {
-            values[i] += tariff_eurpMWh(toLuxZone(start.plusSeconds(i * stepSeconds)));
+            values[i] = tariff_eurpMWh(toLuxZone(start.plusSeconds(i * stepSeconds)));
         }
 
         return (ArrayTimeSeries) dayAheadPrices_eurpMWh.toBuilder()
