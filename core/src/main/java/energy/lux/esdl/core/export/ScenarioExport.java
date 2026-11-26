@@ -19,6 +19,7 @@ import energy.lux.engine.EnergyModel;
 import energy.lux.engine.gridconnections.GridConnection;
 import energy.lux.engine.managementclasses.aggregatormanagements.aggregatorenergymanagements.J_ISIE_Aggregator_EMS;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -118,7 +119,12 @@ public class ScenarioExport {
         // 11 and 12 without a represented archetype, so their aggregators get the market feedback of the national
         // fleet: the planned fleet of the file stands for all flex assets in the country.
         ISIE_SCENARIO_11_NATIONAL_FLEET("../../../ISIE/Scenarios/Scenarios Modelvergelijking/scenario_11_normalised.esdl"),
-        ISIE_SCENARIO_12_NATIONAL_FLEET("../../../ISIE/Scenarios/Scenarios Modelvergelijking/scenario_12_normalised.esdl");
+        ISIE_SCENARIO_12_NATIONAL_FLEET("../../../ISIE/Scenarios/Scenarios Modelvergelijking/scenario_12_normalised.esdl"),
+        // The first of the national scenario: one ESDL per pocket and archetype without district heating.
+        ISIE_NATIONAL_POCKET1_KM_HOOG_TOU_ARCH1(
+                "../../../ISIE/Scenarios/National Scenario/pocket_1/km_hoog_tou/pocket1_km_hoog_tou_arch1.esdl",
+                new RepresentedArchetype("km", 1, "1woDH", 0.8)
+        );
 
         private final String esdlFileName;
         // Null when the ESDL stands for the whole country, as the national constants of the aggregator assume.
@@ -146,6 +152,16 @@ public class ScenarioExport {
         energyModel.f_initializeEngine();
         energyModel.f_runRapidSimulation();
 
+        exportResults(esdl, energyModel, scenario.name().toLowerCase(), exportDirectory);
+    }
+
+    /**
+     * Write the exports of a model whose rapid run has ended.
+     *
+     * @param runName what the names of the files call the run
+     */
+    static void exportResults(EnergySystem esdl, EnergyModel energyModel, String runName, Path exportDirectory)
+            throws IOException {
         Files.createDirectories(exportDirectory);
         var exporter = new ProfileExporter(energyModel);
 
@@ -153,24 +169,24 @@ public class ScenarioExport {
         exporter.writeElectricityProfiles(
                 exportHouse,
                 sheetNameOf(exportHouse),
-                exportDirectory.resolve(exportFileName("woning"))
+                exportDirectory.resolve(exportFileName(runName, "woning"))
         );
 
         exporter.writeElectricityProfiles(
                 energyModel,
                 "Totaal van gebied",
-                exportDirectory.resolve(exportFileName("totaal_gebied"))
+                exportDirectory.resolve(exportFileName(runName, "totaal_gebied"))
         );
 
         exporter.writeHeatProfiles(
                 exportHouse,
                 sheetNameOf(exportHouse),
-                exportDirectory.resolve(exportFileName("woning_warmte"))
+                exportDirectory.resolve(exportFileName(runName, "woning_warmte"))
         );
         exporter.writeHeatProfiles(
                 energyModel,
                 "Totaal van gebied",
-                exportDirectory.resolve(exportFileName("totaal_gebied_warmte"))
+                exportDirectory.resolve(exportFileName(runName, "totaal_gebied_warmte"))
         );
 
         logAggregatorChecks(energyModel);
@@ -203,7 +219,7 @@ public class ScenarioExport {
         );
     }
 
-    private static List<J_ISIE_Aggregator_EMS> findIsieAggregators(EnergyModel energyModel) {
+    static List<J_ISIE_Aggregator_EMS> findIsieAggregators(EnergyModel energyModel) {
         var aggregators = new ArrayList<J_ISIE_Aggregator_EMS>();
         for (var energyCoop : energyModel.pop_energyCoops) {
             if (energyCoop.f_getAggregatorEnergyManagement() instanceof J_ISIE_Aggregator_EMS aggregator) {
@@ -296,7 +312,7 @@ public class ScenarioExport {
         return gridConnection.p_ownerID + ", " + address;
     }
 
-    private static String exportFileName(String scopeName) {
-        return "Export_ModelData_" + scenario.name().toLowerCase() + "_" + scopeName + ".xlsx";
+    private static String exportFileName(String runName, String scopeName) {
+        return "Export_ModelData_" + runName + "_" + scopeName + ".xlsx";
     }
 }

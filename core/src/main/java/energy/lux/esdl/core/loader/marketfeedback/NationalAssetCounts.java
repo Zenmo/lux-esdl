@@ -10,8 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * How many households and flex assets the whole country has in one archetype, whatever their contract. One row of
- * national_asset_counts.csv, which generate_national_asset_counts.py makes from ISIE/Pockets_to_archetypes.
+ * How many households and flex assets the country has in one archetype, in one pocket or in all of them, whatever
+ * their contract. From national_asset_counts.csv, which generate_national_asset_counts.py makes from
+ * ISIE/Pockets_to_archetypes and which has a row per pocket.
  * The counts are fractional: the archetype data divides national totals over pockets and archetypes.
  */
 public record NationalAssetCounts(
@@ -24,31 +25,48 @@ public record NationalAssetCounts(
 ) {
     private static final String tableResource = "/marketfeedback/national_asset_counts.csv";
     private static final String expectedHeader =
-            "stock_family,sub_archetype,households,heat_pumps,hybrid_heat_pumps,evs,v2g_evs,batteries";
+            "stock_family,pocket,sub_archetype,households,heat_pumps,hybrid_heat_pumps,evs,v2g_evs,batteries";
 
     public static NationalAssetCounts of(RepresentedArchetype archetype) {
-        for (String row : readRows()) {
-            String[] cells = row.split(",");
-            if (cells[0].equals(archetype.stockFamily()) && cells[1].equals(archetype.subArchetype())) {
-                return parseCounts(cells);
-            }
-        }
-        throw new EsdlException(String.format(
-                "%s has no row for stock family %s and sub-archetype %s",
-                tableResource,
-                archetype.stockFamily(),
-                archetype.subArchetype()
-        ));
+        return readRows().stream()
+                .map(row -> row.split(","))
+                .filter(cells -> isOf(cells, archetype))
+                .map(NationalAssetCounts::parseCounts)
+                .reduce(NationalAssetCounts::plus)
+                .orElseThrow(() -> new EsdlException(String.format(
+                        "%s has no row for stock family %s, pocket %s and sub-archetype %s",
+                        tableResource,
+                        archetype.stockFamily(),
+                        archetype.pocket() == null ? "any" : archetype.pocket(),
+                        archetype.subArchetype()
+                )));
+    }
+
+    private static boolean isOf(String[] cells, RepresentedArchetype archetype) {
+        return cells[0].equals(archetype.stockFamily())
+                && (archetype.pocket() == null || Integer.parseInt(cells[1]) == archetype.pocket())
+                && cells[2].equals(archetype.subArchetype());
+    }
+
+    private NationalAssetCounts plus(NationalAssetCounts other) {
+        return new NationalAssetCounts(
+                this.households + other.households,
+                this.heatPumps + other.heatPumps,
+                this.hybridHeatPumps + other.hybridHeatPumps,
+                this.evs + other.evs,
+                this.v2gEvs + other.v2gEvs,
+                this.batteries + other.batteries
+        );
     }
 
     private static NationalAssetCounts parseCounts(String[] cells) {
         return new NationalAssetCounts(
-                Double.parseDouble(cells[2]),
                 Double.parseDouble(cells[3]),
                 Double.parseDouble(cells[4]),
                 Double.parseDouble(cells[5]),
                 Double.parseDouble(cells[6]),
-                Double.parseDouble(cells[7])
+                Double.parseDouble(cells[7]),
+                Double.parseDouble(cells[8])
         );
     }
 

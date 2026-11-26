@@ -1,5 +1,6 @@
 package energy.lux.esdl.core.loader.profile;
 
+import energy.lux.esdl.core.EsdlException;
 import energy.lux.esdl.core.loader.profile.bare.BareProfileChecker;
 import energy.lux.esdl.core.loader.profile.bare.BareProfileReader;
 import energy.lux.esdl.core.util.DateTimeUtil;
@@ -93,6 +94,32 @@ public class GlobalProfileLoader {
         );
         energyModel.pp_dayAheadElectricityPricing_eurpMWh = priceProfilePointer;
         return priceTimeSeries;
+    }
+
+    /**
+     * Plan and bill on another price than the day-ahead price of the ESDL, such as the price another ESDL left behind.
+     *
+     * @param price_eurpMWh one value per timestep of the run, from its start on
+     */
+    public void replaceDayAheadElectricityPricing(double[] price_eurpMWh) {
+        var timeParameters = energyModel.p_timeParameters;
+        if (price_eurpMWh.length != timeParameters.getNumberOfTimeSteps()) {
+            throw new EsdlException(String.format(
+                    "The start price has %d values, the run has %d timesteps",
+                    price_eurpMWh.length,
+                    timeParameters.getNumberOfTimeSteps()
+            ));
+        }
+        var pricePointer = new J_ProfilePointer(
+                "start_price_eur_per_mwh",
+                price_eurpMWh.clone(),
+                timeParameters.getTimeStep_h(),
+                timeParameters.getRunStartTime_h(),
+                OL_ProfileUnits.PRICE_EURPMWH
+        );
+        energyModel.f_addProfile(pricePointer);
+        energyModel.pp_dayAheadElectricityPricing_eurpMWh = pricePointer;
+        logger.info("Replaced the day-ahead price of the ESDL by a given start price");
     }
 
     /**

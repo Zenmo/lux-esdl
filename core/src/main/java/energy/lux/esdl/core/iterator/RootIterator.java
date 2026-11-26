@@ -89,11 +89,29 @@ public class RootIterator {
             EnergyModel energyModel,
             RepresentedArchetype representedArchetype
     ) {
+        loadEsdlIntoLux(esdlEnergySystem, energyModel, representedArchetype, null);
+    }
+
+    /**
+     * @param representedArchetype as above
+     * @param startPrice_eurpMWh   the price the aggregators plan on instead of the day-ahead price of the ESDL, one
+     *                             value per timestep of the run; null to keep the price of the ESDL. The time of use
+     *                             tariff stays that of the ESDL.
+     */
+    public static void loadEsdlIntoLux(
+            EnergySystem esdlEnergySystem,
+            EnergyModel energyModel,
+            RepresentedArchetype representedArchetype,
+            double[] startPrice_eurpMWh
+    ) {
         Measures measures = esdlEnergySystem.getMeasures();
 
         var weather = loadEnvironmentalProfiles(esdlEnergySystem.getEnergySystemInformation(), energyModel);
         loadParties(esdlEnergySystem.getParties(), energyModel);
         var timeOfUseTariffProfile = loadServices(esdlEnergySystem.getServices(), energyModel, readTimeOfUseTariff(measures));
+        if (startPrice_eurpMWh != null) {
+            new GlobalProfileLoader(energyModel).replaceDayAheadElectricityPricing(startPrice_eurpMWh);
+        }
 
         var instance = single(esdlEnergySystem.getInstance(), Instance.class.getName());
 

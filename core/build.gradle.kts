@@ -117,6 +117,26 @@ tasks.register<JavaExec>("exportScenario") {
     luxPythonExecutable.orNull?.let { systemProperty("lux.pythonExecutable", it) }
 }
 
+// Runs the ESDLs of a national scenario one after the other, each on the price the one before it left.
+// ./gradlew exportNationalScenario -PscenarioKey=km_hoog_tou
+//   -Ppockets=1,3           only these pockets; all of them by default
+//   -PfollowOn=<curve csv>  (absolute path) start from the end price of this curve instead of the day-ahead price
+//   -PchainOutput=<folder>  (absolute path) where the results go; a chain of other ESDLs needs a folder of its own
+tasks.register<JavaExec>("exportNationalScenario") {
+    group = "application"
+    description = "Run the ESDLs of a national scenario as a chain and export their results and price curves."
+    mainClass.set("energy.lux.esdl.core.export.NationalScenarioExport")
+    classpath = sourceSets.main.get().runtimeClasspath
+    maxHeapSize = "8g"
+    workingDir = lux2Directory
+    systemProperty("scenarioKey", (project.findProperty("scenarioKey") ?: "") as String)
+    systemProperty("pockets", (project.findProperty("pockets") ?: "") as String)
+    systemProperty("followOn", (project.findProperty("followOn") ?: "") as String)
+    systemProperty("chainOutput", (project.findProperty("chainOutput") ?: "") as String)
+    systemProperty("lux.nationalScenarioDirectory", rootDir.resolve("../ISIE/Scenarios/National Scenario").canonicalPath)
+    luxPythonExecutable.orNull?.let { systemProperty("lux.pythonExecutable", it) }
+}
+
 // Turns the electricity profiles of an ESDL into the normalized shape that the loader reads.
 // ./gradlew normalizeEsdl -PesdlIn=<input.esdl> -PesdlOut=<output.esdl>   (absolute paths)
 tasks.register<JavaExec>("normalizeEsdl") {
