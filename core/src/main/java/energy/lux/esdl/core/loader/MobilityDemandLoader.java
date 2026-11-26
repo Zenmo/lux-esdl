@@ -1,5 +1,6 @@
 package energy.lux.esdl.core.loader;
 
+import energy.lux.esdl.core.EsdlException;
 import energy.lux.esdl.core.NotImplemented;
 import energy.lux.esdl.core.util.DateTimeUtil;
 import esdl.DateTimeProfile;
@@ -8,8 +9,6 @@ import esdl.GenericProfile;
 import esdl.MobilityDemand;
 import esdl.Port;
 import esdl.ProfileElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import energy.lux.engine.activitytrackers.J_ActivityTrackerTrips;
 import energy.lux.engine.activitytrackers.J_ActivityTrackerTrips.TripRecord;
 import energy.lux.engine.EnergyModel;
@@ -28,12 +27,14 @@ import java.util.List;
  * the start of the next is a trip, and the energy of the session that follows a trip is what
  * that trip consumed, which gives its distance.
  * <p>
+ * The energy of a session is what the charge point drew from the grid. Only the efficiency of
+ * the charge point times that ends up in the battery, so only that much was driven. The engine
+ * applies the same efficiency when it charges, so it draws the stated energy from the grid again.
+ * <p>
  * That leaves the stretch before the first session, which no session accounts for. The vehicle
  * is treated as being at home then, since there is no energy to derive a distance from.
  */
 public class MobilityDemandLoader {
-    private static final Logger logger = LoggerFactory.getLogger(MobilityDemandLoader.class);
-
     private static final double hoursPerYear = 8760;
 
     private final EnergyModel energyModel;
@@ -46,27 +47,28 @@ public class MobilityDemandLoader {
     }
 
     /**
-     * @return a trip tracker built from the charging sessions of this charge point,
-     *         or null when the ESDL states none, in which case LUX falls back to its own
-     *         weekly trip patterns.
+     * @return a trip tracker built from the charging sessions of this charge point.
+     * @throws EsdlException when the charge point has no MobilityDemand with charging sessions,
+     *         since there is then nothing to derive its trips from.
      */
     public J_ActivityTrackerTrips readTripTracker(EVChargingStation chargingStation) {
         var mobilityDemand = findMobilityDemand(chargingStation);
         if (mobilityDemand == null) {
-            return null;
+            throw new EsdlException(
+                    "Charge point " + chargingStation.getName() + " is not connected to a MobilityDemand"
+            );
         }
 
         var profile = findChargingSessionProfile(mobilityDemand);
         if (profile == null) {
-            logger.warn(
-                    "MobilityDemand {} of charging station {} has no profile of charging sessions",
+            throw new EsdlException(String.format(
+                    "MobilityDemand %s of charge point %s has no profile of charging sessions",
                     mobilityDemand.getName(),
                     chargingStation.getName()
-            );
-            return null;
+            ));
         }
 
-        var sessions = readChargingSessions(profile);
+        var sessions = readChargingSessions(profile, chargingEfficiencyOf(chargingStation));
         var trips = toTrips(sessions, energyConsumptionOfACar_kWhpkm());
 
         return new J_ActivityTrackerTrips(energyModel.p_timeParameters, trips);
@@ -106,14 +108,25 @@ public class MobilityDemandLoader {
         return dateTimeProfile;
     }
 
+    // The EV gets the same default of no losses when the charge point states no efficiency.
+    private static double chargingEfficiencyOf(EVChargingStation chargingStation) {
+        var chargingEfficiency_fr = ChargePointSettings.read(chargingStation).chargingEfficiency_fr();
+        if (chargingEfficiency_fr == null) {
+            return 1.0;
+        }
+        return chargingEfficiency_fr;
+    }
+
     /**
      * A charging session: the vehicle is at its charge point between these two moments,
      * expressed in hours since the start of the simulation year.
+     *
+     * @param energyIntoBattery_kWh the energy the ESDL states, after the losses of the charge point
      */
-    private record ChargingSession(double arrival_h, double departure_h, double chargedEnergy_kWh) {
+    private record ChargingSession(double arrival_h, double departure_h, double energyIntoBattery_kWh) {
     }
 
-    private List<ChargingSession> readChargingSessions(DateTimeProfile profile) {
+    private List<ChargingSession> readChargingSessions(DateTimeProfile profile, double chargingEfficiency_fr) {
         var sessions = new ArrayList<ChargingSession>();
 
         for (ProfileElement element : profile.getElement()) {
@@ -126,7 +139,8 @@ public class MobilityDemandLoader {
                 departure_h += hoursPerYear;
             }
 
-            sessions.add(new ChargingSession(arrival_h, departure_h, element.getValue()));
+            var energyFromGrid_kWh = element.getValue();
+            sessions.add(new ChargingSession(arrival_h, departure_h, energyFromGrid_kWh * chargingEfficiency_fr));
         }
 
         sessions.sort(Comparator.comparingDouble(ChargingSession::arrival_h));
@@ -150,7 +164,7 @@ public class MobilityDemandLoader {
             trips.add(new TripRecord(
                     departure,
                     nextArrival.arrival_h(),
-                    nextArrival.chargedEnergy_kWh() / energyConsumption_kWhpkm
+                    nextArrival.energyIntoBattery_kWh() / energyConsumption_kWhpkm
             ));
         }
 

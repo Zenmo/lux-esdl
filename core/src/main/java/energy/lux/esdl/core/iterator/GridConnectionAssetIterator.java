@@ -460,8 +460,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
 
     /**
      * The charging sessions of the ESDL replace the weekly trip patterns that LUX would
-     * otherwise read from its own CSV. When the ESDL states none, the annual distance derived
-     * from the full load hours of the charge point still steers those default patterns.
+     * otherwise read from its own CSV.
      */
     @Override
     public SwitchStatus caseEVChargingStation(EVChargingStation evChargingStation) {
@@ -469,9 +468,6 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
             var maxChargingPower_W = evChargingStation.getPower();
             var maxChargingPowerKw = maxChargingPower_W * 0.001;
             var tripTracker = mobilityDemandLoader.readTripTracker(evChargingStation);
-
-            double consumedEnergy_kWh = evChargingStation.getFullLoadHours() * maxChargingPowerKw;
-            double traveledDistance_km = consumedEnergy_kWh / energyModel.avgc_data.avgEVEnergyConsumptionCar_kWhpkm();
 
             var averagesData = energyModel.avgc_data;
             var electricVehicle = new J_EAEV(
@@ -486,9 +482,6 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
                     tripTracker
             );
             ChargePointSettings.read(evChargingStation).setChargingEfficienciesOf(electricVehicle);
-            if (tripTracker == null) {
-                electricVehicle.getTripTracker().setAnnualDistance_km(traveledDistance_km);
-            }
 
             // Houses that the aggregator manages get their management replaced afterwards.
             if (luxGridConnection.f_getChargingManagement() == null) {
