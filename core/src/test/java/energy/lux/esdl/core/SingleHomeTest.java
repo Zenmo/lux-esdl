@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Loads and runs single_home.esdl, a fabricated ESDL in the convention of the ISIE ESDLs: one house
  * with a heat pump, PV, a home battery and an EV on a dynamic contract, under a time of use tariff and
- * an active local congestion measure on a 10 kVA transformer. Its profiles are constant over the year,
+ * an active local congestion measure on a 3 kVA transformer. Its profiles are constant over the year,
  * or the same every day, so that what the loader should make of them can be worked out by hand.
  * <p>
  * The PV is modelled with pvlib, so this needs the Python that luxPythonExecutable names. That takes
@@ -103,14 +103,15 @@ public class SingleHomeTest {
         var aggregator = findAggregator();
         assertThat(aggregator.getTimeOfUseTariffProfile()).isSameAs(findProfile("esdl_time_of_use_tariff_eur_per_mwh"));
         assertThat(aggregator.getCongestionFactor_eurpMWhpkW()).isEqualTo(1000.0);
-        // 90% of the 10 kVA transformer.
-        assertThat(aggregator.getCongestionDeadzone_kW()).isEqualTo(9.0, Offset.offset(1e-9));
+        // 90% of the 3 kVA transformer.
+        assertThat(aggregator.getCongestionDeadzone_kW()).isEqualTo(2.7, Offset.offset(1e-9));
     }
 
     /**
-     * The day-ahead price is free for three night hours, so the EV, the battery and the heat pump all
-     * plan to take their energy then. Without the congestion factor the house goes up to almost 10 kW
-     * in those hours; with it the aggregator spreads them so the house stays just within the deadzone.
+     * The EV starts full and its trips take 9.5 kWh a day, so it first has to charge in the night
+     * after the seventh day. From then on it charges 10 kWh every night, which without the congestion
+     * factor takes the house to about 3.2 kW in the cheap night hours; with it the aggregator spreads
+     * the charging so the house stays around the deadzone.
      * <p>
      * The only test that runs the model, since the others read the same loaded model.
      */
@@ -120,14 +121,17 @@ public class SingleHomeTest {
         luxEngine.f_initializeEngine();
 
         var peakLoad_kW = 0.0;
-        var stepsInAWeek = (int) Math.round(7 * 24 / luxEngine.p_timeParameters.getTimeStep_h());
-        for (int step = 0; step < stepsInAWeek; step++) {
+        var stepsInTenDays = (int) Math.round(10 * 24 / luxEngine.p_timeParameters.getTimeStep_h());
+        for (int step = 0; step < stepsInTenDays; step++) {
             luxEngine.f_runTimestep();
             peakLoad_kW = Math.max(peakLoad_kW, house.fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.ELECTRICITY));
         }
 
-        assertThat(luxEngine.v_timeStepsElapsed).isEqualTo(stepsInAWeek);
-        assertThat(peakLoad_kW).isLessThanOrEqualTo(deadzone_kW + 1e-6);
+        assertThat(luxEngine.v_timeStepsElapsed).isEqualTo(stepsInTenDays);
+        // The congestion factor is a price, not a cap: the house goes over the deadzone as far as the
+        // cheap hours still pay for at 1000 EUR/MWh per kW. Their largest advantage, about 121 EUR/MWh
+        // of day-ahead price and 145 of tariff with VAT, pays for some 0.27 kW.
+        assertThat(peakLoad_kW).isLessThanOrEqualTo(deadzone_kW + 0.3);
         // Close to the deadzone, so it is the congestion that holds the house back.
         assertThat(peakLoad_kW).isGreaterThan(deadzone_kW - 0.5);
     }

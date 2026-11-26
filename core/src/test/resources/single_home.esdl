@@ -5,7 +5,7 @@
       <asset xsi:type="esdl:Import" id="import" name="Import">
         <port xsi:type="esdl:OutPort" id="import-out" name="Out" connectedTo="transformer-in" />
       </asset>
-      <asset xsi:type="esdl:Transformer" id="transformer" name="Transformer" capacity="10000.0" voltagePrimary="11.0" voltageSecundary="0.42">
+      <asset xsi:type="esdl:Transformer" id="transformer" name="Transformer" capacity="3000.0" voltagePrimary="11.0" voltageSecundary="0.42">
         <port xsi:type="esdl:InPort" id="transformer-in" name="In" connectedTo="import-out" />
         <port xsi:type="esdl:OutPort" id="transformer-out" name="Out" connectedTo="cable-in" />
       </asset>
