@@ -82,9 +82,13 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
 
     private static final double heatPumpBelowZeroEtaReductionFactor = 1.0;
 
-    // ISIE assumes an EV leaves every charging session at 80%. The ISIE aggregator also has to bring the EV back to
-    // this at the end of the run, so it is the same 80%.
-    private static final double initialStateOfChargeOfACar_fr = 0.8;
+    // ISIE assumes an EV leaves every charging session at 80%. The ISIE aggregator plans every departure to that and
+    // also has to bring the EV back to it at the end of the run, so its EVs start at the same 80%.
+    private static final double initialStateOfChargeOfAManagedCar_fr = 0.8;
+
+    // Without a dynamic contract the house charges until the battery is full, so its EV starts full. Otherwise its
+    // first session would also charge the 20% up to full, which no trip in the ESDL accounts for.
+    private static final double initialStateOfChargeOfAnUnmanagedCar_fr = 1.0;
 
     private final GridConnection luxGridConnection;
 
@@ -476,7 +480,7 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
                     luxGridConnection,
                     maxChargingPowerKw,
                     readBatteryCapacity_kWh(evChargingStation),
-                    initialStateOfChargeOfACar_fr,
+                    initialStateOfChargeOfACar_fr(),
                     energyModel.p_timeParameters,
                     averagesData.avgEVEnergyConsumptionCar_kWhpkm(),
                     1.0,
@@ -491,6 +495,14 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
             }
         }
         return DONE;
+    }
+
+    // A dynamic contract is what lets the aggregator take over the charging, see GridConnectionLoader.
+    private double initialStateOfChargeOfACar_fr() {
+        if (GridConnectionLoader.hasDynamicContract(entryPoint)) {
+            return initialStateOfChargeOfAManagedCar_fr;
+        }
+        return initialStateOfChargeOfAnUnmanagedCar_fr;
     }
 
     /**
