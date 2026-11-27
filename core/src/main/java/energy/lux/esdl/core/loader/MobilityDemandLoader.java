@@ -17,6 +17,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Turn the yearly charging sessions of an ESDL MobilityDemand into the trips of a vehicle.
@@ -31,8 +32,13 @@ import java.util.List;
  * the charge point times that ends up in the battery, so only that much was driven. The engine
  * applies the same efficiency when it charges, so it draws the stated energy from the grid again.
  * <p>
- * That leaves the stretch before the first session, which no session accounts for. The vehicle
- * is treated as being at home then, since there is no energy to derive a distance from.
+ * That leaves the trip to the first session, which no gap accounts for. The year stands for one
+ * that repeats, so it is the trip from the last session back to the first, and the energy of the
+ * first session is what it consumed. Without it the first session would charge nothing and the
+ * vehicle would count as plugged in from the start of the year. That trip runs over the end of
+ * the year, so it is cut in two: the part in the next year, and the part from the last session
+ * to the end of the run. Only the first part consumes energy, since the engine takes the energy
+ * of a trip on arrival and only that part arrives.
  */
 public class MobilityDemandLoader {
     private static final double hoursPerYear = 8760;
@@ -123,7 +129,7 @@ public class MobilityDemandLoader {
      *
      * @param energyIntoBattery_kWh the energy the ESDL states, after the losses of the charge point
      */
-    private record ChargingSession(double arrival_h, double departure_h, double energyIntoBattery_kWh) {
+    record ChargingSession(double arrival_h, double departure_h, double energyIntoBattery_kWh) {
     }
 
     private List<ChargingSession> readChargingSessions(DateTimeProfile profile, double chargingEfficiency_fr) {
@@ -151,8 +157,9 @@ public class MobilityDemandLoader {
      * Every gap between two consecutive sessions is one trip. Sessions that touch leave no gap
      * and so produce no trip; the energy of the second one is then simply charged on arrival.
      */
-    private static List<TripRecord> toTrips(List<ChargingSession> sessions, double energyConsumption_kWhpkm) {
+    static List<TripRecord> toTrips(List<ChargingSession> sessions, double energyConsumption_kWhpkm) {
         var trips = new ArrayList<TripRecord>();
+        tripToFirstSession(sessions, energyConsumption_kWhpkm).ifPresent(trips::add);
 
         for (int i = 0; i + 1 < sessions.size(); i++) {
             var departure = sessions.get(i).departure_h();
@@ -168,7 +175,56 @@ public class MobilityDemandLoader {
             ));
         }
 
+        tripFromLastSession(sessions).ifPresent(trips::add);
         return trips;
+    }
+
+    /**
+     * The trip from the last session of the year back to the first, cut off at the start of the
+     * year. A last session that runs into the next year has its departure there, which in a
+     * repeating year is that hour of this year. Empty when that departure is not before the first
+     * arrival, so that the two sessions leave no gap.
+     */
+    private static Optional<TripRecord> tripToFirstSession(
+            List<ChargingSession> sessions,
+            double energyConsumption_kWhpkm
+    ) {
+        if (sessions.isEmpty()) {
+            return Optional.empty();
+        }
+        var firstSession = sessions.get(0);
+        var lastSession = sessions.get(sessions.size() - 1);
+        var departure_h = Math.max(0, lastSession.departure_h() - hoursPerYear);
+        if (firstSession.arrival_h() <= departure_h) {
+            return Optional.empty();
+        }
+        return Optional.of(new TripRecord(
+                departure_h,
+                firstSession.arrival_h(),
+                firstSession.energyIntoBattery_kWh() / energyConsumption_kWhpkm
+        ));
+    }
+
+    /**
+     * The trip from the last session of the year to the first session of the next year, without
+     * energy: tripToFirstSession has that. It ends after the run, so the vehicle stays away until
+     * the run ends and leaves the last session as it would any other. Empty when the last session
+     * runs into the next year, since the vehicle is then plugged in when the run ends.
+     */
+    private static Optional<TripRecord> tripFromLastSession(List<ChargingSession> sessions) {
+        if (sessions.isEmpty()) {
+            return Optional.empty();
+        }
+        var firstSession = sessions.get(0);
+        var lastSession = sessions.get(sessions.size() - 1);
+        if (lastSession.departure_h() >= hoursPerYear) {
+            return Optional.empty();
+        }
+        return Optional.of(new TripRecord(
+                lastSession.departure_h(),
+                hoursPerYear + firstSession.arrival_h(),
+                0
+        ));
     }
 
     /**

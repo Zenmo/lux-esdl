@@ -62,7 +62,10 @@ public class SingleHomeTest {
 
     /**
      * The car is plugged in every evening and charges 10 kWh at the charge point, of which the
-     * efficiency of 0.95 leaves 9.5 kWh in the battery for the trip of the next day.
+     * efficiency of 0.95 leaves 9.5 kWh in the battery for the trip of the next day. The last
+     * session ends at 08:00 on 1 January of the next year, so the trip back to the first session
+     * runs from 08:00 to 18:00 on 1 January, as every other trip does. Those are UTC; on the Dutch
+     * clock of the simulation that is from hour 9.
      */
     @Test
     public void testTripsFollowFromChargingSessions() {
@@ -71,8 +74,9 @@ public class SingleHomeTest {
         assertThat(electricVehicle.getChargingEfficiency_r()).isEqualTo(0.95);
 
         var trips = electricVehicle.getTripTracker().getTripsStartingBetween_h(0, 2 * 8760);
-        // 365 sessions leave 364 gaps between them.
-        assertThat(trips).hasSize(364);
+        // 365 sessions leave 364 gaps between them, plus the trip back to the first session.
+        assertThat(trips).hasSize(365);
+        assertThat(trips.get(0).startTime_h()).isEqualTo(9.0, Offset.offset(1e-9));
 
         var expectedDistance_km = 10.0 * 0.95 / electricVehicle.getEnergyConsumption_kWhpkm();
         for (var trip : trips) {
@@ -108,26 +112,35 @@ public class SingleHomeTest {
     }
 
     /**
-     * The EV starts full and its trips take 9.5 kWh a day, so it first has to charge in the night
-     * after the seventh day. From then on it charges 10 kWh every night, which without the congestion
-     * factor takes the house to about 3.2 kW in the cheap night hours; with it the aggregator spreads
-     * the charging so the house stays around the deadzone.
+     * The EV starts at 80% of its 75 kWh, 60 kWh, and its trips take 9.5 kWh a day, the first one
+     * on 1 January already. So it comes home at 50.5 kWh every evening and charges 10 kWh every
+     * night, which without the congestion factor takes the house to about 3.2 kW in the cheap night
+     * hours; with it the aggregator spreads the charging so the house stays around the deadzone.
      * <p>
      * The only test that runs the model, since the others read the same loaded model.
      */
     @Test
     public void testCongestionKeepsTheHouseWithinTheDeadzone() {
         var deadzone_kW = findAggregator().getCongestionDeadzone_kW();
+        var electricVehicle = findElectricVehicle();
         luxEngine.f_initializeEngine();
 
         var peakLoad_kW = 0.0;
-        var stepsInTenDays = (int) Math.round(10 * 24 / luxEngine.p_timeParameters.getTimeStep_h());
+        var lowestStateOfChargeOnTheFirstDay_kWh = electricVehicle.getCurrentSOC_kWh();
+        var timeStepsPerDay = (int) Math.round(24 / luxEngine.p_timeParameters.getTimeStep_h());
+        var stepsInTenDays = 10 * timeStepsPerDay;
         for (int step = 0; step < stepsInTenDays; step++) {
             luxEngine.f_runTimestep();
             peakLoad_kW = Math.max(peakLoad_kW, house.fm_currentBalanceFlows_kW.get(OL_EnergyCarriers.ELECTRICITY));
+            if (step < timeStepsPerDay) {
+                lowestStateOfChargeOnTheFirstDay_kWh =
+                        Math.min(lowestStateOfChargeOnTheFirstDay_kWh, electricVehicle.getCurrentSOC_kWh());
+            }
         }
 
         assertThat(luxEngine.v_timeStepsElapsed).isEqualTo(stepsInTenDays);
+        // The trip back to the first session is driven: the EV comes home at 60 - 9.5 kWh.
+        assertThat(lowestStateOfChargeOnTheFirstDay_kWh).isEqualTo(50.5, Offset.offset(1e-6));
         // The congestion factor is a price, not a cap: the house goes over the deadzone as far as the
         // cheap hours still pay for at 1000 EUR/MWh per kW. Their largest advantage, about 121 EUR/MWh
         // of day-ahead price and 145 of tariff with VAT, pays for some 0.27 kW.

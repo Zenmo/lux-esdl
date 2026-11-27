@@ -82,7 +82,9 @@ public class GridConnectionAssetIterator extends EsdlSwitch<SwitchStatus> {
 
     private static final double heatPumpBelowZeroEtaReductionFactor = 1.0;
 
-    private static final double initialStateOfChargeOfACar_fr = 1.0;
+    // ISIE assumes an EV leaves every charging session at 80%. The ISIE aggregator also has to bring the EV back to
+    // this at the end of the run, so it is the same 80%.
+    private static final double initialStateOfChargeOfACar_fr = 0.8;
 
     private final GridConnection luxGridConnection;
 
